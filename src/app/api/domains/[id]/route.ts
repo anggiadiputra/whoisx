@@ -80,7 +80,7 @@ export async function PUT(
     
     // If refreshWhois is requested, perform new WHOIS lookup
     if (refreshWhois) {
-      console.log(`Refreshing WHOIS data for ${existingDomain.domain}`)
+      // console.log(`Refreshing WHOIS data for ${existingDomain.domain}`)
       const whoisResult = await lookupDomain(existingDomain.domain)
       
       if (whoisResult.success && whoisResult.data) {

@@ -205,7 +205,7 @@ export async function PUT(
       }
     })
 
-    console.log(`✅ User updated successfully: ${user.name} (${user.email})`)
+    // console.log(`✅ User updated successfully: ${user.name} (${user.email})`)
 
     return NextResponse.json({
       success: true,
@@ -276,7 +276,7 @@ export async function DELETE(
       where: { id }
     })
 
-    console.log(`✅ User deleted successfully: ${existingUser.name} (${existingUser.email})`)
+    // console.log(`✅ User deleted successfully: ${existingUser.name} (${existingUser.email})`)
 
     return NextResponse.json({
       success: true,

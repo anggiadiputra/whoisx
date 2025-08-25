@@ -30,7 +30,7 @@ export async function logActivity({
       }
     })
     
-    console.log(`Activity logged: ${type} - ${description}`)
+    // Activity logged successfully
     return activity
   } catch (error) {
     console.error('Failed to log activity:', error)

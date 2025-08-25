@@ -193,7 +193,7 @@ export async function POST(request: NextRequest) {
       }
     })
 
-    console.log(`✅ User created successfully: ${user.name} (${user.email})`)
+    // console.log(`✅ User created successfully: ${user.name} (${user.email})`)
 
     return NextResponse.json({
       success: true,

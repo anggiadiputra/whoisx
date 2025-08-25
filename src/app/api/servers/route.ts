@@ -186,10 +186,10 @@ export async function POST(request: NextRequest) {
           serverId: server.id
         }
       })
-      console.log(`✅ Assigned ${body.domainIds.length} domains to server:`, server.serverName)
+      // console.log(`✅ Assigned ${body.domainIds.length} domains to server:`, server.serverName)
     }
 
-    console.log('✅ Server created successfully:', server.serverName)
+    // console.log('✅ Server created successfully:', server.serverName)
 
     return NextResponse.json({
       success: true,

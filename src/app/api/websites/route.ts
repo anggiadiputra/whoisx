@@ -128,7 +128,7 @@ export async function POST(request: NextRequest) {
       }
     })
 
-    console.log('✅ Website created successfully:', website.siteName)
+    // console.log('✅ Website created successfully:', website.siteName)
 
     return NextResponse.json({
       success: true,

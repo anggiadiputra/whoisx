@@ -130,13 +130,11 @@ export default function HomePage() {
     })
 
     setRenewalCosts(costs)
-    console.log('💰 Renewal costs calculated:', costs)
   }, [])
 
   // Move all hooks to the top
   const fetchDomains = useCallback(async () => {
     try {
-      console.log('🔍 Fetching domains from API...')
       const response = await fetch('/api/domains', {
         method: 'GET',
         headers: {
@@ -145,15 +143,10 @@ export default function HomePage() {
         credentials: 'include', // Include cookies for authentication
       })
       
-      console.log('📡 API Response status:', response.status)
-      
       if (response.ok) {
         const data = await response.json()
-        console.log('✅ API Response data:', data)
-        console.log('📊 Stats received:', data.stats)
         setDomains(data.domains || [])
         setStats(data.stats || { total: 0, expired: 0, expiring30: 0, expiring7: 0, expiring1: 0 })
-        console.log('📊 Stats set to state:', data.stats || { total: 0, expired: 0, expiring30: 0, expiring7: 0, expiring1: 0 })
         
         // Calculate renewal costs
         calculateRenewalCosts(data.domains || [])

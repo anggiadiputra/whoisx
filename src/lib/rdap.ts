@@ -288,7 +288,7 @@ export async function lookupDomain(domain: string): Promise<{
   
   for (const providerUrl of providers) {
     try {
-      console.log(`Trying RDAP lookup for ${domain} via ${providerUrl}`)
+      // Trying RDAP lookup
       
       const url = `${providerUrl}${domain.toLowerCase()}`
       const response = await makeRequest(url)

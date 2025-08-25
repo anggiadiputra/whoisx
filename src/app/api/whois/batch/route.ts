@@ -27,11 +27,11 @@ export async function POST(request: NextRequest) {
     let completed = 0
     
     // Perform batch WHOIS lookup
-    console.log(`Starting batch WHOIS lookup for ${domains.length} domains`)
+    // console.log(`Starting batch WHOIS lookup for ${domains.length} domains`)
     
     const batchResults = await batchLookupDomains(domains, (completedCount, total) => {
       completed = completedCount
-      console.log(`Batch progress: ${completedCount}/${total}`)
+      // console.log(`Batch progress: ${completedCount}/${total}`)
     })
     
     // Process results and update/create domain records

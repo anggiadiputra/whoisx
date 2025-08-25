@@ -194,8 +194,6 @@ export default function ServersPage() {
       const data = await response.json()
       
       if (data.success) {
-        console.log('📊 Servers received:', data.servers.length)
-        console.log('📊 Stats received:', data.stats)
         setServers(data.servers)
         setStats(data.stats)
       } else {
@@ -276,12 +274,10 @@ export default function ServersPage() {
 
     // Event listeners for server updates/deletes
     const handleServerUpdate = () => {
-      console.log('🔄 Server updated, refreshing data...')
       fetchServers()
     }
 
     const handleServerDelete = () => {
-      console.log('🗑️ Server deleted, refreshing data...')
       fetchServers()
     }
 

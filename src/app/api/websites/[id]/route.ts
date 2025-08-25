@@ -128,7 +128,7 @@ export async function PUT(
       }
     })
 
-    console.log('✅ Website updated successfully:', updatedWebsite.siteName)
+    // console.log('✅ Website updated successfully:', updatedWebsite.siteName)
 
     return NextResponse.json({
       success: true,
@@ -179,7 +179,7 @@ export async function DELETE(
       where: { id }
     })
 
-    console.log('✅ Website deleted successfully:', website.siteName)
+    // console.log('✅ Website deleted successfully:', website.siteName)
 
     return NextResponse.json({
       success: true,

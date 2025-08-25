@@ -35,7 +35,7 @@ export async function POST(request: NextRequest) {
     }
     
     // Perform fresh WHOIS lookup
-    console.log(`Performing WHOIS lookup for ${domain}`)
+    // console.log(`Performing WHOIS lookup for ${domain}`)
     const whoisResult = await lookupDomain(domain)
     
     if (!whoisResult.success) {

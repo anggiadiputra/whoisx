@@ -162,8 +162,6 @@ export async function GET(request: NextRequest) {
 // POST /api/domains - Add new domain with WHOIS lookup
 export async function POST(request: NextRequest) {
   try {
-    console.log('🔍 Adding new domain...')
-    
     // Get session for activity logging
     const session = await getServerSession(authOptions)
     if (!session?.user) {
@@ -186,7 +184,6 @@ export async function POST(request: NextRequest) {
     })
     
     if (existingDomain) {
-      console.log(`❌ Domain ${domain} already exists`)
       return NextResponse.json({
         success: false,
         error: 'Domain already exists'
@@ -194,11 +191,9 @@ export async function POST(request: NextRequest) {
     }
     
     // Perform WHOIS lookup
-    console.log(`🔍 Looking up WHOIS for ${domain}`)
     const whoisResult = await lookupDomain(domain)
     
     if (!whoisResult.success) {
-      console.log(`⚠️ WHOIS failed for ${domain}, creating without WHOIS data`)
       // Still create domain record even if WHOIS fails
       const newDomain = await prisma.domain.create({
         data: {
@@ -210,7 +205,6 @@ export async function POST(request: NextRequest) {
         }
       })
       
-      console.log(`✅ Domain ${domain} created successfully (without WHOIS)`)
       return NextResponse.json({
         success: true,
         data: newDomain,
@@ -241,8 +235,6 @@ export async function POST(request: NextRequest) {
     const newDomain = await prisma.domain.create({
       data: domainData
     })
-    
-    console.log(`✅ Domain ${domain} created successfully with WHOIS data`)
     
     // Cache the WHOIS data
     if (whoisResult.rawData) {

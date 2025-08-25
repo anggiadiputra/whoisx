@@ -21,13 +21,13 @@ export async function POST(
       }, { status: 404 })
     }
 
-    console.log(`🔄 Updating WHOIS for ${domain.domain}`)
+    // console.log(`🔄 Updating WHOIS for ${domain.domain}`)
 
     // Perform fresh WHOIS lookup
     const whoisResult = await lookupDomain(domain.domain)
 
     if (!whoisResult.success) {
-      console.log(`❌ WHOIS update failed for ${domain.domain}: ${whoisResult.error}`)
+      // console.log(`❌ WHOIS update failed for ${domain.domain}: ${whoisResult.error}`)
       return NextResponse.json({
         success: false,
         error: whoisResult.error || 'Failed to fetch WHOIS data'
@@ -71,7 +71,7 @@ export async function POST(
       })
     }
 
-    console.log(`✅ WHOIS updated successfully for ${domain.domain}`)
+    // console.log(`✅ WHOIS updated successfully for ${domain.domain}`)
 
     return NextResponse.json({
       success: true,

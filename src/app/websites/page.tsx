@@ -198,8 +198,6 @@ export default function WebsitesPage() {
       const data = await response.json()
       
       if (data.success) {
-        console.log('📊 Websites received:', data.websites.length)
-        console.log('📊 Stats received:', data.stats)
         setWebsites(data.websites)
         setStats(data.stats)
       } else {

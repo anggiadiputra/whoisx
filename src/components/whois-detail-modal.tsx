@@ -107,7 +107,7 @@ export function WhoisDetailModal({ domainId, domainName, children }: WhoisDetail
         try {
           await sendWhoisUpdateNotification(domainName)
         } catch (error) {
-          console.log('WhatsApp notification failed:', error)
+          // WhatsApp notification failed silently
           // Don't show error to user as this is optional feature
         }
         

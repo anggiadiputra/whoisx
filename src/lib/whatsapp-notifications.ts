@@ -48,7 +48,7 @@ export class WhatsAppNotificationService {
     } = {}
   ): Promise<boolean> {
     if (!this.settings?.enabled || !this.settings.token || !this.settings.phoneNumber) {
-      console.log('WhatsApp notifications not configured')
+      // WhatsApp notifications not configured
       return false
     }
 

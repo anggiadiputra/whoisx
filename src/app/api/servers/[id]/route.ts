@@ -161,13 +161,10 @@ export async function PUT(
             serverId: id
           }
         })
-        console.log(`✅ Assigned ${body.domainIds.length} domains to server:`, updatedServer.serverName)
-      } else {
-        console.log('✅ Unassigned all domains from server:', updatedServer.serverName)
       }
     }
 
-    console.log('✅ Server updated successfully:', updatedServer.serverName)
+
 
     return NextResponse.json({
       success: true,
@@ -222,7 +219,7 @@ export async function DELETE(
       where: { id }
     })
 
-    console.log('✅ Server deleted successfully:', existingServer.serverName)
+
 
     return NextResponse.json({
       success: true,
