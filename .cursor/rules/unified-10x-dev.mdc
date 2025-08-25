@@ -1,0 +1,179 @@
+# Domain Management Web App - 10X Developer Framework
+
+## Project Context & Architecture
+**Tech Stack**: Next.js 15 + TypeScript + PostgreSQL + Tailwind CSS + Vercel
+**Architecture**: Full-stack Next.js with API Routes, PostgreSQL database, RDAP API integrations
+**Core Constraints**: Vercel deployment, RDAP compliance, role-based access, domain expiry tracking
+
+## Development Standards
+**Code Quality**: TypeScript strict mode, functional components with hooks, SOLID principles
+**Naming**: 
+- Components: PascalCase (DomainDashboard, WhoisLookup)
+- Functions: camelCase (fetchDomainData, validateDomainFormat)
+- Files: kebab-case (domain-table.tsx, whois-service.ts)
+- Database: snake_case (renewal_price, days_to_expiry)
+**Error Handling**: 
+- Try-catch for RDAP API calls with retry logic
+- Global error boundary for React components
+- Proper HTTP status codes (404 for domain not found, 429 for rate limits)
+**Comments**: RDAP endpoint documentation, batch processing logic, cache TTL explanations
+
+## Security & Authentication
+**Auth Pattern**: NextAuth.js with JWT tokens, role-based middleware protection
+**Input Validation**: Domain format validation before RDAP calls, SQL injection prevention with Prisma
+**Rate Limiting**: Implement rate limiting for WHOIS API endpoints
+**Headers**: CORS configuration for RDAP calls, secure cookie settings
+**Permissions**: 
+- Admin: Full CRUD on domains and users
+- Staff: CRUD on domains only
+- Finance: Read-only with renewal price access
+
+## Domain-Specific Requirements
+**RDAP Integration**:
+- Primary endpoints: Verisign (.com/.cc), IDNIC (.id), Neustar (.biz), Afilias, PIR (.org)
+- Retry logic: 3 attempts with exponential backoff
+- Fallback chain: Try TLD-specific endpoint → Try generic endpoints → Cache fallback
+- Batch processing: Maximum 100 domains per batch request
+
+**Database Design**:
+- Users: id (UUID), name, email (unique), role (enum), password_hash, created_at
+- Domains: id (UUID), domain (unique), renewal_price, notes, registrar, created_date, expiry_date, status, days_to_expiry, last_checked, created_at
+- WHOIS Cache: id (UUID), domain, whois_data (JSONB), cached_at
+
+**Caching Strategy**:
+- Redis/Upstash for production, in-memory for development
+- TTL: 24 hours for WHOIS data
+- Cache invalidation on manual refresh
+- Cache warming for batch operations
+
+## UI/UX Guidelines
+**Domain Dashboard**:
+- Expiry countdown with color coding (red: <7 days, yellow: <30 days, green: >30 days)
+- Filterable by expiry timeline (1 day, 7 days, 30 days)
+- Sortable by expiry date, registrar, renewal price
+- Batch operations for WHOIS refresh
+
+**Accessibility**: 
+- Screen reader support for expiry alerts
+- Keyboard navigation for domain table
+- Color contrast for expiry status indicators
+- ARIA labels for domain status
+
+**Performance**: 
+- Lazy loading for domain table pagination
+- Optimistic updates for domain additions
+- Background WHOIS refresh without UI blocking
+- Debounced search for domain filtering
+
+**Responsive Design**:
+- Mobile-first domain table with horizontal scroll
+- Collapsible filters on mobile
+- Touch-friendly batch selection
+
+## Problem-Solving Approach for Domain Management
+**RDAP Failures**:
+1. IDENTIFY: Check domain format, TLD support, API endpoint availability
+2. ISOLATE: Test single domain vs batch, check network connectivity
+3. FIX: Switch to fallback endpoint, implement retry with backoff
+4. VERIFY: Validate WHOIS data structure, test with known good domains
+
+**Cache Issues**:
+1. IDENTIFY: Check cache hit/miss rates, TTL expiration
+2. ISOLATE: Test cache warming, invalidation logic
+3. FIX: Adjust TTL, implement cache preloading for critical domains
+4. VERIFY: Monitor cache performance, validate data freshness
+
+## Performance & Efficiency
+**RDAP Optimization**:
+- Parallel API calls for batch processing
+- Connection pooling for HTTP requests
+- Intelligent endpoint selection based on TLD
+- Circuit breaker pattern for failing endpoints
+
+**Database Optimization**:
+- Indexes on domain, expiry_date, registrar
+- Materialized views for dashboard aggregations
+- Bulk upserts for batch WHOIS updates
+- Connection pooling with Prisma
+
+**Frontend Optimization**:
+- Virtual scrolling for large domain lists
+- React Query for server state management
+- Code splitting by role-based routes
+- Image optimization for registrar logos
+
+## Domain-Specific Error Handling
+**RDAP Errors**:
+- Invalid domain format: Client-side validation with regex
+- Unsupported TLD: Graceful fallback with message
+- API rate limits: Exponential backoff with queue management
+- Network timeouts: Retry with different endpoints
+
+**Business Logic Errors**:
+- Duplicate domain entries: Upsert logic with conflict resolution
+- Invalid expiry dates: Data validation and sanitization
+- Missing WHOIS data: Partial updates with status tracking
+
+## Quick Commands for Domain Management
+- "RDAP MODE" - Focus on WHOIS data integration and API reliability
+- "BATCH MODE" - Optimize for bulk domain processing and performance
+- "EXPIRY MODE" - Prioritize expiry tracking and renewal workflows
+- "CACHE MODE" - Optimize caching strategy and invalidation logic
+- "ROLE MODE" - Focus on user permissions and access control
+
+## Team Collaboration
+**Domain Data Standards**:
+- Consistent WHOIS field mapping across providers
+- Standardized date formats (ISO 8601)
+- Unified error response structure
+- Clear API documentation for RDAP integrations
+
+**Deployment Pipeline**:
+- Staging environment with test RDAP data
+- Production cache warming for known domains
+- Database migration strategy for schema changes
+- Environment-specific RDAP endpoint configuration
+
+## Rapid Development Patterns
+**RDAP Service Template**:
+- Generic RDAP client with provider-specific adapters
+- Retry mechanism with configurable backoff
+- Response transformation to unified format
+- Error categorization (network, format, business)
+
+**Domain CRUD Operations**:
+- Bulk import from CSV with validation
+- Batch WHOIS refresh with progress tracking
+- Export filtered results to Excel/CSV
+- Domain transfer workflow between registrars
+
+## Memory Generation Protocol
+**Implementation Tracking**:
+- After each feature implementation, update this rule with:
+  - New patterns discovered
+  - Performance optimizations applied
+  - Error handling improvements
+  - RDAP provider quirks and workarounds
+- Create memory entries for:
+  - Successful RDAP integration patterns
+  - Database optimization techniques
+  - Caching strategies that work
+  - User workflow improvements
+
+**Rule Evolution**:
+- Track which RDAP providers are most reliable
+- Document optimal batch sizes for different operations
+- Record performance benchmarks for large domain sets
+- Maintain compatibility matrix for different TLDs
+
+## Current Implementation Status
+- [ ] Project initialization with Next.js + TypeScript
+- [ ] Database schema design and Prisma setup
+- [ ] RDAP service integration with retry logic
+- [ ] Caching layer implementation
+- [ ] Authentication and role-based access
+- [ ] Domain dashboard with expiry tracking
+- [ ] Batch processing capabilities
+- [ ] Deployment to Vercel with production database
+
+**Next Priority**: Complete project setup and begin RDAP service implementation with proper error handling and caching strategy.

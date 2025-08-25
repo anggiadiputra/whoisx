@@ -1,0 +1,219 @@
+---
+alwaysApply: true
+---
+
+# Memory Generation System for Domain Management App
+
+## Overview
+This system automatically generates and updates memories after each implementation phase to maintain context and improve development efficiency.
+
+## Memory Generation Triggers
+1. **Feature Implementation Complete**: After completing any major feature
+2. **Bug Fix Resolution**: After resolving significant issues
+3. **Performance Optimization**: After implementing performance improvements
+4. **API Integration**: After integrating new RDAP providers or services
+5. **Database Changes**: After schema modifications or migrations
+6. **Deployment Success**: After successful production deployments
+
+## Memory Categories
+
+### 1. RDAP Integration Memories
+**Template**: "Successfully integrated [PROVIDER] RDAP endpoint with [SPECIFIC_FEATURES]. Key learnings: [LESSONS]. Performance: [METRICS]. Gotchas: [ISSUES_ENCOUNTERED]."
+
+**Example**: "Successfully integrated Verisign RDAP endpoint with batch processing and retry logic. Key learnings: Rate limits at 100 req/min, requires user-agent header. Performance: 95% success rate, 200ms avg response. Gotchas: Returns different date formats for .com vs .cc domains."
+
+### 2. Database Optimization Memories  
+**Template**: "Optimized [TABLE/QUERY] for [SPECIFIC_USE_CASE]. Changes: [MODIFICATIONS]. Performance impact: [BEFORE_VS_AFTER]. Migration notes: [DEPLOYMENT_CONSIDERATIONS]."
+
+**Example**: "Optimized domains table for expiry filtering by adding composite index on (expiry_date, status). Changes: Added index, updated queries to use covering index. Performance impact: Query time reduced from 2.3s to 120ms for 10k+ domains. Migration notes: Zero downtime, but requires REINDEX on production."
+
+### 3. Caching Strategy Memories
+**Template**: "Implemented [CACHE_TYPE] for [DATA_TYPE] with [TTL_STRATEGY]. Hit rate: [PERCENTAGE]. Invalidation strategy: [METHOD]. Memory usage: [METRICS]."
+
+**Example**: "Implemented Redis caching for WHOIS data with 24h TTL and LRU eviction. Hit rate: 78% in production. Invalidation strategy: Manual refresh + automated on data update. Memory usage: ~2MB for 1000 cached domains."
+
+### 4. User Experience Memories
+**Template**: "Enhanced [UI_COMPONENT] for [USER_ROLE] with [IMPROVEMENTS]. User feedback: [RESPONSE]. Performance impact: [METRICS]. Accessibility improvements: [A11Y_FEATURES]."
+
+### 5. Error Handling Memories
+**Template**: "Resolved [ERROR_TYPE] in [COMPONENT/SERVICE]. Root cause: [ANALYSIS]. Solution: [FIX]. Prevention measures: [SAFEGUARDS]. Monitoring added: [ALERTS]."
+
+### 6. Performance Optimization Memories
+**Template**: "Optimized [FEATURE] performance by [METHOD]. Before: [OLD_METRICS]. After: [NEW_METRICS]. Techniques used: [OPTIMIZATIONS]. Trade-offs: [CONSIDERATIONS]."
+
+## Memory Update Protocol
+
+### After Each Implementation Session:
+1. **Assess What Was Built**: Document the primary feature/fix implemented
+2. **Capture Key Learnings**: Record unexpected challenges and solutions
+3. **Note Performance Impact**: Include relevant metrics and benchmarks
+4. **Document Configuration**: Record environment-specific settings
+5. **Update Rule References**: Modify unified-10x-dev.mdc with new patterns
+
+### Memory Quality Standards:
+- **Specific**: Include exact version numbers, configuration values, metrics
+- **Actionable**: Provide enough detail for future implementation
+- **Contextual**: Explain why decisions were made, not just what was done
+- **Measurable**: Include performance metrics, error rates, user feedback
+
+## Rule Update Requirements
+
+### After Each Major Implementation:
+1. **Update unified-10x-dev.mdc** with:
+   - New patterns discovered
+   - Updated performance benchmarks
+   - Revised error handling strategies
+   - Enhanced security considerations
+
+2. **Create Specialized Rules** when needed:
+   - `rdap-providers.mdc` - Provider-specific configurations and quirks
+   - `domain-validation.mdc` - Domain format validation and TLD handling
+   - `caching-strategies.mdc` - Cache optimization and invalidation patterns
+   - `performance-benchmarks.mdc` - Performance targets and optimization techniques
+
+### Memory-to-Rule Integration:
+- **Successful Patterns** → Add to unified-10x-dev.mdc as recommended approaches
+- **Failed Approaches** → Document in unified-10x-dev.mdc as anti-patterns
+- **Configuration Values** → Create dedicated config rule files
+- **Provider Quirks** → Maintain provider-specific rule documentation
+
+## Implementation Checklist
+
+### Before Starting Work:
+- [ ] Review existing memories for similar implementations
+- [ ] Check unified-10x-dev.mdc for current patterns
+- [ ] Identify which memories will need updates
+
+### During Implementation:
+- [ ] Document unexpected issues and solutions
+- [ ] Record configuration values and environment specifics
+- [ ] Note performance metrics and optimization opportunities
+
+### After Completing Work:
+- [ ] Generate memory using appropriate template
+- [ ] Update unified-10x-dev.mdc with new patterns
+- [ ] Create specialized rules if new domains emerged
+- [ ] Verify memory accuracy and completeness
+
+## Memory Maintenance
+
+### Weekly Review:
+- Consolidate similar memories to avoid duplication
+- Update outdated performance metrics
+- Archive memories that are no longer relevant
+- Validate memory accuracy against current codebase
+
+### Monthly Audit:
+- Review rule effectiveness and usage
+- Identify patterns that should become automated
+- Update templates based on team feedback
+- Cleanup obsolete memories and rules
+
+This system ensures continuous learning and knowledge retention, making each implementation session more efficient than the last.# Memory Generation System for Domain Management App
+
+## Overview
+This system automatically generates and updates memories after each implementation phase to maintain context and improve development efficiency.
+
+## Memory Generation Triggers
+1. **Feature Implementation Complete**: After completing any major feature
+2. **Bug Fix Resolution**: After resolving significant issues
+3. **Performance Optimization**: After implementing performance improvements
+4. **API Integration**: After integrating new RDAP providers or services
+5. **Database Changes**: After schema modifications or migrations
+6. **Deployment Success**: After successful production deployments
+
+## Memory Categories
+
+### 1. RDAP Integration Memories
+**Template**: "Successfully integrated [PROVIDER] RDAP endpoint with [SPECIFIC_FEATURES]. Key learnings: [LESSONS]. Performance: [METRICS]. Gotchas: [ISSUES_ENCOUNTERED]."
+
+**Example**: "Successfully integrated Verisign RDAP endpoint with batch processing and retry logic. Key learnings: Rate limits at 100 req/min, requires user-agent header. Performance: 95% success rate, 200ms avg response. Gotchas: Returns different date formats for .com vs .cc domains."
+
+### 2. Database Optimization Memories  
+**Template**: "Optimized [TABLE/QUERY] for [SPECIFIC_USE_CASE]. Changes: [MODIFICATIONS]. Performance impact: [BEFORE_VS_AFTER]. Migration notes: [DEPLOYMENT_CONSIDERATIONS]."
+
+**Example**: "Optimized domains table for expiry filtering by adding composite index on (expiry_date, status). Changes: Added index, updated queries to use covering index. Performance impact: Query time reduced from 2.3s to 120ms for 10k+ domains. Migration notes: Zero downtime, but requires REINDEX on production."
+
+### 3. Caching Strategy Memories
+**Template**: "Implemented [CACHE_TYPE] for [DATA_TYPE] with [TTL_STRATEGY]. Hit rate: [PERCENTAGE]. Invalidation strategy: [METHOD]. Memory usage: [METRICS]."
+
+**Example**: "Implemented Redis caching for WHOIS data with 24h TTL and LRU eviction. Hit rate: 78% in production. Invalidation strategy: Manual refresh + automated on data update. Memory usage: ~2MB for 1000 cached domains."
+
+### 4. User Experience Memories
+**Template**: "Enhanced [UI_COMPONENT] for [USER_ROLE] with [IMPROVEMENTS]. User feedback: [RESPONSE]. Performance impact: [METRICS]. Accessibility improvements: [A11Y_FEATURES]."
+
+### 5. Error Handling Memories
+**Template**: "Resolved [ERROR_TYPE] in [COMPONENT/SERVICE]. Root cause: [ANALYSIS]. Solution: [FIX]. Prevention measures: [SAFEGUARDS]. Monitoring added: [ALERTS]."
+
+### 6. Performance Optimization Memories
+**Template**: "Optimized [FEATURE] performance by [METHOD]. Before: [OLD_METRICS]. After: [NEW_METRICS]. Techniques used: [OPTIMIZATIONS]. Trade-offs: [CONSIDERATIONS]."
+
+## Memory Update Protocol
+
+### After Each Implementation Session:
+1. **Assess What Was Built**: Document the primary feature/fix implemented
+2. **Capture Key Learnings**: Record unexpected challenges and solutions
+3. **Note Performance Impact**: Include relevant metrics and benchmarks
+4. **Document Configuration**: Record environment-specific settings
+5. **Update Rule References**: Modify unified-10x-dev.mdc with new patterns
+
+### Memory Quality Standards:
+- **Specific**: Include exact version numbers, configuration values, metrics
+- **Actionable**: Provide enough detail for future implementation
+- **Contextual**: Explain why decisions were made, not just what was done
+- **Measurable**: Include performance metrics, error rates, user feedback
+
+## Rule Update Requirements
+
+### After Each Major Implementation:
+1. **Update unified-10x-dev.mdc** with:
+   - New patterns discovered
+   - Updated performance benchmarks
+   - Revised error handling strategies
+   - Enhanced security considerations
+
+2. **Create Specialized Rules** when needed:
+   - `rdap-providers.mdc` - Provider-specific configurations and quirks
+   - `domain-validation.mdc` - Domain format validation and TLD handling
+   - `caching-strategies.mdc` - Cache optimization and invalidation patterns
+   - `performance-benchmarks.mdc` - Performance targets and optimization techniques
+
+### Memory-to-Rule Integration:
+- **Successful Patterns** → Add to unified-10x-dev.mdc as recommended approaches
+- **Failed Approaches** → Document in unified-10x-dev.mdc as anti-patterns
+- **Configuration Values** → Create dedicated config rule files
+- **Provider Quirks** → Maintain provider-specific rule documentation
+
+## Implementation Checklist
+
+### Before Starting Work:
+- [ ] Review existing memories for similar implementations
+- [ ] Check unified-10x-dev.mdc for current patterns
+- [ ] Identify which memories will need updates
+
+### During Implementation:
+- [ ] Document unexpected issues and solutions
+- [ ] Record configuration values and environment specifics
+- [ ] Note performance metrics and optimization opportunities
+
+### After Completing Work:
+- [ ] Generate memory using appropriate template
+- [ ] Update unified-10x-dev.mdc with new patterns
+- [ ] Create specialized rules if new domains emerged
+- [ ] Verify memory accuracy and completeness
+
+## Memory Maintenance
+
+### Weekly Review:
+- Consolidate similar memories to avoid duplication
+- Update outdated performance metrics
+- Archive memories that are no longer relevant
+- Validate memory accuracy against current codebase
+
+### Monthly Audit:
+- Review rule effectiveness and usage
+- Identify patterns that should become automated
+- Update templates based on team feedback
+- Cleanup obsolete memories and rules
+
+This system ensures continuous learning and knowledge retention, making each implementation session more efficient than the last.

@@ -1,0 +1,254 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+enum UserRole {
+  ADMIN
+  STAFF
+  FINANCE
+}
+
+enum DomainStatus {
+  ACTIVE
+  EXPIRED
+  PENDING_RENEWAL
+  SUSPENDED
+  PENDING_TRANSFER
+}
+
+enum ServerType {
+  HOSTING
+  VPS
+}
+
+enum ServerStatus {
+  ACTIVE
+  SUSPENDED
+  EXPIRED
+  MAINTENANCE
+  CANCELLED
+}
+
+enum WebsiteStatus {
+  ACTIVE
+  INACTIVE
+  MAINTENANCE
+  DEVELOPMENT
+  SUSPENDED
+}
+
+enum UserStatus {
+  ACTIVE
+  INACTIVE
+  SUSPENDED
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String  @map("user_id")
+  type              String
+  provider          String
+  providerAccountId String  @map("provider_account_id")
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@map("accounts")
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique @map("session_token")
+  userId       String   @map("user_id")
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("sessions")
+}
+
+model User {
+  id            String     @id @default(cuid())
+  name          String?
+  email         String     @unique
+  emailVerified DateTime?  @map("email_verified")
+  image         String?
+  role          UserRole   @default(STAFF)
+  status        UserStatus @default(ACTIVE)
+  passwordHash  String?    @map("password_hash")
+  lastLoginAt   DateTime?  @map("last_login_at")
+  createdAt     DateTime   @default(now()) @map("created_at")
+  updatedAt     DateTime   @updatedAt @map("updated_at")
+
+  accounts   Account[]
+  sessions   Session[]
+  activities Activity[]
+
+  @@map("users")
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+  @@map("verificationtokens")
+}
+
+model Domain {
+  id            String       @id @default(cuid())
+  domain        String       @unique
+  renewalPrice  Decimal?     @map("renewal_price")
+  notes         String?
+  registrar     String?
+  createdDate   DateTime?    @map("created_date")
+  expiryDate    DateTime?    @map("expiry_date")
+  updatedDate   DateTime?    @map("updated_date")    // Restored as requested
+  status        DomainStatus @default(ACTIVE)
+  daysToExpiry  Int?         @map("days_to_expiry")
+  lastChecked   DateTime?    @map("last_checked")
+  
+  // WHOIS fields (removed only registrar_abuse_email, registrar_abuse_phone, registrar_url)
+  nameServers   String?      @map("name_servers")     // JSON array of nameservers
+  domainStatus  String?      @map("domain_status")    // RDAP domain status
+  dnssecStatus  String?      @map("dnssec_status")    // DNSSEC status ("Signed" or "Unsigned")
+  registrarWhoisServer String? @map("registrar_whois_server") // Keep this one
+  
+  // Server Assignment
+  serverId      String?      @map("server_id")        // Foreign key to Server
+  
+  createdAt     DateTime     @default(now()) @map("created_at")
+  updatedAt     DateTime     @updatedAt @map("updated_at")
+
+  // Relations
+  whoisCache WhoisCache[]
+  server     Server?      @relation(fields: [serverId], references: [id], onDelete: SetNull)
+  websites   Website[]    // One domain can have multiple websites
+
+  @@map("domains")
+}
+
+model WhoisCache {
+  id        String   @id @default(cuid())
+  domain    String
+  whoisData Json     @map("whois_data")
+  cachedAt  DateTime @default(now()) @map("cached_at")
+
+  // Relations
+  domainRecord Domain @relation(fields: [domain], references: [domain], onDelete: Cascade)
+
+  @@map("whois_cache")
+}
+
+model Server {
+  id            String       @id @default(cuid())
+  serverName    String       @map("server_name")
+  provider      String       // e.g., "DigitalOcean", "AWS", "Hostinger", "Niagahoster"
+  serverType    ServerType   @map("server_type")
+  status        ServerStatus @default(ACTIVE)
+  
+  // Server Details
+  ipAddress     String?      @map("ip_address")
+  
+  // Dates
+  createdDate   DateTime?    @map("created_date")
+  expiryDate    DateTime?    @map("expiry_date")
+  lastChecked   DateTime?    @map("last_checked")
+  daysToExpiry  Int?         @map("days_to_expiry")
+  
+  // Access Details
+  username      String?
+  password      String?      // Should be encrypted in production
+  
+  // Additional Info
+  notes         String?
+  
+  // Monitoring
+  isMonitored   Boolean      @default(false) @map("is_monitored")
+  uptimePercent Decimal?     @map("uptime_percent")
+  lastDowntime  DateTime?    @map("last_downtime")
+  
+  createdAt     DateTime     @default(now()) @map("created_at")
+  updatedAt     DateTime     @updatedAt @map("updated_at")
+
+  // Relations
+  domains       Domain[]     // One server can have many domains
+
+  @@map("servers")
+}
+
+model Website {
+  id          String      @id @default(cuid())
+  siteName    String      @map("site_name")
+  domainId    String      @map("domain_id")
+  
+  // Optional fields
+  username    String?
+  password    String?     // Should be encrypted in production
+  cms         String?     // Content Management System (WordPress, Laravel, etc.)
+  
+  // Additional info
+  description String?
+  notes       String?
+  
+  // Status
+  status      WebsiteStatus @default(ACTIVE)
+  isLive      Boolean     @default(true) @map("is_live")
+  
+  // Timestamps
+  createdAt   DateTime    @default(now()) @map("created_at")
+  updatedAt   DateTime    @updatedAt @map("updated_at")
+  
+  // Relations
+  domain      Domain      @relation(fields: [domainId], references: [id], onDelete: Cascade)
+  
+  @@map("websites")
+}
+
+enum ActivityType {
+  USER_LOGIN
+  USER_LOGOUT
+  DOMAIN_ADDED
+  DOMAIN_UPDATED
+  DOMAIN_DELETED
+  SERVER_ADDED
+  SERVER_UPDATED
+  SERVER_DELETED
+  WEBSITE_ADDED
+  WEBSITE_UPDATED
+  WEBSITE_DELETED
+  USER_CREATED
+  USER_UPDATED
+  USER_DELETED
+}
+
+model Activity {
+  id          String       @id @default(cuid())
+  type        ActivityType
+  description String
+  userId      String?      @map("user_id")
+  entityType  String?      @map("entity_type") // domain, server, website, user
+  entityId    String?      @map("entity_id")
+  metadata    String?      // JSON string for additional data
+  createdAt   DateTime     @default(now()) @map("created_at")
+  
+  // Relations
+  user        User?        @relation(fields: [userId], references: [id], onDelete: SetNull)
+  
+  @@map("activities")
+}

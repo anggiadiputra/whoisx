@@ -1,0 +1,177 @@
+# Domain Management Web App - Project Overview
+
+## Project Mission
+Build a comprehensive domain management web application that centralizes WHOIS tracking, automates renewal monitoring, and provides role-based access for different user types managing domain portfolios.
+
+## Core Value Propositions
+1. **Centralized Domain Tracking**: Single dashboard for all domain assets
+2. **Automated WHOIS Monitoring**: Real-time data from multiple RDAP providers
+3. **Expiry Management**: Proactive alerts and renewal tracking
+4. **Batch Processing**: Efficient handling of large domain portfolios
+5. **Role-Based Access**: Tailored views for Admin, Staff, and Finance roles
+
+## Technical Architecture
+
+### Frontend Stack
+- **Next.js 15**: Full-stack React framework with App Router
+- **TypeScript**: Strict typing for enhanced developer experience
+- **Tailwind CSS**: Utility-first styling for rapid UI development
+- **React Query/SWR**: Server state management and caching
+- **NextAuth.js**: Authentication and session management
+
+### Backend Stack  
+- **Next.js API Routes**: RESTful API endpoints
+- **Prisma ORM**: Type-safe database access and migrations
+- **PostgreSQL**: Primary database for domain and user data
+- **Redis/Upstash**: Caching layer for WHOIS data
+- **RDAP APIs**: Multiple providers for comprehensive domain data
+
+### Infrastructure
+- **Vercel**: Deployment platform with serverless functions
+- **Supabase/Railway**: Managed PostgreSQL hosting
+- **Upstash**: Managed Redis for caching
+- **GitHub**: Version control and CI/CD integration
+
+## Key Features Implementation
+
+### 1. Domain Management
+```typescript
+// Core domain operations
+interface Domain {
+  id: string
+  domain: string
+  renewalPrice: number
+  notes?: string
+  registrar: string
+  createdDate: Date
+  expiryDate: Date
+  status: DomainStatus
+  daysToExpiry: number
+  lastChecked: Date
+}
+```
+
+### 2. RDAP Integration
+```typescript
+// Multi-provider RDAP service
+const rdapProviders = [
+  'https://rdap.verisign.com/com/v1/domain/',
+  'https://rdap.verisign.com/cc/v1/domain/',
+  'https://rdap.idnic.id/rdap/domain/',
+  'https://rdap.neustar.biz/rdap/domain/',
+  'https://rdap.afilias.net/rdap/domain/',
+  'https://rdap.pir.org/rdap/domain/'
+]
+```
+
+### 3. Role-Based Access Control
+```typescript
+enum UserRole {
+  ADMIN = 'admin',    // Full access: domains + users
+  STAFF = 'staff',    // Domain management only
+  FINANCE = 'finance' // Read-only + renewal prices
+}
+```
+
+### 4. Caching Strategy
+- **WHOIS Data**: 24-hour TTL with manual refresh option
+- **Dashboard Stats**: 1-hour TTL for aggregated data
+- **User Sessions**: Standard NextAuth session duration
+- **API Responses**: Edge caching for static domain lists
+
+## Database Schema
+
+### Users Table
+- `id` (UUID, Primary Key)
+- `name` (String)
+- `email` (String, Unique)
+- `role` (Enum: admin/staff/finance)
+- `password_hash` (String)
+- `created_at` (Timestamp)
+
+### Domains Table
+- `id` (UUID, Primary Key)
+- `domain` (String, Unique)
+- `renewal_price` (Decimal)
+- `notes` (Text, Optional)
+- `registrar` (String, from WHOIS)
+- `created_date` (Date, from WHOIS)
+- `expiry_date` (Date, from WHOIS)
+- `status` (String, from WHOIS)
+- `days_to_expiry` (Integer, Calculated)
+- `last_checked` (Timestamp)
+- `created_at` (Timestamp)
+
+### WHOIS Cache Table
+- `id` (UUID, Primary Key)
+- `domain` (String)
+- `whois_data` (JSONB, Raw RDAP response)
+- `cached_at` (Timestamp)
+
+## API Design
+
+### Domain Endpoints
+- `POST /api/domains` - Add domain with WHOIS lookup
+- `GET /api/domains` - List domains with filtering/sorting
+- `GET /api/domains/:id` - Get domain details
+- `PUT /api/domains/:id` - Update domain information
+- `DELETE /api/domains/:id` - Remove domain
+
+### WHOIS Endpoints
+- `POST /api/whois` - Single domain WHOIS lookup
+- `POST /api/whois/batch` - Batch domain processing
+- `GET /api/whois/cache/:domain` - Get cached WHOIS data
+- `DELETE /api/whois/cache/:domain` - Invalidate cache
+
+### User Management
+- `GET /api/users` - List users (Admin only)
+- `POST /api/users` - Create user (Admin only)
+- `PUT /api/users/:id` - Update user (Admin only)
+- `DELETE /api/users/:id` - Delete user (Admin only)
+
+## Performance Requirements
+- **WHOIS Lookups**: Process 100 domains within 10 seconds
+- **Dashboard Load**: Initial page load under 3 seconds
+- **Batch Operations**: Handle up to 1000 domains efficiently
+- **Cache Hit Rate**: Target 80%+ for repeated WHOIS queries
+- **Uptime**: 99% availability target
+
+## Security Considerations
+- **Input Validation**: Domain format validation before API calls
+- **Rate Limiting**: Prevent abuse of WHOIS endpoints
+- **Authentication**: JWT-based sessions with role verification
+- **Data Protection**: Encrypt sensitive data at rest
+- **API Security**: CORS configuration and request validation
+
+## Error Handling Strategy
+1. **Domain Validation**: Client-side format checking
+2. **API Failures**: Retry logic with exponential backoff
+3. **Network Issues**: Graceful degradation with cached data
+4. **User Errors**: Clear error messages and recovery suggestions
+5. **System Errors**: Comprehensive logging and monitoring
+
+## Future Enhancements
+- **Email Notifications**: Expiry reminders and alerts
+- **Registrar Integration**: Auto-renewal capabilities
+- **Export Functions**: CSV/Excel export for reporting
+- **Mobile App**: React Native companion app
+- **Analytics**: Usage patterns and cost optimization
+- **API Webhooks**: Integration with external systems
+
+## Development Workflow
+1. **Feature Planning**: Define requirements and acceptance criteria
+2. **Database Design**: Schema updates and migrations
+3. **API Development**: Backend endpoints with error handling
+4. **Frontend Implementation**: UI components and user flows
+5. **Testing**: Unit, integration, and E2E testing
+6. **Deployment**: Staging validation and production release
+7. **Monitoring**: Performance tracking and error alerting
+
+## Success Metrics
+- **User Adoption**: Active users managing domains
+- **System Reliability**: Uptime and error rates
+- **Performance**: Response times and cache efficiency
+- **Data Accuracy**: WHOIS data freshness and reliability
+- **User Satisfaction**: Feature usage and feedback scores
+
+This overview serves as the foundation for all development decisions and should be referenced when implementing new features or making architectural changes.
