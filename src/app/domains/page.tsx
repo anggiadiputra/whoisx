@@ -78,6 +78,8 @@ export default function DomainsPage() {
   const [searchTerm, setSearchTerm] = useState('')
   const [filterExpiring, setFilterExpiring] = useState<string | null>(null)
   const [showAddDomain, setShowAddDomain] = useState(false)
+  const [showEditDomain, setShowEditDomain] = useState(false)
+  const [selectedDomainForEdit, setSelectedDomainForEdit] = useState<Domain | null>(null)
   const [showAssignModal, setShowAssignModal] = useState(false)
   const [selectedDomainForAssign, setSelectedDomainForAssign] = useState<Domain | null>(null)
   const [newDomain, setNewDomain] = useState({
@@ -86,6 +88,12 @@ export default function DomainsPage() {
     notes: ''
   })
   const [addingDomain, setAddingDomain] = useState(false)
+  const [editingDomain, setEditingDomain] = useState(false)
+  const [editDomain, setEditDomain] = useState({
+    domain: '',
+    renewalPrice: '',
+    notes: ''
+  })
   const [currentPage, setCurrentPage] = useState(1)
   const [itemsPerPage] = useState(10)
 
@@ -308,6 +316,66 @@ export default function DomainsPage() {
     }
   }
 
+  // Handle edit domain
+  const handleEditDomain = (domain: Domain) => {
+    setSelectedDomainForEdit(domain)
+    setEditDomain({
+      domain: domain.domain,
+      renewalPrice: domain.renewalPrice?.toString() || '',
+      notes: domain.notes || ''
+    })
+    setShowEditDomain(true)
+  }
+
+  const handleUpdateDomain = async (e: React.FormEvent) => {
+    e.preventDefault()
+    
+    if (!selectedDomainForEdit) return
+
+    setEditingDomain(true)
+
+    try {
+      const response = await fetch(`/api/domains/${selectedDomainForEdit.id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          renewalPrice: editDomain.renewalPrice ? parseFloat(editDomain.renewalPrice) : null,
+          notes: editDomain.notes.trim() || null,
+        }),
+      })
+
+      const data = await response.json()
+
+      if (response.ok) {
+        toast({
+          title: "Success!",
+          description: `Domain ${selectedDomainForEdit.domain} has been updated successfully.`,
+        })
+        setEditDomain({ domain: '', renewalPrice: '', notes: '' })
+        setShowEditDomain(false)
+        setSelectedDomainForEdit(null)
+        fetchDomains()
+      } else {
+        toast({
+          title: "Error Updating Domain",
+          description: data.error || 'Failed to update domain. Please try again.',
+          variant: "destructive",
+        })
+      }
+    } catch (error) {
+      console.error('Error updating domain:', error)
+      toast({
+        title: "Network Error",
+        description: 'Unable to connect to server. Please check your connection.',
+        variant: "destructive",
+      })
+    } finally {
+      setEditingDomain(false)
+    }
+  }
+
   // Filter domains based on search and expiry filter
   const filteredDomains = domains.filter(domain => {
     const matchesSearch = domain.domain.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -458,6 +526,91 @@ export default function DomainsPage() {
                           </>
                         ) : (
                           'Add Domain'
+                        )}
+                      </Button>
+                    </div>
+                  </form>
+                </DialogContent>
+              </Dialog>
+            )}
+
+            {/* Edit Domain Modal */}
+            {canManageDomains && (
+              <Dialog open={showEditDomain} onOpenChange={setShowEditDomain}>
+                <DialogContent className="sm:max-w-[425px]">
+                  <DialogHeader>
+                    <DialogTitle>Edit Domain</DialogTitle>
+                    <DialogDescription>
+                      Update domain information. Domain name cannot be changed.
+                    </DialogDescription>
+                  </DialogHeader>
+                  <form onSubmit={handleUpdateDomain} className="space-y-4 mt-4">
+                    <div className="space-y-2">
+                      <label htmlFor="editDomain" className="text-sm font-medium text-gray-700">
+                        Domain Name
+                      </label>
+                      <Input
+                        id="editDomain"
+                        value={editDomain.domain}
+                        disabled
+                        className="bg-gray-50"
+                      />
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <label htmlFor="editRenewalPrice" className="text-sm font-medium text-gray-700">
+                        Renewal Price (Optional)
+                      </label>
+                      <Input
+                        id="editRenewalPrice"
+                        type="number"
+                        step="0.01"
+                        placeholder="0.00"
+                        value={editDomain.renewalPrice}
+                        onChange={(e) => setEditDomain(prev => ({ ...prev, renewalPrice: e.target.value }))}
+                        disabled={editingDomain}
+                      />
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <label htmlFor="editNotes" className="text-sm font-medium text-gray-700">
+                        Notes (Optional)
+                      </label>
+                      <Input
+                        id="editNotes"
+                        placeholder="Additional information..."
+                        value={editDomain.notes}
+                        onChange={(e) => setEditDomain(prev => ({ ...prev, notes: e.target.value }))}
+                        disabled={editingDomain}
+                      />
+                    </div>
+                    
+                    <div className="flex space-x-3 pt-4">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={() => {
+                          setShowEditDomain(false)
+                          setSelectedDomainForEdit(null)
+                          setEditDomain({ domain: '', renewalPrice: '', notes: '' })
+                        }}
+                        className="flex-1"
+                        disabled={editingDomain}
+                      >
+                        Cancel
+                      </Button>
+                      <Button
+                        type="submit"
+                        disabled={editingDomain}
+                        className="flex-1"
+                      >
+                        {editingDomain ? (
+                          <>
+                            <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+                            Updating...
+                          </>
+                        ) : (
+                          'Update Domain'
                         )}
                       </Button>
                     </div>
@@ -664,14 +817,7 @@ export default function DomainsPage() {
                                     size="sm" 
                                     className="text-blue-600 hover:text-blue-700 hover:bg-blue-50" 
                                     title="Edit Domain"
-                                    onClick={() => {
-                                      // TODO: Implement edit domain functionality
-                                      toast({
-                                        title: "Edit Domain",
-                                        description: "Edit domain functionality will be implemented soon",
-                                        variant: "default",
-                                      })
-                                    }}
+                                    onClick={() => handleEditDomain(domain)}
                                   >
                                     <Edit className="w-4 h-4" />
                                   </Button>
@@ -850,13 +996,7 @@ export default function DomainsPage() {
                                 size="sm"
                                 className="text-green-600 hover:text-green-700 hover:bg-green-50 h-8 px-2"
                                 title="Edit Domain"
-                                onClick={() => {
-                                  toast({
-                                    title: "Edit Domain",
-                                    description: "Edit domain functionality will be implemented soon",
-                                    variant: "default",
-                                  })
-                                }}
+                                onClick={() => handleEditDomain(domain)}
                               >
                                 <Edit className="w-3 h-3" />
                               </Button>
