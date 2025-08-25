@@ -82,6 +82,7 @@ export default function DomainsPage() {
   const [selectedDomainForAssign, setSelectedDomainForAssign] = useState<Domain | null>(null)
   const [newDomain, setNewDomain] = useState({
     domain: '',
+    renewalPrice: '',
     notes: ''
   })
   const [addingDomain, setAddingDomain] = useState(false)
@@ -272,6 +273,7 @@ export default function DomainsPage() {
         },
         body: JSON.stringify({
           domain: newDomain.domain.trim().toLowerCase(),
+          renewalPrice: newDomain.renewalPrice ? parseFloat(newDomain.renewalPrice) : null,
           notes: newDomain.notes.trim() || null,
         }),
       })
@@ -283,7 +285,7 @@ export default function DomainsPage() {
           title: "Success!",
           description: `Domain ${newDomain.domain} has been added successfully.`,
         })
-        setNewDomain({ domain: '', notes: '' })
+        setNewDomain({ domain: '', renewalPrice: '', notes: '' })
         setShowAddDomain(false)
         fetchDomains()
       } else {
@@ -402,6 +404,21 @@ export default function DomainsPage() {
                         value={newDomain.domain}
                         onChange={(e) => setNewDomain(prev => ({ ...prev, domain: e.target.value }))}
                         required
+                        disabled={addingDomain}
+                      />
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <label htmlFor="renewalPrice" className="text-sm font-medium text-gray-700">
+                        Renewal Price (Optional)
+                      </label>
+                      <Input
+                        id="renewalPrice"
+                        type="number"
+                        step="0.01"
+                        placeholder="0.00"
+                        value={newDomain.renewalPrice}
+                        onChange={(e) => setNewDomain(prev => ({ ...prev, renewalPrice: e.target.value }))}
                         disabled={addingDomain}
                       />
                     </div>
