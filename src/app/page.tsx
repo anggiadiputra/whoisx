@@ -93,9 +93,6 @@ export default function HomePage() {
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState('')
   const [filterExpiring, setFilterExpiring] = useState<string | null>(null)
-  
-  // Debounced search term for better performance
-  const debouncedSearchTerm = useDebounce(searchTerm, 300)
   const [showAddDomain, setShowAddDomain] = useState(false)
   const [newDomain, setNewDomain] = useState({
     domain: '',
@@ -105,6 +102,9 @@ export default function HomePage() {
   const [addingDomain, setAddingDomain] = useState(false)
   const [currentPage, setCurrentPage] = useState(1)
   const [itemsPerPage] = useState(10)
+
+  // Debounced search term for better performance
+  const debouncedSearchTerm = useDebounce(searchTerm, 300)
 
   // Calculate renewal costs for expiring domains
   const calculateRenewalCosts = useCallback((domainsList: Domain[]) => {
@@ -210,6 +210,34 @@ export default function HomePage() {
     setCurrentPage(1)
   }, [searchTerm, filterExpiring])
 
+  // Memoized filtered domains for better performance
+  const filteredDomains = useMemo(() => {
+    return domains.filter(domain => {
+      const matchesSearch = domain.domain.toLowerCase().includes(debouncedSearchTerm.toLowerCase())
+      
+      if (!filterExpiring) return matchesSearch
+      
+      const days = domain.daysToExpiry
+      if (filterExpiring === '1' && days !== null && days <= 1) return matchesSearch
+      if (filterExpiring === '7' && days !== null && days <= 7) return matchesSearch
+      if (filterExpiring === '30' && days !== null && days <= 30) return matchesSearch
+      
+      return false
+    })
+  }, [domains, debouncedSearchTerm, filterExpiring])
+
+  // Memoized pagination logic
+  const paginationData = useMemo(() => {
+    const totalPages = Math.ceil(filteredDomains.length / itemsPerPage)
+    const startIndex = (currentPage - 1) * itemsPerPage
+    const endIndex = startIndex + itemsPerPage
+    const paginatedDomains = filteredDomains.slice(startIndex, endIndex)
+    
+    return { totalPages, startIndex, endIndex, paginatedDomains }
+  }, [filteredDomains, currentPage, itemsPerPage])
+
+  const { totalPages, startIndex, endIndex, paginatedDomains } = paginationData
+
   // Early returns after all hooks
   if (status === 'loading' || loading) {
     return (
@@ -268,34 +296,7 @@ export default function HomePage() {
   const canManageDomains = session?.user?.role === 'ADMIN' || session?.user?.role === 'STAFF'
   const canViewPrices = session?.user?.role === 'ADMIN' || session?.user?.role === 'FINANCE'
 
-  // Filter domains based on search and expiry filter
-  // Memoized filtered domains for better performance
-  const filteredDomains = useMemo(() => {
-    return domains.filter(domain => {
-      const matchesSearch = domain.domain.toLowerCase().includes(debouncedSearchTerm.toLowerCase())
-      
-      if (!filterExpiring) return matchesSearch
-      
-      const days = domain.daysToExpiry
-      if (filterExpiring === '1' && days !== null && days <= 1) return matchesSearch
-      if (filterExpiring === '7' && days !== null && days <= 7) return matchesSearch
-      if (filterExpiring === '30' && days !== null && days <= 30) return matchesSearch
-      
-      return false
-    })
-  }, [domains, debouncedSearchTerm, filterExpiring])
-
-  // Memoized pagination logic
-  const paginationData = useMemo(() => {
-    const totalPages = Math.ceil(filteredDomains.length / itemsPerPage)
-    const startIndex = (currentPage - 1) * itemsPerPage
-    const endIndex = startIndex + itemsPerPage
-    const paginatedDomains = filteredDomains.slice(startIndex, endIndex)
-    
-    return { totalPages, startIndex, endIndex, paginatedDomains }
-  }, [filteredDomains, currentPage, itemsPerPage])
-
-  const { totalPages, startIndex, endIndex, paginatedDomains } = paginationData
+  // Filter domains based on search and expiry filter (moved to hooks section above)
 
 
 
