@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useMemo, memo } from 'react'
 import { useSession } from 'next-auth/react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -14,6 +14,7 @@ import { Navbar } from '@/components/navbar'
 import { WhoisDetailModal } from '@/components/whois-detail-modal'
 import { AssignDomainModal } from '@/components/assign-domain-modal'
 import { formatIndonesianDate } from '@/lib/utils'
+import { useDebounce } from '@/hooks/use-debounce'
 import { 
   Plus, 
   Search, 
@@ -77,6 +78,9 @@ export default function DomainsPage() {
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState('')
   const [filterExpiring, setFilterExpiring] = useState<string | null>(null)
+  
+  // Debounced search term for better performance
+  const debouncedSearchTerm = useDebounce(searchTerm, 300)
   const [showAddDomain, setShowAddDomain] = useState(false)
   const [showEditDomain, setShowEditDomain] = useState(false)
   const [selectedDomainForEdit, setSelectedDomainForEdit] = useState<Domain | null>(null)
@@ -376,27 +380,35 @@ export default function DomainsPage() {
     }
   }
 
-  // Filter domains based on search and expiry filter
-  const filteredDomains = domains.filter(domain => {
-    const matchesSearch = domain.domain.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         domain.registrar?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         domain.notes?.toLowerCase().includes(searchTerm.toLowerCase())
+  // Memoized filtered domains for better performance
+  const filteredDomains = useMemo(() => {
+    return domains.filter(domain => {
+      const matchesSearch = domain.domain.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) ||
+                           domain.registrar?.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) ||
+                           domain.notes?.toLowerCase().includes(debouncedSearchTerm.toLowerCase())
 
-    if (!matchesSearch) return false
+      if (!matchesSearch) return false
 
-    if (filterExpiring === 'critical') return domain.daysToExpiry && domain.daysToExpiry <= 1
-    if (filterExpiring === 'warning') return domain.daysToExpiry && domain.daysToExpiry <= 7
-    if (filterExpiring === 'attention') return domain.daysToExpiry && domain.daysToExpiry <= 30
-    if (filterExpiring === 'good') return domain.daysToExpiry && domain.daysToExpiry > 30
+      if (filterExpiring === 'critical') return domain.daysToExpiry && domain.daysToExpiry <= 1
+      if (filterExpiring === 'warning') return domain.daysToExpiry && domain.daysToExpiry <= 7
+      if (filterExpiring === 'attention') return domain.daysToExpiry && domain.daysToExpiry <= 30
+      if (filterExpiring === 'good') return domain.daysToExpiry && domain.daysToExpiry > 30
 
-    return true
-  })
+      return true
+    })
+  }, [domains, debouncedSearchTerm, filterExpiring])
 
-  // Pagination logic
-  const totalPages = Math.ceil(filteredDomains.length / itemsPerPage)
-  const startIndex = (currentPage - 1) * itemsPerPage
-  const endIndex = startIndex + itemsPerPage
-  const paginatedDomains = filteredDomains.slice(startIndex, endIndex)
+  // Memoized pagination logic
+  const paginationData = useMemo(() => {
+    const totalPages = Math.ceil(filteredDomains.length / itemsPerPage)
+    const startIndex = (currentPage - 1) * itemsPerPage
+    const endIndex = startIndex + itemsPerPage
+    const paginatedDomains = filteredDomains.slice(startIndex, endIndex)
+    
+    return { totalPages, startIndex, endIndex, paginatedDomains }
+  }, [filteredDomains, currentPage, itemsPerPage])
+
+  const { totalPages, startIndex, endIndex, paginatedDomains } = paginationData
 
   const statsCards = [
     {

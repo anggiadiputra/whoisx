@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useMemo } from 'react'
 import { useSession } from 'next-auth/react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -16,6 +16,7 @@ import { Navbar } from '@/components/navbar'
 import { WhoisDetailModal } from '@/components/whois-detail-modal'
 import { RecentActivity } from '@/components/recent-activity'
 import { formatIndonesianDate } from '@/lib/utils'
+import { useDebounce } from '@/hooks/use-debounce'
 import { 
   Plus, 
   Search, 
@@ -92,6 +93,9 @@ export default function HomePage() {
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState('')
   const [filterExpiring, setFilterExpiring] = useState<string | null>(null)
+  
+  // Debounced search term for better performance
+  const debouncedSearchTerm = useDebounce(searchTerm, 300)
   const [showAddDomain, setShowAddDomain] = useState(false)
   const [newDomain, setNewDomain] = useState({
     domain: '',
@@ -265,24 +269,33 @@ export default function HomePage() {
   const canViewPrices = session?.user?.role === 'ADMIN' || session?.user?.role === 'FINANCE'
 
   // Filter domains based on search and expiry filter
-  const filteredDomains = domains.filter(domain => {
-    const matchesSearch = domain.domain.toLowerCase().includes(searchTerm.toLowerCase())
-    
-    if (!filterExpiring) return matchesSearch
-    
-    const days = domain.daysToExpiry
-    if (filterExpiring === '1' && days !== null && days <= 1) return matchesSearch
-    if (filterExpiring === '7' && days !== null && days <= 7) return matchesSearch
-    if (filterExpiring === '30' && days !== null && days <= 30) return matchesSearch
-    
-    return false
-  })
+  // Memoized filtered domains for better performance
+  const filteredDomains = useMemo(() => {
+    return domains.filter(domain => {
+      const matchesSearch = domain.domain.toLowerCase().includes(debouncedSearchTerm.toLowerCase())
+      
+      if (!filterExpiring) return matchesSearch
+      
+      const days = domain.daysToExpiry
+      if (filterExpiring === '1' && days !== null && days <= 1) return matchesSearch
+      if (filterExpiring === '7' && days !== null && days <= 7) return matchesSearch
+      if (filterExpiring === '30' && days !== null && days <= 30) return matchesSearch
+      
+      return false
+    })
+  }, [domains, debouncedSearchTerm, filterExpiring])
 
-  // Pagination logic
-  const totalPages = Math.ceil(filteredDomains.length / itemsPerPage)
-  const startIndex = (currentPage - 1) * itemsPerPage
-  const endIndex = startIndex + itemsPerPage
-  const paginatedDomains = filteredDomains.slice(startIndex, endIndex)
+  // Memoized pagination logic
+  const paginationData = useMemo(() => {
+    const totalPages = Math.ceil(filteredDomains.length / itemsPerPage)
+    const startIndex = (currentPage - 1) * itemsPerPage
+    const endIndex = startIndex + itemsPerPage
+    const paginatedDomains = filteredDomains.slice(startIndex, endIndex)
+    
+    return { totalPages, startIndex, endIndex, paginatedDomains }
+  }, [filteredDomains, currentPage, itemsPerPage])
+
+  const { totalPages, startIndex, endIndex, paginatedDomains } = paginationData
 
 
 

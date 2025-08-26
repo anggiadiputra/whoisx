@@ -8,6 +8,10 @@ import authOptions from '@/lib/auth'
 
 // GET /api/domains - List all domains with optional filtering
 export async function GET(request: NextRequest) {
+  // Add cache headers for better performance
+  const headers = new Headers()
+  headers.set('Cache-Control', 'public, s-maxage=30, stale-while-revalidate=60')
+  
   try {
     const { searchParams } = new URL(request.url)
     const expiring = searchParams.get('expiring')
@@ -149,7 +153,7 @@ export async function GET(request: NextRequest) {
       success: true,
       domains: domainsWithCalculatedExpiry,
       stats
-    })
+    }, { headers })
   } catch (error: any) {
     console.error('Error fetching domains:', error)
     return NextResponse.json({

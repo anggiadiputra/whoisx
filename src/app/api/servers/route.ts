@@ -6,6 +6,10 @@ import { ServerType, ServerStatus } from '@prisma/client'
 
 // GET /api/servers - List all servers with stats
 export async function GET(request: NextRequest) {
+  // Add cache headers for better performance
+  const headers = new Headers()
+  headers.set('Cache-Control', 'public, s-maxage=30, stale-while-revalidate=60')
+  
   try {
     const session = await getServerSession(authOptions)
     
@@ -105,7 +109,7 @@ export async function GET(request: NextRequest) {
       success: true,
       servers: serversWithCalculatedExpiry,
       stats
-    })
+    }, { headers })
 
   } catch (error) {
     console.error('❌ Error fetching servers:', error)
