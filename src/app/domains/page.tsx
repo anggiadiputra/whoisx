@@ -78,9 +78,6 @@ export default function DomainsPage() {
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState('')
   const [filterExpiring, setFilterExpiring] = useState<string | null>(null)
-  
-  // Debounced search term for better performance
-  const debouncedSearchTerm = useDebounce(searchTerm, 300)
   const [showAddDomain, setShowAddDomain] = useState(false)
   const [showEditDomain, setShowEditDomain] = useState(false)
   const [selectedDomainForEdit, setSelectedDomainForEdit] = useState<Domain | null>(null)
@@ -100,6 +97,9 @@ export default function DomainsPage() {
   })
   const [currentPage, setCurrentPage] = useState(1)
   const [itemsPerPage] = useState(10)
+
+  // Debounced search term for better performance
+  const debouncedSearchTerm = useDebounce(searchTerm, 300)
 
   // User permissions
   const userRole = session?.user?.role
@@ -190,6 +190,36 @@ export default function DomainsPage() {
   useEffect(() => {
     setCurrentPage(1)
   }, [searchTerm, filterExpiring])
+
+  // Memoized filtered domains for better performance
+  const filteredDomains = useMemo(() => {
+    return domains.filter(domain => {
+      const matchesSearch = domain.domain.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) ||
+                           domain.registrar?.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) ||
+                           domain.notes?.toLowerCase().includes(debouncedSearchTerm.toLowerCase())
+
+      if (!matchesSearch) return false
+
+      if (filterExpiring === 'critical') return domain.daysToExpiry && domain.daysToExpiry <= 1
+      if (filterExpiring === 'warning') return domain.daysToExpiry && domain.daysToExpiry <= 7
+      if (filterExpiring === 'attention') return domain.daysToExpiry && domain.daysToExpiry <= 30
+      if (filterExpiring === 'good') return domain.daysToExpiry && domain.daysToExpiry > 30
+
+      return true
+    })
+  }, [domains, debouncedSearchTerm, filterExpiring])
+
+  // Memoized pagination logic
+  const paginationData = useMemo(() => {
+    const totalPages = Math.ceil(filteredDomains.length / itemsPerPage)
+    const startIndex = (currentPage - 1) * itemsPerPage
+    const endIndex = startIndex + itemsPerPage
+    const paginatedDomains = filteredDomains.slice(startIndex, endIndex)
+    
+    return { totalPages, startIndex, endIndex, paginatedDomains }
+  }, [filteredDomains, currentPage, itemsPerPage])
+
+  const { totalPages, startIndex, endIndex, paginatedDomains } = paginationData
 
   // Handle assign domain
   const handleAssignDomain = (domain: Domain) => {
@@ -380,35 +410,7 @@ export default function DomainsPage() {
     }
   }
 
-  // Memoized filtered domains for better performance
-  const filteredDomains = useMemo(() => {
-    return domains.filter(domain => {
-      const matchesSearch = domain.domain.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) ||
-                           domain.registrar?.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) ||
-                           domain.notes?.toLowerCase().includes(debouncedSearchTerm.toLowerCase())
-
-      if (!matchesSearch) return false
-
-      if (filterExpiring === 'critical') return domain.daysToExpiry && domain.daysToExpiry <= 1
-      if (filterExpiring === 'warning') return domain.daysToExpiry && domain.daysToExpiry <= 7
-      if (filterExpiring === 'attention') return domain.daysToExpiry && domain.daysToExpiry <= 30
-      if (filterExpiring === 'good') return domain.daysToExpiry && domain.daysToExpiry > 30
-
-      return true
-    })
-  }, [domains, debouncedSearchTerm, filterExpiring])
-
-  // Memoized pagination logic
-  const paginationData = useMemo(() => {
-    const totalPages = Math.ceil(filteredDomains.length / itemsPerPage)
-    const startIndex = (currentPage - 1) * itemsPerPage
-    const endIndex = startIndex + itemsPerPage
-    const paginatedDomains = filteredDomains.slice(startIndex, endIndex)
-    
-    return { totalPages, startIndex, endIndex, paginatedDomains }
-  }, [filteredDomains, currentPage, itemsPerPage])
-
-  const { totalPages, startIndex, endIndex, paginatedDomains } = paginationData
+  // Filtering and pagination logic moved to hooks section above
 
   const statsCards = [
     {
