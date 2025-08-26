@@ -6,11 +6,12 @@ import { DomainStatus } from '@prisma/client'
 // GET /api/domains/[id] - Get domain details
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params
     const domain = await prisma.domain.findUnique({
-      where: { id: params.id },
+      where: { id },
       include: {
         whoisCache: {
           orderBy: {
@@ -55,15 +56,16 @@ export async function GET(
 // PUT /api/domains/[id] - Update domain
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params
     const body = await request.json()
     const { renewalPrice, notes, refreshWhois } = body
     
     // Check if domain exists
     const existingDomain = await prisma.domain.findUnique({
-      where: { id: params.id }
+      where: { id }
     })
     
     if (!existingDomain) {
@@ -112,7 +114,7 @@ export async function PUT(
     }
     
     const updatedDomain = await prisma.domain.update({
-      where: { id: params.id },
+      where: { id },
       data: updateData,
       include: {
         whoisCache: {
@@ -151,12 +153,13 @@ export async function PUT(
 // DELETE /api/domains/[id] - Delete domain
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params
     // Check if domain exists
     const existingDomain = await prisma.domain.findUnique({
-      where: { id: params.id }
+      where: { id }
     })
     
     if (!existingDomain) {
@@ -168,7 +171,7 @@ export async function DELETE(
     
     // Delete domain (cascade will handle whois_cache)
     await prisma.domain.delete({
-      where: { id: params.id }
+      where: { id }
     })
     
     return NextResponse.json({
