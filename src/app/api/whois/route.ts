@@ -1,10 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { lookupDomain, isCacheValid } from '@/lib/rdap'
+import { requireManager } from '@/lib/permissions'
 
 // POST /api/whois - Single domain WHOIS lookup
 export async function POST(request: NextRequest) {
   try {
+    // Lookups write to the WHOIS cache, so only ADMIN and STAFF may trigger them
+    const { error } = await requireManager()
+    if (error) {
+      return error
+    }
+
     const body = await request.json()
     const { domain, forceRefresh = false } = body
     

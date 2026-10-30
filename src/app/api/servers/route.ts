@@ -3,12 +3,12 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { ServerType, ServerStatus } from '@prisma/client'
+import { withoutPassword, PRIVATE_CACHE_CONTROL } from '@/lib/permissions'
 
 // GET /api/servers - List all servers with stats
 export async function GET(request: NextRequest) {
-  // Add cache headers for better performance
   const headers = new Headers()
-  headers.set('Cache-Control', 'public, s-maxage=30, stale-while-revalidate=60')
+  headers.set('Cache-Control', PRIVATE_CACHE_CONTROL)
   
   try {
     const session = await getServerSession(authOptions)
@@ -52,7 +52,7 @@ export async function GET(request: NextRequest) {
       }
 
       return {
-        ...server,
+        ...withoutPassword(server, session.user.role),
         daysToExpiry,
         domainCount: server.domains.length
       }

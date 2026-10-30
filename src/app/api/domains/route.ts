@@ -1,16 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getServerSession } from 'next-auth'
 import { prisma } from '@/lib/prisma'
 import { lookupDomain } from '@/lib/rdap'
 import { DomainStatus } from '@prisma/client'
 import { ActivityLogger } from '@/lib/activity-logger'
-import authOptions from '@/lib/auth'
+import { requireManager, PRIVATE_CACHE_CONTROL } from '@/lib/permissions'
 
 // GET /api/domains - List all domains with optional filtering
 export async function GET(request: NextRequest) {
-  // Add cache headers for better performance
   const headers = new Headers()
-  headers.set('Cache-Control', 'public, s-maxage=30, stale-while-revalidate=60')
+  headers.set('Cache-Control', PRIVATE_CACHE_CONTROL)
   
   try {
     const { searchParams } = new URL(request.url)
@@ -166,10 +164,10 @@ export async function GET(request: NextRequest) {
 // POST /api/domains - Add new domain with WHOIS lookup
 export async function POST(request: NextRequest) {
   try {
-    // Get session for activity logging
-    const session = await getServerSession(authOptions)
-    if (!session?.user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    // Only ADMIN and STAFF can add domains
+    const { session, error } = await requireManager()
+    if (error) {
+      return error
     }
     
     const body = await request.json()

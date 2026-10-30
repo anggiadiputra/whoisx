@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { lookupDomain } from '@/lib/rdap'
-import { DomainStatus } from '@prisma/client'
+import { requireManager } from '@/lib/permissions'
 
 // GET /api/domains/[id] - Get domain details
 export async function GET(
@@ -59,6 +59,12 @@ export async function PUT(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    // Only ADMIN and STAFF can update domains
+    const { error } = await requireManager()
+    if (error) {
+      return error
+    }
+
     const { id } = await params
     const body = await request.json()
     const { renewalPrice, notes, refreshWhois } = body
@@ -156,6 +162,12 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    // Only ADMIN and STAFF can delete domains
+    const { error } = await requireManager()
+    if (error) {
+      return error
+    }
+
     const { id } = await params
     // Check if domain exists
     const existingDomain = await prisma.domain.findUnique({

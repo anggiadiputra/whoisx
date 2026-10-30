@@ -6,7 +6,9 @@ import { UserRole } from '@prisma/client'
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    const { name, email, password, role } = body
+    // Role is intentionally not read from the body: self-registration must never
+    // grant elevated access. Admins change roles via /api/users/[id].
+    const { name, email, password } = body
 
     // Validate required fields
     if (!name || !email || !password) {
@@ -49,17 +51,13 @@ export async function POST(request: NextRequest) {
     const saltRounds = 12
     const passwordHash = await bcrypt.hash(password, saltRounds)
 
-    // Validate role
-    const validRoles = Object.values(UserRole)
-    const userRole = role && validRoles.includes(role) ? role : UserRole.STAFF
-
     // Create user
     const user = await prisma.user.create({
       data: {
         name,
         email: email.toLowerCase(),
         passwordHash,
-        role: userRole
+        role: UserRole.STAFF
       },
       select: {
         id: true,

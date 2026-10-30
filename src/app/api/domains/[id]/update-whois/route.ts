@@ -1,12 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { lookupDomain } from '@/lib/rdap'
+import { requireManager } from '@/lib/permissions'
 
 export async function POST(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    // Only ADMIN and STAFF can refresh stored WHOIS data
+    const { error } = await requireManager()
+    if (error) {
+      return error
+    }
+
     const { id } = await params
 
     // Get domain from database

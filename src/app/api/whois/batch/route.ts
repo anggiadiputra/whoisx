@@ -2,10 +2,17 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { batchLookupDomains } from '@/lib/rdap'
 import { DomainStatus } from '@prisma/client'
+import { requireManager } from '@/lib/permissions'
 
 // POST /api/whois/batch - Batch WHOIS lookup for multiple domains
 export async function POST(request: NextRequest) {
   try {
+    // Batch lookups create and update domain records, so only ADMIN and STAFF may run them
+    const { error } = await requireManager()
+    if (error) {
+      return error
+    }
+
     const body = await request.json()
     const { domains, updateExisting = false } = body
     

@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { ServerType, ServerStatus } from '@prisma/client'
+import { withoutPassword, PRIVATE_CACHE_CONTROL } from '@/lib/permissions'
 
 // GET /api/servers/[id] - Get server details
 export async function GET(
@@ -40,12 +41,12 @@ export async function GET(
     return NextResponse.json({
       success: true,
       server: {
-        ...server,
+        ...withoutPassword(server, session.user.role),
         daysToExpiry,
         monthlyPrice: server.monthlyPrice ? Number(server.monthlyPrice) : null,
         uptimePercent: server.uptimePercent ? Number(server.uptimePercent) : null
       }
-    })
+    }, { headers: { 'Cache-Control': PRIVATE_CACHE_CONTROL } })
 
   } catch (error) {
     console.error('❌ Error fetching server:', error)
