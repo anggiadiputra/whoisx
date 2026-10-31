@@ -26,7 +26,7 @@
     }
   ],
   "vars": {
-    "NEXTAUTH_URL": "https://assetdev.example.workers.dev"
+    "NEXTAUTH_URL": "https://assetdev.naon.id"
   },
   "observability": {
     "enabled": true
