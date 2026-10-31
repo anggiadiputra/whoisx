@@ -35,7 +35,10 @@ import {
   Clock,
   ChevronLeft,
   ChevronRight,
-  RefreshCw
+  RefreshCw,
+  X,
+  Save,
+  Loader2
 } from 'lucide-react'
 
 interface User {
@@ -784,10 +787,21 @@ export default function UsersPage() {
           
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowAddModal(false)}>
+              <X className="w-4 h-4 mr-2" />
               Cancel
             </Button>
             <Button onClick={handleAddUser} disabled={addingUser}>
-              {addingUser ? 'Creating...' : 'Create User'}
+              {addingUser ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  Creating...
+                </>
+              ) : (
+                <>
+                  <Plus className="w-4 h-4 mr-2" />
+                  Create User
+                </>
+              )}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -867,10 +881,21 @@ export default function UsersPage() {
           
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowEditModal(false)}>
+              <X className="w-4 h-4 mr-2" />
               Cancel
             </Button>
             <Button onClick={handleUpdateUser} disabled={editingUser}>
-              {editingUser ? 'Updating...' : 'Update User'}
+              {editingUser ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  Updating...
+                </>
+              ) : (
+                <>
+                  <Save className="w-4 h-4 mr-2" />
+                  Update User
+                </>
+              )}
             </Button>
           </DialogFooter>
         </DialogContent>

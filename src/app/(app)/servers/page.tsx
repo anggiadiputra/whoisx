@@ -21,7 +21,9 @@ import {
   Cloud,
   CalendarClock,
   CalendarX,
-  RefreshCw
+  RefreshCw,
+  X,
+  Save
 } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
@@ -838,6 +840,7 @@ export default function ServersPage() {
 
                   <div className="flex justify-end gap-2">
                     <Button variant="outline" onClick={() => setShowAddModal(false)}>
+                      <X className="w-4 h-4 mr-2" />
                       Cancel
                     </Button>
                     <Button onClick={handleAddServer} disabled={addingServer}>
@@ -847,7 +850,10 @@ export default function ServersPage() {
                           Adding...
                         </>
                       ) : (
-                        'Add Server'
+                        <>
+                          <Plus className="w-4 h-4 mr-2" />
+                          Add Server
+                        </>
                       )}
                     </Button>
                   </div>
@@ -1602,6 +1608,7 @@ export default function ServersPage() {
                 onClick={() => setShowEditModal(false)}
                 disabled={editingServer}
               >
+                <X className="w-4 h-4 mr-2" />
                 Cancel
               </Button>
               <Button 
@@ -1614,7 +1621,10 @@ export default function ServersPage() {
                     Updating...
                   </>
                 ) : (
-                  'Update Server'
+                  <>
+                    <Save className="w-4 h-4 mr-2" />
+                    Update Server
+                  </>
                 )}
               </Button>
             </div>

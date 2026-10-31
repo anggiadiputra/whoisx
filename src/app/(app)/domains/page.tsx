@@ -38,7 +38,9 @@ import {
   Loader2,
   Cloud,
   ShoppingCart,
-  CalendarClock
+  CalendarClock,
+  X,
+  Save
 } from 'lucide-react'
 
 interface Domain {
@@ -538,6 +540,7 @@ export default function DomainsPage() {
                         className="flex-1"
                         disabled={addingDomain}
                       >
+                        <X className="w-4 h-4 mr-2" />
                         Cancel
                       </Button>
                       <Button
@@ -551,7 +554,10 @@ export default function DomainsPage() {
                             Adding...
                           </>
                         ) : (
-                          'Add Domain'
+                          <>
+                            <Plus className="w-4 h-4 mr-2" />
+                            Add Domain
+                          </>
                         )}
                       </Button>
                     </div>
@@ -623,6 +629,7 @@ export default function DomainsPage() {
                         className="flex-1"
                         disabled={editingDomain}
                       >
+                        <X className="w-4 h-4 mr-2" />
                         Cancel
                       </Button>
                       <Button
@@ -636,7 +643,10 @@ export default function DomainsPage() {
                             Updating...
                           </>
                         ) : (
-                          'Update Domain'
+                          <>
+                            <Save className="w-4 h-4 mr-2" />
+                            Update Domain
+                          </>
                         )}
                       </Button>
                     </div>

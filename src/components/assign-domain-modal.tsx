@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Badge } from '@/components/ui/badge'
 import { useToast } from '@/hooks/use-toast'
-import { Server, Loader2, Cloud } from 'lucide-react'
+import { Server, Loader2, Cloud, X, Unlink, Link } from 'lucide-react'
 
 interface Domain {
   id: string
@@ -264,7 +264,9 @@ export function AssignDomainModal({ domain, isOpen, onClose, onSuccess }: Assign
               >
                 {loading ? (
                   <Loader2 className="w-4 h-4 animate-spin mr-2" />
-                ) : null}
+                ) : (
+                  <Unlink className="w-4 h-4 mr-2" />
+                )}
                 Unassign
               </Button>
             )}
@@ -272,6 +274,7 @@ export function AssignDomainModal({ domain, isOpen, onClose, onSuccess }: Assign
           
           <div className="flex space-x-2">
             <Button variant="outline" onClick={onClose} disabled={loading}>
+              <X className="w-4 h-4 mr-2" />
               Cancel
             </Button>
             <Button
@@ -280,7 +283,9 @@ export function AssignDomainModal({ domain, isOpen, onClose, onSuccess }: Assign
             >
               {loading ? (
                 <Loader2 className="w-4 h-4 animate-spin mr-2" />
-              ) : null}
+              ) : (
+                <Link className="w-4 h-4 mr-2" />
+              )}
               Assign
             </Button>
           </div>

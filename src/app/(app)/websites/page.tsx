@@ -30,7 +30,9 @@ import {
   ChevronLeft,
   ChevronRight,
   AppWindow,
-  RefreshCw
+  RefreshCw,
+  X,
+  Save
 } from 'lucide-react'
 
 // UI Components
@@ -1095,6 +1097,7 @@ export default function WebsitesPage() {
 
           <div className="flex justify-end gap-4 mt-6">
             <Button variant="outline" onClick={() => setShowAddModal(false)}>
+              <X className="w-4 h-4 mr-2" />
               Cancel
             </Button>
             <Button onClick={handleAddWebsite} disabled={addingWebsite}>
@@ -1104,7 +1107,10 @@ export default function WebsitesPage() {
                   Adding...
                 </>
               ) : (
-                'Add Website'
+                <>
+                  <Plus className="w-4 h-4 mr-2" />
+                  Add Website
+                </>
               )}
             </Button>
           </div>
@@ -1263,6 +1269,7 @@ export default function WebsitesPage() {
 
           <div className="flex justify-end gap-4 mt-6">
             <Button variant="outline" onClick={() => setShowEditModal(false)}>
+              <X className="w-4 h-4 mr-2" />
               Cancel
             </Button>
             <Button onClick={handleUpdateWebsite} disabled={editingWebsite}>
@@ -1272,7 +1279,10 @@ export default function WebsitesPage() {
                   Updating...
                 </>
               ) : (
-                'Update Website'
+                <>
+                  <Save className="w-4 h-4 mr-2" />
+                  Update Website
+                </>
               )}
             </Button>
           </div>
