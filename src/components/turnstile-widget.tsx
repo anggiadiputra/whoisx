@@ -20,10 +20,11 @@ interface TurnstileWidgetProps {
   onToken: (token: string) => void
   // Change it to get a fresh challenge (a token works for one sign-in attempt only)
   resetKey?: number
+  className?: string
 }
 
 // Explicit rendering, so the widget also appears after client-side navigation
-export function TurnstileWidget({ siteKey, onToken, resetKey }: TurnstileWidgetProps) {
+export function TurnstileWidget({ siteKey, onToken, resetKey, className = 'flex justify-center' }: TurnstileWidgetProps) {
   const containerRef = useRef<HTMLDivElement>(null)
   const widgetIdRef = useRef<string | null>(null)
   const onTokenRef = useRef(onToken)
@@ -62,7 +63,7 @@ export function TurnstileWidget({ siteKey, onToken, resetKey }: TurnstileWidgetP
         strategy="afterInteractive"
         onReady={() => setReady(true)}
       />
-      <div ref={containerRef} className="flex justify-center" />
+      <div ref={containerRef} className={className} />
     </>
   )
 }

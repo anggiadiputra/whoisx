@@ -16,6 +16,8 @@ import { PageSkeleton } from '@/components/page-skeleton'
 import { PageHeader } from '@/components/page-header'
 import { useAppName } from '@/components/app-name-provider'
 import { APP_NAME_MAX_LENGTH } from '@/lib/app-name'
+import { TurnstileWidget } from '@/components/turnstile-widget'
+import { useDebounce } from '@/hooks/use-debounce'
 import { 
   MessageSquare,
   Bell,
@@ -32,6 +34,12 @@ import {
   UserPlus,
   ShieldCheck
 } from 'lucide-react'
+
+interface SavedTurnstile {
+  enabled: boolean
+  siteKey: string
+  secretKeySet: boolean
+}
 
 interface WhatsAppSettings {
   enabled: boolean
@@ -59,7 +67,14 @@ export default function SettingsPage() {
   // Sign-up and Turnstile state live on the server; null until loaded
   const [registrationEnabled, setRegistrationEnabled] = useState<boolean | null>(null)
   const [savedRegistrationEnabled, setSavedRegistrationEnabled] = useState<boolean | null>(null)
+  const [savedTurnstile, setSavedTurnstile] = useState<SavedTurnstile | null>(null)
   const [turnstileEnabled, setTurnstileEnabled] = useState(false)
+  const [turnstileSiteKey, setTurnstileSiteKey] = useState('')
+  // Blank keeps the saved secret; the server never sends it back
+  const [turnstileSecretKey, setTurnstileSecretKey] = useState('')
+  const [turnstileTestToken, setTurnstileTestToken] = useState('')
+  const [turnstileResetKey, setTurnstileResetKey] = useState(0)
+  const debouncedTurnstileSiteKey = useDebounce(turnstileSiteKey.trim(), 600)
   const [loading, setLoading] = useState(false)
   const [testLoading, setTestLoading] = useState(false)
   
@@ -96,7 +111,9 @@ export default function SettingsPage() {
         if (!result) return
         setRegistrationEnabled(result.registrationEnabled)
         setSavedRegistrationEnabled(result.registrationEnabled)
-        setTurnstileEnabled(result.turnstileEnabled)
+        setSavedTurnstile(result.turnstile)
+        setTurnstileEnabled(result.turnstile.enabled)
+        setTurnstileSiteKey(result.turnstile.siteKey)
       })
       .catch(() => {
         // Leave the sign-up switch disabled; saving other settings still works
@@ -148,6 +165,13 @@ export default function SettingsPage() {
   }
 
   const trimmedAppName = appNameInput.trim()
+  const turnstileChanged = savedTurnstile !== null && (
+    turnstileEnabled !== savedTurnstile.enabled ||
+    turnstileSiteKey.trim() !== savedTurnstile.siteKey ||
+    turnstileSecretKey.trim() !== ''
+  )
+  // Turning Turnstile on, or changing its keys while on, needs a passed test check first
+  const turnstileNeedsCheck = turnstileEnabled && turnstileChanged
 
   const handleSaveSettings = async () => {
     if (!trimmedAppName) {
@@ -159,13 +183,34 @@ export default function SettingsPage() {
       return
     }
 
+    if (turnstileNeedsCheck && !turnstileTestToken) {
+      toast({
+        title: "Turnstile Check Required",
+        description: "Enter both keys and complete the Turnstile check in the Security tab before saving",
+        variant: "destructive",
+      })
+      return
+    }
+
     setLoading(true)
     try {
-      // App name and sign-up are stored on the server; only send what changed
-      const changes: { appName?: string; registrationEnabled?: boolean } = {}
+      // These settings are stored on the server; only send what changed
+      const changes: {
+        appName?: string
+        registrationEnabled?: boolean
+        turnstile?: { enabled: boolean; siteKey: string; secretKey: string; testToken: string }
+      } = {}
       if (trimmedAppName !== appName) changes.appName = trimmedAppName
       if (registrationEnabled !== null && registrationEnabled !== savedRegistrationEnabled) {
         changes.registrationEnabled = registrationEnabled
+      }
+      if (turnstileChanged) {
+        changes.turnstile = {
+          enabled: turnstileEnabled,
+          siteKey: turnstileSiteKey.trim(),
+          secretKey: turnstileSecretKey.trim(),
+          testToken: turnstileTestToken,
+        }
       }
 
       if (Object.keys(changes).length > 0) {
@@ -176,6 +221,8 @@ export default function SettingsPage() {
         })
         const result = await response.json().catch(() => ({}))
         if (!response.ok) {
+          // A test token works once; get a fresh one for the next try
+          if (changes.turnstile?.testToken) setTurnstileResetKey(key => key + 1)
           throw new Error(result.error || 'Failed to save settings')
         }
         if (result.appName !== undefined) {
@@ -185,6 +232,12 @@ export default function SettingsPage() {
         }
         if (result.registrationEnabled !== undefined) {
           setSavedRegistrationEnabled(result.registrationEnabled)
+        }
+        if (result.turnstile !== undefined) {
+          setSavedTurnstile(result.turnstile)
+          setTurnstileSiteKey(result.turnstile.siteKey)
+          setTurnstileSecretKey('')
+          setTurnstileTestToken('')
         }
       }
 
@@ -642,19 +695,74 @@ export default function SettingsPage() {
                 </div>
 
                 {/* Turnstile */}
-                <div className="flex items-center justify-between gap-4">
-                  <div className="flex items-center space-x-3">
-                    <ShieldCheck className="w-5 h-5 text-orange-500" />
-                    <div>
-                      <Label className="text-base font-medium">Cloudflare Turnstile</Label>
-                      <p className="text-sm text-gray-500">
-                        Bot check on the sign-in form. Turn it on by adding the <code className="font-mono text-xs">TURNSTILE_SITE_KEY</code> and <code className="font-mono text-xs">TURNSTILE_SECRET_KEY</code> secrets to the Worker.
-                      </p>
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between gap-4">
+                    <div className="flex items-center space-x-3">
+                      <ShieldCheck className="w-5 h-5 text-orange-500" />
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <Label htmlFor="turnstileEnabled" className="text-base font-medium">Cloudflare Turnstile</Label>
+                          <Badge variant={savedTurnstile?.enabled ? 'default' : 'secondary'}>
+                            {savedTurnstile?.enabled ? 'Active' : 'Off'}
+                          </Badge>
+                        </div>
+                        <p className="text-sm text-gray-500">
+                          Bot check on the sign-in form. Create a widget for this domain in the Cloudflare dashboard (Turnstile → Add widget) and paste its keys here.
+                        </p>
+                      </div>
                     </div>
+                    <Switch
+                      id="turnstileEnabled"
+                      checked={turnstileEnabled}
+                      disabled={savedTurnstile === null}
+                      onCheckedChange={setTurnstileEnabled}
+                    />
                   </div>
-                  <Badge variant={turnstileEnabled ? 'default' : 'secondary'} className="shrink-0">
-                    {turnstileEnabled ? 'Active' : 'Not configured'}
-                  </Badge>
+
+                  {turnstileEnabled && (
+                    <div className="space-y-4 pl-8">
+                      <div className="space-y-2">
+                        <Label htmlFor="turnstileSiteKey">Site Key</Label>
+                        <Input
+                          id="turnstileSiteKey"
+                          placeholder="0x4AAAAAAA..."
+                          autoComplete="off"
+                          value={turnstileSiteKey}
+                          onChange={(e) => {
+                            setTurnstileSiteKey(e.target.value)
+                            setTurnstileTestToken('')
+                          }}
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="turnstileSecretKey">Secret Key</Label>
+                        <Input
+                          id="turnstileSecretKey"
+                          type="password"
+                          placeholder={savedTurnstile?.secretKeySet ? 'Saved. Leave blank to keep it' : '0x4AAAAAAA...'}
+                          autoComplete="new-password"
+                          value={turnstileSecretKey}
+                          onChange={(e) => setTurnstileSecretKey(e.target.value)}
+                        />
+                        <p className="text-xs text-gray-500">Stored on the server and never shown again</p>
+                      </div>
+
+                      {turnstileNeedsCheck && debouncedTurnstileSiteKey && (
+                        <div className="space-y-2">
+                          <p className="text-sm text-gray-500">
+                            Complete this check, then save. It confirms the keys work on this domain, so a wrong key cannot lock you out of sign in.
+                          </p>
+                          <TurnstileWidget
+                            key={debouncedTurnstileSiteKey}
+                            siteKey={debouncedTurnstileSiteKey}
+                            onToken={setTurnstileTestToken}
+                            resetKey={turnstileResetKey}
+                            className="flex"
+                          />
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </div>
               </CardContent>
             </Card>

@@ -4,7 +4,8 @@ import bcrypt from "bcryptjs"
 import { prisma } from "@/lib/prisma"
 import { UserRole } from "@prisma/client"
 import { ActivityLogger } from "@/lib/activity-logger"
-import { TURNSTILE_FAILED, verifyTurnstile } from "@/lib/turnstile"
+import { TURNSTILE_FAILED, verifyTurnstileToken } from "@/lib/turnstile"
+import { getActiveTurnstile } from "@/lib/app-settings"
 
 export const authOptions: NextAuthOptions = {
   providers: [
@@ -18,7 +19,8 @@ export const authOptions: NextAuthOptions = {
       async authorize(credentials, req) {
         // Outside the try below so the form can tell a failed check from a wrong password
         const remoteIp = req?.headers?.["cf-connecting-ip"] as string | undefined
-        if (!(await verifyTurnstile(credentials?.turnstileToken, remoteIp))) {
+        const turnstile = await getActiveTurnstile()
+        if (turnstile && !(await verifyTurnstileToken(turnstile.secretKey, credentials?.turnstileToken, remoteIp))) {
           throw new Error(TURNSTILE_FAILED)
         }
 

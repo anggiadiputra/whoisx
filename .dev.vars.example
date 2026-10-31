@@ -2,7 +2,3 @@
 NEXTJS_ENV=development
 NEXTAUTH_SECRET=replace-with-a-long-random-string
 NEXTAUTH_URL=http://localhost:8787
-# Optional: Turnstile on the sign-in form (both needed). These are Cloudflare's always-pass test keys;
-# in production add your widget's keys as Worker secrets.
-# TURNSTILE_SITE_KEY=1x00000000000000000000AA
-# TURNSTILE_SECRET_KEY=1x0000000000000000000000000000000AA

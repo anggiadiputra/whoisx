@@ -4,8 +4,17 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { APP_NAME_MAX_LENGTH } from '@/lib/app-name'
-import { APP_NAME_KEY, REGISTRATION_ENABLED_KEY, getAppName, getRegistrationEnabled } from '@/lib/app-settings'
-import { getTurnstileSiteKey } from '@/lib/turnstile'
+import {
+  APP_NAME_KEY,
+  REGISTRATION_ENABLED_KEY,
+  TURNSTILE_ENABLED_KEY,
+  TURNSTILE_SECRET_KEY_KEY,
+  TURNSTILE_SITE_KEY_KEY,
+  getAppName,
+  getRegistrationEnabled,
+  getTurnstileSettings,
+} from '@/lib/app-settings'
+import { verifyTurnstileToken } from '@/lib/turnstile'
 
 async function requireAdmin() {
   const session = await getServerSession(authOptions)
@@ -34,23 +43,36 @@ export async function GET() {
   const denied = await requireAdmin()
   if (denied) return denied
 
+  const turnstile = await getTurnstileSettings()
+
   return NextResponse.json({
     appName: await getAppName(),
     registrationEnabled: await getRegistrationEnabled(),
-    // Turnstile is configured with Worker secrets, not from this page
-    turnstileEnabled: getTurnstileSiteKey() !== null,
+    turnstile: {
+      enabled: turnstile.enabled,
+      siteKey: turnstile.siteKey,
+      // The secret key never leaves the server
+      secretKeySet: turnstile.secretKey !== '',
+    },
   })
 }
 
-// PUT /api/settings/general - Rename the application and/or open or close sign-up (Admin only)
+// PUT /api/settings/general - Save any of: app name, sign-up switch, Turnstile (Admin only)
 export async function PUT(request: NextRequest) {
   try {
     const denied = await requireAdmin()
     if (denied) return denied
 
     const body = await request.json().catch(() => null)
-    const result: { success: true; appName?: string; registrationEnabled?: boolean } = { success: true }
+    const writes: Array<[key: string, value: string]> = []
+    const result: {
+      success: true
+      appName?: string
+      registrationEnabled?: boolean
+      turnstile?: { enabled: boolean; siteKey: string; secretKeySet: boolean }
+    } = { success: true }
 
+    // Validate everything first so a rejected field does not leave the others half-saved
     if (body?.appName !== undefined) {
       const appName = typeof body.appName === 'string' ? body.appName.trim() : ''
 
@@ -65,7 +87,7 @@ export async function PUT(request: NextRequest) {
         )
       }
 
-      await saveSetting(APP_NAME_KEY, appName)
+      writes.push([APP_NAME_KEY, appName])
       result.appName = appName
     }
 
@@ -74,11 +96,49 @@ export async function PUT(request: NextRequest) {
         return NextResponse.json({ error: 'registrationEnabled must be true or false' }, { status: 400 })
       }
 
-      await saveSetting(REGISTRATION_ENABLED_KEY, String(body.registrationEnabled))
+      writes.push([REGISTRATION_ENABLED_KEY, String(body.registrationEnabled)])
       result.registrationEnabled = body.registrationEnabled
     }
 
-    // The name is rendered by the root layout (sidebar, page titles); sign-up state by the auth pages
+    if (body?.turnstile !== undefined) {
+      const { enabled, siteKey, secretKey, testToken } = body.turnstile ?? {}
+
+      if (typeof enabled !== 'boolean') {
+        return NextResponse.json({ error: 'turnstile.enabled must be true or false' }, { status: 400 })
+      }
+
+      const newSiteKey = typeof siteKey === 'string' ? siteKey.trim() : ''
+      // A blank secret keeps the one already saved
+      const newSecretKey = typeof secretKey === 'string' ? secretKey.trim() : ''
+      const effectiveSecretKey = newSecretKey || (await getTurnstileSettings()).secretKey
+
+      if (enabled) {
+        if (!newSiteKey || !effectiveSecretKey) {
+          return NextResponse.json({ error: 'Enter both the Turnstile site key and secret key' }, { status: 400 })
+        }
+
+        // A token from the test widget proves the keys pair up and work on this hostname,
+        // so a typo cannot lock everyone out of sign in
+        const remoteIp = request.headers.get('cf-connecting-ip') ?? undefined
+        if (!(await verifyTurnstileToken(effectiveSecretKey, testToken, remoteIp))) {
+          return NextResponse.json(
+            { error: 'Turnstile check failed. Make sure both keys come from the same widget and this hostname is added to it.' },
+            { status: 400 }
+          )
+        }
+      }
+
+      writes.push([TURNSTILE_SITE_KEY_KEY, newSiteKey])
+      if (newSecretKey) writes.push([TURNSTILE_SECRET_KEY_KEY, newSecretKey])
+      writes.push([TURNSTILE_ENABLED_KEY, String(enabled)])
+      result.turnstile = { enabled, siteKey: newSiteKey, secretKeySet: effectiveSecretKey !== '' }
+    }
+
+    for (const [key, value] of writes) {
+      await saveSetting(key, value)
+    }
+
+    // The name is rendered by the root layout (sidebar, page titles); sign-up and Turnstile by the auth pages
     revalidatePath('/', 'layout')
 
     return NextResponse.json(result)

@@ -169,10 +169,15 @@ npm run deploy
 Before the first deploy:
 1. Set `NEXTAUTH_URL` in `wrangler.jsonc` (`vars`) to the Worker URL or your custom domain.
 2. Add the `NEXTAUTH_SECRET` secret (dashboard → Settings → Variables and Secrets, or `npx wrangler secret put NEXTAUTH_SECRET`).
-3. Optional: protect the sign-in form with [Turnstile](https://developers.cloudflare.com/turnstile/). Create a widget for
-   your domain, then add its keys as the `TURNSTILE_SITE_KEY` and `TURNSTILE_SECRET_KEY` secrets. It turns on when both are set.
 
-Public sign-up can be closed in Settings → Security; admins then add accounts from the Users page.
+Settings → Security (admins) has two switches:
+- **Public Sign Up**: when off, admins add accounts from the Users page.
+- **Cloudflare Turnstile**: a bot check on the sign-in form. Create a widget for your domain in the Cloudflare dashboard
+  (Turnstile → Add widget), paste its site key and secret key, pass the test check and save. If you ever get locked out,
+  turn it off with:
+  ```bash
+  npx wrangler d1 execute DB --remote --command "UPDATE app_settings SET value = 'false' WHERE key = 'turnstileEnabled'"
+  ```
 
 New sign-ups get the STAFF role. To make the first admin, sign up and then run:
 ```bash
