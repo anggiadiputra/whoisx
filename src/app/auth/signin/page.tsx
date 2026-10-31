@@ -7,39 +7,7 @@ import Link from 'next/link'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Badge } from '@/components/ui/badge'
-import { Separator } from '@/components/ui/separator'
-import { AlertCircle, Eye, EyeOff, Globe, Shield, User, CheckCircle, ClipboardCheck, Copy, Loader2, ArrowRight, Sparkles, Wallet } from 'lucide-react'
-
-const demoAccounts = [
-  {
-    role: 'Admin',
-    email: 'admin@example.com',
-    password: 'password123',
-    icon: Shield,
-    color: 'bg-red-500',
-    description: 'Full access to all features',
-    badge: 'Full Access'
-  },
-  {
-    role: 'Staff',
-    email: 'staff@example.com', 
-    password: 'password123',
-    icon: User,
-    color: 'bg-blue-500',
-    description: 'Domain management only',
-    badge: 'Management'
-  },
-  {
-    role: 'Finance',
-    email: 'finance@example.com',
-    password: 'password123', 
-    icon: Wallet,
-    color: 'bg-green-500',
-    description: 'Read-only with pricing access',
-    badge: 'Read Only'
-  }
-]
+import { AlertCircle, Eye, EyeOff, Globe, Loader2, ArrowRight } from 'lucide-react'
 
 export default function SignInPage() {
   const [email, setEmail] = useState('')
@@ -47,30 +15,8 @@ export default function SignInPage() {
   const [showPassword, setShowPassword] = useState(false)
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
-  const [copiedEmail, setCopiedEmail] = useState('')
-  const [success, setSuccess] = useState('')
   const router = useRouter()
   const searchParams = useSearchParams()
-
-  // Auto-fill demo credentials when clicked
-  const fillDemoCredentials = (account: typeof demoAccounts[0]) => {
-    setEmail(account.email)
-    setPassword(account.password)
-    setError('')
-    setSuccess(`Demo credentials filled for ${account.role}`)
-    setTimeout(() => setSuccess(''), 3000)
-  }
-
-  // Copy email to clipboard
-  const copyEmail = async (email: string) => {
-    try {
-      await navigator.clipboard.writeText(email)
-      setCopiedEmail(email)
-      setTimeout(() => setCopiedEmail(''), 2000)
-    } catch (err) {
-      console.error('Failed to copy email:', err)
-    }
-  }
 
   // Check for redirect from middleware
   useEffect(() => {
@@ -113,14 +59,7 @@ export default function SignInPage() {
     <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
 
       <div className="relative w-full max-w-md mx-auto space-y-6">
-        {/* Success/Error Messages */}
-        {success && (
-          <div className="flex items-center space-x-2 p-4 bg-green-50 border border-green-200 rounded-lg">
-            <CheckCircle className="w-5 h-5 text-green-600" />
-            <span className="text-green-800 font-medium">{success}</span>
-          </div>
-        )}
-
+        {/* Error Message */}
         {error && (
           <div className="flex items-center space-x-2 p-4 bg-red-50 border border-red-200 rounded-lg">
             <AlertCircle className="w-5 h-5 text-red-600" />
@@ -211,75 +150,6 @@ export default function SignInPage() {
               >
                 Don't have an account? <span className="font-semibold text-blue-600">Create one now</span>
               </Link>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Demo Accounts */}
-        <Card>
-          <CardHeader className="text-center pb-4">
-            <div className="flex items-center justify-center space-x-2 mb-2">
-              <Sparkles className="w-5 h-5 text-blue-600" />
-              <CardTitle className="text-lg font-bold text-gray-900">Try Demo Accounts</CardTitle>
-            </div>
-            <CardDescription className="text-gray-600">
-              Experience different role permissions instantly
-            </CardDescription>
-          </CardHeader>
-          
-          <CardContent className="space-y-3">
-            {demoAccounts.map((account, index) => {
-              const IconComponent = account.icon
-              return (
-                <div
-                  key={index}
-                  onClick={() => fillDemoCredentials(account)}
-                  className="border border-gray-200 rounded-lg p-4 hover:border-blue-300 hover:bg-gray-50 transition-colors cursor-pointer bg-white"
-                >
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-3">
-                      <div className={`w-10 h-10 ${account.color} rounded-lg flex items-center justify-center text-white`}>
-                        <IconComponent className="w-5 h-5" />
-                      </div>
-                      <div className="flex-1">
-                        <div className="flex items-center space-x-2">
-                          <p className="font-semibold text-gray-900">{account.role}</p>
-                          <Badge variant="secondary" className="text-xs">
-                            {account.badge}
-                          </Badge>
-                        </div>
-                        <p className="text-sm text-gray-600">{account.description}</p>
-                        <p className="text-xs text-gray-500 font-mono mt-1">{account.email}</p>
-                      </div>
-                    </div>
-                    <div className="flex flex-col items-end space-y-1">
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation()
-                          copyEmail(account.email)
-                        }}
-                        className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all duration-200"
-                        title="Copy email"
-                      >
-                        {copiedEmail === account.email ? (
-                          <ClipboardCheck className="w-4 h-4 text-green-600" />
-                        ) : (
-                          <Copy className="w-4 h-4" />
-                        )}
-                      </button>
-                      <span className="text-xs text-gray-400">Click to use</span>
-                    </div>
-                  </div>
-                </div>
-              )
-            })}
-            
-            <Separator className="my-4" />
-            
-            <div className="text-center p-3 bg-blue-50 rounded-lg border border-blue-100">
-              <p className="text-xs text-blue-700 font-medium">
-                All demo accounts use password: <code className="bg-blue-100 px-2 py-1 rounded font-mono">password123</code>
-              </p>
             </div>
           </CardContent>
         </Card>
