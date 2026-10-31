@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { signIn, getSession } from 'next-auth/react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
@@ -26,14 +26,6 @@ export function SignInForm({ registrationEnabled, turnstileSiteKey }: SignInForm
   const [turnstileResetKey, setTurnstileResetKey] = useState(0)
   const router = useRouter()
   const searchParams = useSearchParams()
-
-  // Check for redirect from middleware
-  useEffect(() => {
-    const from = searchParams.get('from')
-    if (from) {
-      setError('Please sign in to access that page')
-    }
-  }, [searchParams])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
