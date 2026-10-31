@@ -1,6 +1,6 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
-  "name": "whoisx",
+  "name": "assetdev",
   "main": ".open-next/worker.js",
   "compatibility_date": "2026-10-20",
   // nodejs_compat is required by OpenNext; global_fetch_strictly_public lets the app call RDAP servers
@@ -13,7 +13,7 @@
     {
       // Must match "name" above
       "binding": "WORKER_SELF_REFERENCE",
-      "service": "whoisx"
+      "service": "assetdev"
     }
   ],
   "hyperdrive": [
@@ -27,7 +27,7 @@
     }
   ],
   "vars": {
-    "NEXTAUTH_URL": "https://whoisx.example.workers.dev"
+    "NEXTAUTH_URL": "https://assetdev.example.workers.dev"
   },
   "observability": {
     "enabled": true
