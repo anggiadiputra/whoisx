@@ -1,34 +1,41 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import { useToast } from '@/hooks/use-toast'
-import { Navbar } from '@/components/navbar'
+import { useDebounce } from '@/hooks/use-debounce'
+import { useApiQuery, useRefreshApiData } from '@/hooks/use-api-query'
+import { useConfirm } from '@/components/confirm-dialog'
+import { PageSkeleton } from '@/components/page-skeleton'
 import { StatCard } from '@/components/stat-card'
+import { PageHeader } from '@/components/page-header'
+import { ManageMenu, ManageAction } from '@/components/manage-menu'
+import { StatusPill, toneFromBgClass } from '@/components/status-pill'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
+import { Card, CardContent } from '@/components/ui/card'
+
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { 
-  Users, 
+  Users,
   User,
-  Plus, 
-  Search, 
-  Filter, 
-  Eye, 
-  Edit, 
-  Trash2, 
-  Shield, 
-  UserCheck, 
-  UserX, 
+  Plus,
+  Search,
+  Filter,
+  Eye,
+  Edit,
+  Trash2,
+  Shield,
+  UserCheck,
+  UserX,
   Clock,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  RefreshCw
 } from 'lucide-react'
 
 interface User {
@@ -55,25 +62,41 @@ interface UserStats {
   suspended: number
 }
 
+const EMPTY_STATS: UserStats = {
+  total: 0,
+  active: 0,
+  admin: 0,
+  staff: 0,
+  finance: 0,
+  suspended: 0
+}
+
 export default function UsersPage() {
   const { data: session, status } = useSession()
   const router = useRouter()
   const { toast } = useToast()
 
   // State
-  const [users, setUsers] = useState<User[]>([])
-  const [stats, setStats] = useState<UserStats>({
-    total: 0,
-    active: 0,
-    admin: 0,
-    staff: 0,
-    finance: 0,
-    suspended: 0
-  })
-  const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState('')
   const [filterRole, setFilterRole] = useState('')
   const [filterStatus, setFilterStatus] = useState('')
+  const debouncedSearchTerm = useDebounce(searchTerm, 300)
+
+  // Cached, server-filtered user list; previous results stay visible while filters change
+  const usersUrl = useMemo(() => {
+    const params = new URLSearchParams()
+    if (filterRole) params.append('role', filterRole)
+    if (filterStatus) params.append('status', filterStatus)
+    if (debouncedSearchTerm) params.append('search', debouncedSearchTerm)
+    return `/api/users?${params.toString()}`
+  }, [filterRole, filterStatus, debouncedSearchTerm])
+  const isAdmin = session?.user?.role === 'ADMIN'
+  const usersQuery = useApiQuery<{ users: User[]; stats?: UserStats }>(usersUrl, isAdmin, true)
+  const users = useMemo(() => usersQuery.data?.users ?? [], [usersQuery.data])
+  const stats = usersQuery.data?.stats ?? EMPTY_STATS
+  const loading = status === 'loading' || (isAdmin && usersQuery.isPending)
+  const fetchUsers = useRefreshApiData()
+  const confirm = useConfirm()
   const [showAddModal, setShowAddModal] = useState(false)
   const [showEditModal, setShowEditModal] = useState(false)
   const [showViewModal, setShowViewModal] = useState(false)
@@ -122,8 +145,6 @@ export default function UsersPage() {
       router.push('/')
       return
     }
-
-    fetchUsers()
   }, [session, status, router, toast])
 
   // Reset pagination when filters change
@@ -139,59 +160,6 @@ export default function UsersPage() {
   const handleStatusChange = (value: string) => {
     setFilterStatus(value === 'none' ? '' : value)
   }
-
-  // Fetch users
-  const fetchUsers = useCallback(async () => {
-    try {
-      setLoading(true)
-      
-      const params = new URLSearchParams()
-      if (filterRole) params.append('role', filterRole)
-      if (filterStatus) params.append('status', filterStatus)
-      if (searchTerm) params.append('search', searchTerm)
-      
-      const response = await fetch(`/api/users?${params.toString()}`, {
-        credentials: 'include'
-      })
-
-      if (!response.ok) {
-        throw new Error('Failed to fetch users')
-      }
-
-      const data = await response.json()
-      if (data.success) {
-        setUsers(data.users)
-        setStats(data.stats || {
-          total: 0,
-          active: 0,
-          admin: 0,
-          staff: 0,
-          finance: 0,
-          suspended: 0
-        })
-      }
-    } catch (error) {
-      console.error('Error fetching users:', error)
-      toast({
-        title: "Error",
-        description: "Failed to fetch users",
-        variant: "destructive",
-      })
-    } finally {
-      setLoading(false)
-    }
-  }, [searchTerm, filterRole, filterStatus, toast])
-
-  // Debounced search
-  useEffect(() => {
-    const timeoutId = setTimeout(() => {
-      if (session?.user?.role === 'ADMIN') {
-        fetchUsers()
-      }
-    }, 300)
-
-    return () => clearTimeout(timeoutId)
-  }, [searchTerm, filterRole, filterStatus, fetchUsers, session])
 
   // Get role badge
   const getRoleBadge = (role: string) => {
@@ -398,9 +366,20 @@ export default function UsersPage() {
     }
   }
 
+  // Actions behind each row's "Manage" button; admins cannot delete themselves
+  const userActions = (user: User): ManageAction[] => [
+    { label: 'View Details', icon: Eye, onSelect: () => handleViewUser(user) },
+    { label: 'Edit', icon: Edit, onSelect: () => handleEditUser(user) },
+    ...(session?.user?.id !== user.id ? [{ label: 'Delete', icon: Trash2, onSelect: () => handleDeleteUser(user), destructive: true }] : []),
+  ]
+
   // Handle delete user
   const handleDeleteUser = async (user: User) => {
-    if (!confirm(`Are you sure you want to delete user "${user.name || user.email}"?`)) {
+    const confirmed = await confirm({
+      title: 'Delete user?',
+      description: `"${user.name || user.email}" will be permanently deleted and can no longer sign in. This action cannot be undone.`,
+    })
+    if (!confirmed) {
       return
     }
 
@@ -441,34 +420,32 @@ export default function UsersPage() {
   }
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-2 text-gray-600">Loading users...</p>
-        </div>
-      </div>
-    )
+    return <PageSkeleton />
   }
 
   return (
     <>
-      <Navbar />
       <div className="container mx-auto px-4 py-8">
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-8">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900">User Management</h1>
-          <p className="text-gray-600 mt-2">Manage system users and their permissions</p>
-        </div>
-        <Button onClick={() => setShowAddModal(true)} className="mt-4 md:mt-0">
-          <Plus className="w-4 h-4 mr-2" />
-          Add User
-        </Button>
-      </div>
+      <PageHeader className="mb-8"
+        title="Users"
+        description="Manage system users and their permissions"
+        actions={
+          <>
+            <Button variant="outline" onClick={fetchUsers} disabled={usersQuery.isFetching}>
+              <RefreshCw className={`w-4 h-4 mr-2 ${usersQuery.isFetching ? 'animate-spin' : ''}`} />
+              Refresh
+            </Button>
+            <Button onClick={() => setShowAddModal(true)}>
+              <Plus className="w-4 h-4 mr-2" />
+              Add User
+            </Button>
+          </>
+        }
+      />
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 mb-8">
         {statsCards.map((card, index) => (
           <StatCard key={index} title={card.title} value={card.value} icon={card.icon} color={card.color} bgColor={card.bgColor} />
         ))}
@@ -521,14 +498,8 @@ export default function UsersPage() {
       </Card>
 
       {/* Users Table - Desktop */}
-      <Card className="hidden md:block">
-        <CardHeader>
-          <CardTitle>Users ({filteredUsers.length})</CardTitle>
-          <CardDescription>
-            Showing {startIndex + 1} to {Math.min(endIndex, filteredUsers.length)} of {filteredUsers.length} users
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
+      <Card className="hidden md:block overflow-hidden">
+        <CardContent className="p-0">
           <div className="overflow-x-auto">
             <Table>
               <TableHeader>
@@ -536,9 +507,8 @@ export default function UsersPage() {
                   <TableHead>User</TableHead>
                   <TableHead>Role</TableHead>
                   <TableHead>Status</TableHead>
-                  <TableHead>Last Login</TableHead>
-                  <TableHead>Created</TableHead>
-                  <TableHead>Actions</TableHead>
+                  <TableHead>Activity</TableHead>
+                  <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -555,57 +525,17 @@ export default function UsersPage() {
                         </div>
                       </TableCell>
                       <TableCell>
-                        <Badge className={`${roleBadge.color} text-white`}>
-                          {roleBadge.text}
-                        </Badge>
+                        <StatusPill tone={toneFromBgClass(roleBadge.color)}>{roleBadge.text}</StatusPill>
                       </TableCell>
                       <TableCell>
-                        <Badge className={`${statusBadge.color} text-white`}>
-                          {statusBadge.text}
-                        </Badge>
+                        <StatusPill tone={toneFromBgClass(statusBadge.color)}>{statusBadge.text}</StatusPill>
                       </TableCell>
                       <TableCell>
-                        <div className="flex items-center text-sm text-gray-500">
-                          <Clock className="w-4 h-4 mr-1" />
-                          {formatDate(user.lastLoginAt)}
-                        </div>
+                        <div className="text-sm text-gray-900">Last login: {formatDate(user.lastLoginAt)}</div>
+                        <div className="text-sm text-gray-500">Joined {formatDate(user.createdAt)}</div>
                       </TableCell>
-                      <TableCell>
-                        <div className="text-sm text-gray-500">
-                          {formatDate(user.createdAt)}
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex items-center space-x-2">
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            title="View User"
-                            onClick={() => handleViewUser(user)}
-                          >
-                            <Eye className="w-4 h-4" />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
-                            title="Edit User"
-                            onClick={() => handleEditUser(user)}
-                          >
-                            <Edit className="w-4 h-4" />
-                          </Button>
-                          {session?.user?.id !== user.id && (
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                              title="Delete User"
-                              onClick={() => handleDeleteUser(user)}
-                            >
-                              <Trash2 className="w-4 h-4" />
-                            </Button>
-                          )}
-                        </div>
+                      <TableCell className="text-right">
+                        <ManageMenu actions={userActions(user)} />
                       </TableCell>
                     </TableRow>
                   )
@@ -701,12 +631,8 @@ export default function UsersPage() {
                         </div>
                       </div>
                       <div className="flex flex-col items-end space-y-1">
-                        <Badge className={`${roleBadge.color} text-white text-xs`}>
-                          {roleBadge.text}
-                        </Badge>
-                        <Badge className={`${statusBadge.color} text-white text-xs`}>
-                          {statusBadge.text}
-                        </Badge>
+                        <StatusPill tone={toneFromBgClass(roleBadge.color)}>{roleBadge.text}</StatusPill>
+                        <StatusPill tone={toneFromBgClass(statusBadge.color)}>{statusBadge.text}</StatusPill>
                       </div>
                     </div>
 
@@ -744,37 +670,7 @@ export default function UsersPage() {
 
                     {/* Actions */}
                     <div className="flex items-center justify-between pt-2 border-t">
-                      <div className="flex items-center space-x-2">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="h-8 px-2"
-                          title="View User"
-                          onClick={() => handleViewUser(user)}
-                        >
-                          <Eye className="w-3 h-3" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="text-blue-600 hover:text-blue-700 hover:bg-blue-50 h-8 px-2"
-                          title="Edit User"
-                          onClick={() => handleEditUser(user)}
-                        >
-                          <Edit className="w-3 h-3" />
-                        </Button>
-                        {session?.user?.id !== user.id && (
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="text-red-600 hover:text-red-700 hover:bg-red-50 h-8 px-2"
-                            title="Delete User"
-                            onClick={() => handleDeleteUser(user)}
-                          >
-                            <Trash2 className="w-3 h-3" />
-                          </Button>
-                        )}
-                      </div>
+                      <ManageMenu actions={userActions(user)} />
                       <div className="text-xs text-gray-400">
                         #{user.id.slice(-8)}
                       </div>
@@ -1003,15 +899,11 @@ export default function UsersPage() {
                 </div>
                 <div>
                   <Label className="text-sm font-medium text-gray-500">Role</Label>
-                  <Badge className={`${getRoleBadge(selectedUser.role).color} text-white`}>
-                    {getRoleBadge(selectedUser.role).text}
-                  </Badge>
+                  <StatusPill tone={toneFromBgClass(getRoleBadge(selectedUser.role).color)}>{getRoleBadge(selectedUser.role).text}</StatusPill>
                 </div>
                 <div>
                   <Label className="text-sm font-medium text-gray-500">Status</Label>
-                  <Badge className={`${getStatusBadge(selectedUser.status).color} text-white`}>
-                    {getStatusBadge(selectedUser.status).text}
-                  </Badge>
+                  <StatusPill tone={toneFromBgClass(getStatusBadge(selectedUser.status).color)}>{getStatusBadge(selectedUser.status).text}</StatusPill>
                 </div>
                 <div>
                   <Label className="text-sm font-medium text-gray-500">Email Verified</Label>

@@ -1,32 +1,32 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useMemo } from 'react'
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import { 
-  Server, 
-  Plus, 
-  Search, 
-  Filter, 
-  Eye, 
-  Edit, 
-  Trash2, 
-  RefreshCw,
+  Server,
+  Plus,
+  Search,
+  Filter,
+  Eye,
+  Edit,
+  Trash2,
   ChevronLeft,
   ChevronRight,
   Globe,
   CheckCircle,
-  AlertTriangle,
-  Clock,
-  AlertCircle,
-  Monitor,
   Copy,
-  EyeOff
+  EyeOff,
+  Loader2,
+  Cloud,
+  CalendarClock,
+  CalendarX,
+  RefreshCw
 } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { 
   Table, 
@@ -42,11 +42,12 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from '@/components/ui/dialog'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { useToast } from '@/hooks/use-toast'
+import { useApiQuery, useRefreshApiData } from '@/hooks/use-api-query'
+import { useConfirm } from '@/components/confirm-dialog'
 import {
   Select,
   SelectContent,
@@ -54,8 +55,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { Navbar } from '@/components/navbar'
+import { PageSkeleton } from '@/components/page-skeleton'
 import { StatCard } from '@/components/stat-card'
+import { PageHeader } from '@/components/page-header'
+import { ManageMenu, ManageAction } from '@/components/manage-menu'
+import { StatusPill, toneFromBgClass } from '@/components/status-pill'
 import { formatIndonesianDate } from '@/lib/utils'
 
 interface ServerData {
@@ -96,22 +100,28 @@ interface ServerStats {
   vps: number
 }
 
+const EMPTY_STATS: ServerStats = {
+  total: 0,
+  active: 0,
+  expired: 0,
+  expiring7: 0,
+  expiring30: 0,
+  hosting: 0,
+  vps: 0
+}
+
 export default function ServersPage() {
   const { data: session, status } = useSession()
   const router = useRouter()
   const { toast } = useToast()
 
-  const [servers, setServers] = useState<ServerData[]>([])
-  const [stats, setStats] = useState<ServerStats>({
-    total: 0,
-    active: 0,
-    expired: 0,
-    expiring7: 0,
-    expiring30: 0,
-    hosting: 0,
-    vps: 0
-  })
-  const [loading, setLoading] = useState(true)
+  // Cached server list; refreshed after mutations via fetchServers
+  const serversQuery = useApiQuery<{ servers: ServerData[]; stats: ServerStats }>('/api/servers', status === 'authenticated')
+  const servers = useMemo(() => serversQuery.data?.servers ?? [], [serversQuery.data])
+  const stats = serversQuery.data?.stats ?? EMPTY_STATS
+  const loading = serversQuery.isPending && status === 'authenticated'
+  const fetchServers = useRefreshApiData()
+  const confirm = useConfirm()
   const [searchTerm, setSearchTerm] = useState('')
   const [filterType, setFilterType] = useState<string>('all')
   const [filterStatus, setFilterStatus] = useState<string>('all')
@@ -180,58 +190,6 @@ export default function ServersPage() {
   const canManageServers = userRole === 'ADMIN' || userRole === 'STAFF'
   const canViewPrices = userRole === 'ADMIN' || userRole === 'FINANCE'
 
-  // Fetch servers data
-  const fetchServers = useCallback(async () => {
-    try {
-      setLoading(true)
-      const response = await fetch('/api/servers', {
-        credentials: 'include'
-      })
-      
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`)
-      }
-      
-      const data = await response.json()
-      
-      if (data.success) {
-        setServers(data.servers)
-        setStats(data.stats)
-      } else {
-        console.error('❌ API returned error:', data.error)
-        setServers([])
-        setStats({
-          total: 0,
-          active: 0,
-          expired: 0,
-          expiring7: 0,
-          expiring30: 0,
-          hosting: 0,
-          vps: 0
-        })
-      }
-    } catch (error) {
-      console.error('❌ Error fetching servers:', error)
-      toast({
-        title: "Error",
-        description: "Failed to fetch servers data",
-        variant: "destructive",
-      })
-      setServers([])
-      setStats({
-        total: 0,
-        active: 0,
-        expired: 0,
-        expiring7: 0,
-        expiring30: 0,
-        hosting: 0,
-        vps: 0
-      })
-    } finally {
-      setLoading(false)
-    }
-  }, [toast])
-
   // Fetch available domains (unassigned domains)
   const fetchAvailableDomains = useCallback(async () => {
     try {
@@ -269,10 +227,6 @@ export default function ServersPage() {
 
   // Initial data fetch and event listeners
   useEffect(() => {
-    if (status === 'authenticated') {
-      fetchServers()
-    }
-
     // Event listeners for server updates/deletes
     const handleServerUpdate = () => {
       fetchServers()
@@ -289,7 +243,7 @@ export default function ServersPage() {
       window.removeEventListener('serverUpdated', handleServerUpdate)
       window.removeEventListener('serverDeleted', handleServerDelete)
     }
-  }, [status, fetchServers])
+  }, [fetchServers])
 
   // Reset to first page when filters change
   useEffect(() => {
@@ -298,16 +252,7 @@ export default function ServersPage() {
 
   // Early returns after all hooks
   if (status === 'loading' || loading) {
-    return (
-      <div className="min-h-screen bg-gray-50">
-        <Navbar />
-        <div className="container mx-auto px-4 py-8">
-          <div className="flex items-center justify-center min-h-[400px]">
-            <RefreshCw className="w-8 h-8 animate-spin text-blue-600" />
-          </div>
-        </div>
-      </div>
-    )
+    return <PageSkeleton />
   }
 
   if (status === 'unauthenticated') {
@@ -339,11 +284,11 @@ export default function ServersPage() {
   const getServerTypeIcon = (type: string) => {
     switch (type) {
       case 'HOSTING':
-        return Globe
+        return Cloud
       case 'VPS':
         return Server
       default:
-        return Monitor
+        return Server
     }
   }
 
@@ -546,14 +491,14 @@ export default function ServersPage() {
     {
       title: 'Expiring (30 Days)',
       value: stats.expiring30,
-      icon: AlertTriangle,
+      icon: CalendarClock,
       color: 'text-orange-600',
       bgColor: 'bg-orange-50'
     },
     {
       title: 'Expired Servers',
       value: stats.expired,
-      icon: Clock,
+      icon: CalendarX,
       color: 'text-red-700',
       bgColor: 'bg-red-50'
     }
@@ -646,9 +591,21 @@ export default function ServersPage() {
     }
   }
 
+  // Actions behind each row's "Manage" button
+  const serverActions = (server: ServerData): ManageAction[] => [
+    { label: 'View Details', icon: Eye, onSelect: () => handleViewServer(server) },
+    { label: 'View Domains', icon: Globe, onSelect: () => handleShowDomains(server) },
+    ...(canManageServers ? [{ label: 'Edit', icon: Edit, onSelect: () => handleEditServer(server) }] : []),
+    ...(userRole === 'ADMIN' ? [{ label: 'Delete', icon: Trash2, onSelect: () => handleDeleteServer(server.id, server.serverName), destructive: true }] : []),
+  ]
+
   // Handle delete server
   const handleDeleteServer = async (serverId: string, serverName: string) => {
-    if (!confirm(`Are you sure you want to delete server "${serverName}"? This action cannot be undone.`)) {
+    const confirmed = await confirm({
+      title: 'Delete server?',
+      description: `"${serverName}" will be permanently deleted and its domains will be unassigned. This action cannot be undone.`,
+    })
+    if (!confirmed) {
       return
     }
 
@@ -686,28 +643,31 @@ export default function ServersPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <Navbar />
-      
+    <div>
       <div className="container mx-auto px-4 py-8">
         <div className="space-y-8">
           {/* Header */}
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900">Server Management</h1>
-              <p className="text-gray-600 mt-1">Manage your hosting and VPS servers</p>
-            </div>
-            
-            {canManageServers && (
+          <PageHeader
+            title="Servers"
+            description="Manage your hosting and VPS servers"
+            actions={
               <>
-                <Button 
-                  className="flex items-center gap-2"
-                  onClick={handleShowAddModal}
-                >
-                  <Plus className="w-4 h-4" />
-                  Add New Server
+                <Button variant="outline" onClick={fetchServers} disabled={serversQuery.isFetching}>
+                  <RefreshCw className={`w-4 h-4 mr-2 ${serversQuery.isFetching ? 'animate-spin' : ''}`} />
+                  Refresh
                 </Button>
-                
+                {canManageServers && (
+                  <Button onClick={handleShowAddModal}>
+                    <Plus className="w-4 h-4 mr-2" />
+                    Add Server
+                  </Button>
+                )}
+              </>
+            }
+          />
+
+          {canManageServers && (
+            <>
                 <Dialog open={showAddModal} onOpenChange={setShowAddModal}>
                 <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
                   <DialogHeader>
@@ -825,7 +785,7 @@ export default function ServersPage() {
                       <Label>Assign Domains (Optional)</Label>
                       {loadingDomains ? (
                         <div className="flex items-center justify-center py-4">
-                          <RefreshCw className="w-4 h-4 animate-spin mr-2" />
+                          <Loader2 className="w-4 h-4 animate-spin mr-2" />
                           <span className="text-sm text-gray-500">Loading available domains...</span>
                         </div>
                       ) : availableDomains.length === 0 ? (
@@ -883,7 +843,7 @@ export default function ServersPage() {
                     <Button onClick={handleAddServer} disabled={addingServer}>
                       {addingServer ? (
                         <>
-                          <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+                          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                           Adding...
                         </>
                       ) : (
@@ -895,10 +855,9 @@ export default function ServersPage() {
                 </Dialog>
               </>
             )}
-          </div>
 
           {/* Stats Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
             {statsCards.map((card, index) => (
               <StatCard key={index} title={card.title} value={card.value} icon={card.icon} color={card.color} bgColor={card.bgColor} />
             ))}
@@ -906,14 +865,8 @@ export default function ServersPage() {
 
           {/* Filters and Search */}
           <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Server className="w-5 h-5" />
-                Server List
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="flex flex-col sm:flex-row gap-4 mb-6">
+            <CardContent className="p-6">
+              <div className="flex flex-col sm:flex-row gap-4">
                 <div className="flex-1">
                   <div className="relative">
                     <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
@@ -955,18 +908,20 @@ export default function ServersPage() {
                   </Select>
                 </div>
               </div>
+            </CardContent>
+          </Card>
 
-              {/* Server Table - Desktop */}
-              <div className="border rounded-lg overflow-hidden hidden md:block">
+          {/* Server Table - Desktop */}
+          <Card className="hidden md:block overflow-hidden">
+            <CardContent className="p-0">
+              <div>
                 <Table>
                   <TableHeader>
                     <TableRow>
                       <TableHead>Server</TableHead>
-                      <TableHead>Type</TableHead>
                       <TableHead>Provider</TableHead>
                       <TableHead>Status</TableHead>
-                      <TableHead>Username</TableHead>
-                      <TableHead>Password</TableHead>
+                      <TableHead>Credentials</TableHead>
                       <TableHead>Domains</TableHead>
                       <TableHead>Expiry</TableHead>
                       <TableHead className="text-right">Actions</TableHead>
@@ -975,7 +930,7 @@ export default function ServersPage() {
                   <TableBody>
                     {filteredServers.length === 0 ? (
                       <TableRow>
-                        <TableCell colSpan={9} className="text-center py-8">
+                        <TableCell colSpan={7} className="text-center py-8">
                           <div className="flex flex-col items-center gap-2">
                             <Server className="w-12 h-12 text-gray-400" />
                             <p className="text-gray-500">No servers found</p>
@@ -995,42 +950,28 @@ export default function ServersPage() {
                     ) : (
                       paginatedServers.map((server) => {
                         const serverStatus = getServerStatus(server.status, server.daysToExpiry)
-                        const TypeIcon = getServerTypeIcon(server.serverType)
-                        
+
                         return (
                           <TableRow key={server.id} className="hover:bg-gray-50">
-                            <TableCell className="font-medium">
-                              <div className="flex items-center space-x-3">
-                                <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
-                                  <TypeIcon className="w-4 h-4 text-blue-600" />
-                                </div>
-                                <div>
-                                  <div className="font-medium">{server.serverName}</div>
-                                  {server.ipAddress && (
-                                    <div className="text-sm text-gray-500">{server.ipAddress}</div>
-                                  )}
-                                </div>
-                              </div>
-                            </TableCell>
                             <TableCell>
-                              <Badge variant="outline">
-                                {server.serverType}
-                              </Badge>
-                            </TableCell>
-                            <TableCell>{server.provider}</TableCell>
-                            <TableCell>
-                              <Badge className={`${serverStatus.color} text-white`}>
-                                {serverStatus.text}
-                              </Badge>
-                            </TableCell>
-                            <TableCell>
-                              {server.username ? (
-                                <span className="font-mono text-sm">{server.username}</span>
-                              ) : (
-                                <span className="text-gray-400">No username</span>
+                              <div className="font-medium text-gray-900">{server.serverName}</div>
+                              {server.ipAddress && (
+                                <div className="text-sm text-gray-500">{server.ipAddress}</div>
                               )}
                             </TableCell>
                             <TableCell>
+                              <div className="text-sm text-gray-900">{server.provider}</div>
+                              <div className="text-sm text-gray-500">{server.serverType === 'VPS' ? 'VPS' : 'Hosting'}</div>
+                            </TableCell>
+                            <TableCell>
+                              <StatusPill tone={toneFromBgClass(serverStatus.color)}>{serverStatus.text}</StatusPill>
+                            </TableCell>
+                            <TableCell>
+                              {server.username ? (
+                                <div className="font-mono text-sm text-gray-900">{server.username}</div>
+                              ) : (
+                                <div className="text-sm text-gray-400">No username</div>
+                              )}
                               {server.password ? (
                                 <div className="flex items-center space-x-2">
                                   <div className="flex items-center space-x-1">
@@ -1065,19 +1006,18 @@ export default function ServersPage() {
                                   </div>
                                 </div>
                               ) : (
-                                <span className="text-gray-400">No password</span>
+                                <div className="text-sm text-gray-400">No password</div>
                               )}
                             </TableCell>
                             <TableCell>
-                              <div 
-                                className="flex items-center cursor-pointer hover:bg-gray-50 p-2 rounded-md transition-colors"
+                              <button
+                                type="button"
+                                className="text-sm text-blue-600 hover:underline"
                                 onClick={() => handleShowDomains(server)}
-                                title="Click to view assigned domains"
+                                title="View assigned domains"
                               >
-                                <Badge variant="outline" className="text-xs">
-                                  {server.domainCount || 0} domains
-                                </Badge>
-                              </div>
+                                {server.domainCount || 0} domains
+                              </button>
                             </TableCell>
                             <TableCell>
                               {server.expiryDate ? (
@@ -1096,41 +1036,8 @@ export default function ServersPage() {
                                 'N/A'
                               )}
                             </TableCell>
-                            <TableCell>
-                              <div className="flex items-center justify-end space-x-1">
-                                <Button 
-                                  variant="ghost" 
-                                  size="sm" 
-                                  title="View Server Details"
-                                  onClick={() => handleViewServer(server)}
-                                >
-                                  <Eye className="w-4 h-4" />
-                                </Button>
-                                {canManageServers && (
-                                  <>
-                                    <Button
-                                      variant="ghost"
-                                      size="sm"
-                                      className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
-                                      title="Edit Server"
-                                      onClick={() => handleEditServer(server)}
-                                    >
-                                      <Edit className="w-4 h-4" />
-                                    </Button>
-                                    {userRole === 'ADMIN' && (
-                                      <Button
-                                        variant="ghost"
-                                        size="sm"
-                                        className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                                        title="Delete Server"
-                                        onClick={() => handleDeleteServer(server.id, server.serverName)}
-                                      >
-                                        <Trash2 className="w-4 h-4" />
-                                      </Button>
-                                    )}
-                                  </>
-                                )}
-                              </div>
+                            <TableCell className="text-right">
+                              <ManageMenu actions={serverActions(server)} />
                             </TableCell>
                           </TableRow>
                         )
@@ -1241,9 +1148,7 @@ export default function ServersPage() {
                             <Badge variant="outline" className="text-xs">
                               {server.serverType}
                             </Badge>
-                            <Badge className={`${serverStatus.color} text-white text-xs`}>
-                              {serverStatus.text}
-                            </Badge>
+                            <StatusPill tone={toneFromBgClass(serverStatus.color)}>{serverStatus.text}</StatusPill>
                           </div>
                         </div>
 
@@ -1315,39 +1220,7 @@ export default function ServersPage() {
 
                         {/* Actions */}
                         <div className="flex items-center justify-between pt-2 border-t">
-                          <div className="flex items-center space-x-2">
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              className="h-8 px-2"
-                              title="View Server"
-                              onClick={() => handleViewServer(server)}
-                            >
-                              <Eye className="w-3 h-3" />
-                            </Button>
-                            {canManageServers && (
-                              <>
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  className="text-blue-600 hover:text-blue-700 hover:bg-blue-50 h-8 px-2"
-                                  title="Edit Server"
-                                  onClick={() => handleEditServer(server)}
-                                >
-                                  <Edit className="w-3 h-3" />
-                                </Button>
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  className="text-red-600 hover:text-red-700 hover:bg-red-50 h-8 px-2"
-                                  title="Delete Server"
-                                  onClick={() => handleDeleteServer(server.id, server.serverName)}
-                                >
-                                  <Trash2 className="w-3 h-3" />
-                                </Button>
-                              </>
-                            )}
-                          </div>
+                          <ManageMenu actions={serverActions(server)} />
                           <div className="text-xs text-gray-400">
                             #{server.id.slice(-8)}
                           </div>
@@ -1419,9 +1292,7 @@ export default function ServersPage() {
                   <div>
                     <Label className="text-sm font-medium text-gray-500">Status</Label>
                     <p className="mt-1">
-                      <Badge className={`${getServerStatus(selectedServer.status, selectedServer.daysToExpiry).color} text-white`}>
-                        {getServerStatus(selectedServer.status, selectedServer.daysToExpiry).text}
-                      </Badge>
+                      <StatusPill tone={toneFromBgClass(getServerStatus(selectedServer.status, selectedServer.daysToExpiry).color)}>{getServerStatus(selectedServer.status, selectedServer.daysToExpiry).text}</StatusPill>
                     </p>
                   </div>
 
@@ -1650,7 +1521,7 @@ export default function ServersPage() {
               <Label>Assign Domains (Optional)</Label>
               {loadingDomains ? (
                 <div className="flex items-center justify-center py-4">
-                  <RefreshCw className="w-4 h-4 animate-spin mr-2" />
+                  <Loader2 className="w-4 h-4 animate-spin mr-2" />
                   <span className="text-sm text-gray-500">Loading available domains...</span>
                 </div>
               ) : (
@@ -1739,7 +1610,7 @@ export default function ServersPage() {
               >
                 {editingServer ? (
                   <>
-                    <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                     Updating...
                   </>
                 ) : (

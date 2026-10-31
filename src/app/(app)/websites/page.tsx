@@ -1,29 +1,36 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useMemo } from 'react'
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import { useToast } from '@/hooks/use-toast'
-import { Navbar } from '@/components/navbar'
+import { useApiQuery, useRefreshApiData } from '@/hooks/use-api-query'
+import { useConfirm } from '@/components/confirm-dialog'
+import { PageSkeleton } from '@/components/page-skeleton'
 import { StatCard } from '@/components/stat-card'
+import { PageHeader } from '@/components/page-header'
+import { ManageMenu, ManageAction } from '@/components/manage-menu'
+import { StatusPill, toneFromBgClass } from '@/components/status-pill'
 import { formatIndonesianDate } from '@/lib/utils'
 import { 
-  Globe, 
-  Plus, 
-  Search, 
-  Filter, 
-  Eye, 
+  Globe,
+  Plus,
+  Search,
+  Filter,
+  Eye,
   EyeOff,
-  Edit, 
-  Trash2, 
-  CheckCircle, 
-  AlertTriangle, 
-  Clock, 
+  Edit,
+  Trash2,
+  CheckCircle,
   XCircle,
-  RefreshCw,
   Monitor,
   MonitorOff,
-  Copy
+  Copy,
+  Loader2,
+  ChevronLeft,
+  ChevronRight,
+  AppWindow,
+  RefreshCw
 } from 'lucide-react'
 
 // UI Components
@@ -108,23 +115,29 @@ interface EditWebsite extends NewWebsite {
   id: string
 }
 
+const EMPTY_STATS: WebsiteStats = {
+  total: 0,
+  active: 0,
+  inactive: 0,
+  maintenance: 0,
+  development: 0,
+  suspended: 0,
+  live: 0,
+  offline: 0
+}
+
 export default function WebsitesPage() {
   const { data: session, status } = useSession()
   const router = useRouter()
   const { toast } = useToast()
 
-  const [websites, setWebsites] = useState<Website[]>([])
-  const [stats, setStats] = useState<WebsiteStats>({
-    total: 0,
-    active: 0,
-    inactive: 0,
-    maintenance: 0,
-    development: 0,
-    suspended: 0,
-    live: 0,
-    offline: 0
-  })
-  const [loading, setLoading] = useState(true)
+  // Cached website list; refreshed after mutations via fetchWebsites
+  const websitesQuery = useApiQuery<{ websites: Website[]; stats: WebsiteStats }>('/api/websites', status === 'authenticated')
+  const websites = useMemo(() => websitesQuery.data?.websites ?? [], [websitesQuery.data])
+  const stats = websitesQuery.data?.stats ?? EMPTY_STATS
+  const loading = websitesQuery.isPending && status === 'authenticated'
+  const fetchWebsites = useRefreshApiData()
+  const confirm = useConfirm()
   const [searchTerm, setSearchTerm] = useState('')
   const [filterStatus, setFilterStatus] = useState('all')
   const [currentPage, setCurrentPage] = useState(1)
@@ -184,60 +197,6 @@ export default function WebsitesPage() {
   const userRole = (session?.user as any)?.role
   const canManageWebsites = userRole === 'ADMIN' || userRole === 'STAFF'
 
-  // Fetch websites data
-  const fetchWebsites = useCallback(async () => {
-    try {
-      setLoading(true)
-      const response = await fetch('/api/websites', {
-        credentials: 'include'
-      })
-      
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`)
-      }
-      
-      const data = await response.json()
-      
-      if (data.success) {
-        setWebsites(data.websites)
-        setStats(data.stats)
-      } else {
-        console.error('❌ API returned error:', data.error)
-        setWebsites([])
-        setStats({
-          total: 0,
-          active: 0,
-          inactive: 0,
-          maintenance: 0,
-          development: 0,
-          suspended: 0,
-          live: 0,
-          offline: 0
-        })
-      }
-    } catch (error) {
-      console.error('❌ Error fetching websites:', error)
-      toast({
-        title: "Error",
-        description: "Failed to fetch websites data",
-        variant: "destructive",
-      })
-      setWebsites([])
-      setStats({
-        total: 0,
-        active: 0,
-        inactive: 0,
-        maintenance: 0,
-        development: 0,
-        suspended: 0,
-        live: 0,
-        offline: 0
-      })
-    } finally {
-      setLoading(false)
-    }
-  }, [toast])
-
   // Fetch available domains
   const fetchAvailableDomains = useCallback(async () => {
     try {
@@ -273,10 +232,9 @@ export default function WebsitesPage() {
   // Initial data fetch
   useEffect(() => {
     if (session) {
-      fetchWebsites()
       fetchAvailableDomains()
     }
-  }, [session, fetchWebsites, fetchAvailableDomains])
+  }, [session, fetchAvailableDomains])
 
   // Get website status badge
   const getStatusBadge = (status: string) => {
@@ -301,7 +259,7 @@ export default function WebsitesPage() {
     {
       title: 'Total Websites',
       value: stats.total,
-      icon: Globe,
+      icon: AppWindow,
       color: 'text-blue-600',
       bgColor: 'bg-blue-50'
     },
@@ -592,9 +550,20 @@ export default function WebsitesPage() {
     }
   }
 
+  // Actions behind each row's "Manage" button
+  const websiteActions = (website: Website): ManageAction[] => [
+    { label: 'View Details', icon: Eye, onSelect: () => handleViewWebsite(website) },
+    ...(canManageWebsites ? [{ label: 'Edit', icon: Edit, onSelect: () => handleEditWebsite(website) }] : []),
+    ...(userRole === 'ADMIN' ? [{ label: 'Delete', icon: Trash2, onSelect: () => handleDeleteWebsite(website), destructive: true }] : []),
+  ]
+
   // Handle delete website
   const handleDeleteWebsite = async (website: Website) => {
-    if (!confirm(`Are you sure you want to delete "${website.siteName}"? This action cannot be undone.`)) {
+    const confirmed = await confirm({
+      title: 'Delete website?',
+      description: `"${website.siteName}" will be permanently deleted. This action cannot be undone.`,
+    })
+    if (!confirmed) {
       return
     }
 
@@ -654,11 +623,7 @@ export default function WebsitesPage() {
   }, [searchTerm, filterStatus])
 
   if (status === 'loading' || loading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <RefreshCw className="w-8 h-8 animate-spin" />
-      </div>
-    )
+    return <PageSkeleton />
   }
 
   if (!session) {
@@ -667,30 +632,29 @@ export default function WebsitesPage() {
 
   return (
     <>
-      <Navbar />
       <div className="container mx-auto px-4 py-8">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Website Management</h1>
-          <p className="text-gray-600">Manage your websites and their configurations</p>
-        </div>
-        
-        <div className="flex flex-col sm:flex-row gap-4 mt-4 sm:mt-0">
-          {canManageWebsites && (
-            <Button 
-              className="flex items-center gap-2"
-              onClick={handleShowAddModal}
-            >
-              <Plus className="w-4 h-4" />
-              Add New Website
+      <PageHeader className="mb-8"
+        title="Websites"
+        description="Manage your websites and their configurations"
+        actions={
+          <>
+            <Button variant="outline" onClick={fetchWebsites} disabled={websitesQuery.isFetching}>
+              <RefreshCw className={`w-4 h-4 mr-2 ${websitesQuery.isFetching ? 'animate-spin' : ''}`} />
+              Refresh
             </Button>
-          )}
-        </div>
-      </div>
+            {canManageWebsites && (
+              <Button onClick={handleShowAddModal}>
+                <Plus className="w-4 h-4 mr-2" />
+                Add Website
+              </Button>
+            )}
+          </>
+        }
+      />
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 mb-8">
         {statsCards.map((card, index) => (
           <StatCard key={index} title={card.title} value={card.value} icon={card.icon} color={card.color} bgColor={card.bgColor} />
         ))}
@@ -725,7 +689,7 @@ export default function WebsitesPage() {
       </div>
 
       {/* Websites Table - Desktop */}
-      <Card className="hidden md:block">
+      <Card className="hidden md:block overflow-hidden">
         <CardContent className="p-0">
           <div className="overflow-x-auto">
             <Table>
@@ -735,17 +699,16 @@ export default function WebsitesPage() {
                   <TableHead>Domain</TableHead>
                   <TableHead>CMS</TableHead>
                   <TableHead>Status</TableHead>
-                  <TableHead>Live Status</TableHead>
                   <TableHead>Created</TableHead>
-                  <TableHead>Actions</TableHead>
+                  <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {paginatedWebsites.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={7} className="text-center py-8">
+                    <TableCell colSpan={6} className="text-center py-8">
                       <div className="flex flex-col items-center justify-center text-gray-500">
-                        <Globe className="w-12 h-12 mb-4 opacity-50" />
+                        <AppWindow className="w-12 h-12 mb-4 opacity-50" />
                         <p className="text-lg font-medium mb-2">No websites found</p>
                         <p className="text-sm">
                           {searchTerm || filterStatus !== 'all' 
@@ -785,23 +748,10 @@ export default function WebsitesPage() {
                           )}
                         </TableCell>
                         <TableCell>
-                          <Badge className={`${statusBadge.color} text-white text-xs`}>
-                            {statusBadge.text}
-                          </Badge>
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex items-center gap-2">
-                            {website.isLive ? (
-                              <>
-                                <Monitor className="w-4 h-4 text-green-500" />
-                                <span className="text-green-600 text-sm font-medium">Live</span>
-                              </>
-                            ) : (
-                              <>
-                                <MonitorOff className="w-4 h-4 text-red-500" />
-                                <span className="text-red-600 text-sm font-medium">Offline</span>
-                              </>
-                            )}
+                          <StatusPill tone={toneFromBgClass(statusBadge.color)}>{statusBadge.text}</StatusPill>
+                          <div className={`mt-1 flex items-center gap-1 text-sm ${website.isLive ? 'text-green-600' : 'text-red-600'}`}>
+                            {website.isLive ? <Monitor className="w-3.5 h-3.5" /> : <MonitorOff className="w-3.5 h-3.5" />}
+                            {website.isLive ? 'Live' : 'Offline'}
                           </div>
                         </TableCell>
                         <TableCell>
@@ -809,41 +759,8 @@ export default function WebsitesPage() {
                             {new Date(website.createdAt).toLocaleDateString('id-ID')}
                           </div>
                         </TableCell>
-                        <TableCell>
-                          <div className="flex items-center gap-2">
-                            <Button 
-                              variant="ghost" 
-                              size="sm" 
-                              title="View Details"
-                              onClick={() => handleViewWebsite(website)}
-                            >
-                              <Eye className="w-4 h-4" />
-                            </Button>
-                            {canManageWebsites && (
-                              <>
-                                <Button 
-                                  variant="ghost" 
-                                  size="sm" 
-                                  className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
-                                  title="Edit Website"
-                                  onClick={() => handleEditWebsite(website)}
-                                >
-                                  <Edit className="w-4 h-4" />
-                                </Button>
-                                {userRole === 'ADMIN' && (
-                                  <Button 
-                                    variant="ghost" 
-                                    size="sm" 
-                                    className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                                    title="Delete Website"
-                                    onClick={() => handleDeleteWebsite(website)}
-                                  >
-                                    <Trash2 className="w-4 h-4" />
-                                  </Button>
-                                )}
-                              </>
-                            )}
-                          </div>
+                        <TableCell className="text-right">
+                          <ManageMenu actions={websiteActions(website)} />
                         </TableCell>
                       </TableRow>
                     )
@@ -871,7 +788,7 @@ export default function WebsitesPage() {
           <Card>
             <CardContent className="text-center py-8">
               <div className="flex flex-col items-center justify-center text-gray-500">
-                <Globe className="w-12 h-12 mb-4 opacity-50" />
+                <AppWindow className="w-12 h-12 mb-4 opacity-50" />
                 <p className="text-lg font-medium mb-2">No websites found</p>
                 <p className="text-sm">
                   {searchTerm || filterStatus !== 'all' 
@@ -894,7 +811,7 @@ export default function WebsitesPage() {
                     <div className="flex items-center justify-between">
                       <div className="flex items-center space-x-3">
                         <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
-                          <Globe className="w-4 h-4 text-blue-600" />
+                          <AppWindow className="w-4 h-4 text-blue-600" />
                         </div>
                         <div>
                           <h4 className="font-medium text-gray-900">{website.siteName}</h4>
@@ -902,9 +819,7 @@ export default function WebsitesPage() {
                         </div>
                       </div>
                       <div className="flex flex-col items-end space-y-1">
-                        <Badge className={`${statusBadge.color} text-white text-xs`}>
-                          {statusBadge.text}
-                        </Badge>
+                        <StatusPill tone={toneFromBgClass(statusBadge.color)}>{statusBadge.text}</StatusPill>
                         <div className="flex items-center space-x-1">
                           <div className={`w-2 h-2 rounded-full ${website.isLive ? 'bg-green-500' : 'bg-gray-400'}`}></div>
                           <span className="text-xs text-gray-500">
@@ -941,41 +856,7 @@ export default function WebsitesPage() {
 
                     {/* Actions */}
                     <div className="flex items-center justify-between pt-2 border-t">
-                      <div className="flex items-center space-x-2">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="h-8 px-2"
-                          title="View Website"
-                          onClick={() => handleViewWebsite(website)}
-                        >
-                          <Eye className="w-3 h-3" />
-                        </Button>
-                        {(userRole === 'ADMIN' || userRole === 'STAFF') && (
-                          <>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              className="text-blue-600 hover:text-blue-700 hover:bg-blue-50 h-8 px-2"
-                              title="Edit Website"
-                              onClick={() => handleEditWebsite(website)}
-                            >
-                              <Edit className="w-3 h-3" />
-                            </Button>
-                            {userRole === 'ADMIN' && (
-                              <Button 
-                                variant="ghost" 
-                                size="sm" 
-                                className="text-red-600 hover:text-red-700 hover:bg-red-50 h-8 px-2"
-                                title="Delete Website"
-                                onClick={() => handleDeleteWebsite(website)}
-                              >
-                                <Trash2 className="w-3 h-3" />
-                              </Button>
-                            )}
-                          </>
-                        )}
-                      </div>
+                      <ManageMenu actions={websiteActions(website)} />
                       <div className="text-xs text-gray-400">
                         #{website.id.slice(-8)}
                       </div>
@@ -1082,7 +963,7 @@ export default function WebsitesPage() {
               <Label>Domain *</Label>
               {loadingDomains ? (
                 <div className="flex items-center justify-center py-2">
-                  <RefreshCw className="w-4 h-4 animate-spin mr-2" />
+                  <Loader2 className="w-4 h-4 animate-spin mr-2" />
                   <span className="text-sm text-gray-500">Loading domains...</span>
                 </div>
               ) : (
@@ -1219,7 +1100,7 @@ export default function WebsitesPage() {
             <Button onClick={handleAddWebsite} disabled={addingWebsite}>
               {addingWebsite ? (
                 <>
-                  <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                   Adding...
                 </>
               ) : (
@@ -1387,7 +1268,7 @@ export default function WebsitesPage() {
             <Button onClick={handleUpdateWebsite} disabled={editingWebsite}>
               {editingWebsite ? (
                 <>
-                  <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                   Updating...
                 </>
               ) : (
@@ -1430,9 +1311,7 @@ export default function WebsitesPage() {
                     {(() => {
                       const statusBadge = getStatusBadge(selectedWebsite.status)
                       return (
-                        <Badge className={`${statusBadge.color} text-white text-xs`}>
-                          {statusBadge.text}
-                        </Badge>
+                        <StatusPill tone={toneFromBgClass(statusBadge.color)}>{statusBadge.text}</StatusPill>
                       )
                     })()}
                   </div>

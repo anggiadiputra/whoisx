@@ -1,40 +1,44 @@
 'use client'
 
-import { useState, useEffect, useCallback, useMemo, memo } from 'react'
+import { useState, useEffect, useMemo, memo } from 'react'
 import { useSession } from 'next-auth/react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Badge } from '@/components/ui/badge'
-import { Skeleton } from '@/components/ui/skeleton'
+
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { useToast } from '@/hooks/use-toast'
-import { Navbar } from '@/components/navbar'
+import { PageSkeleton } from '@/components/page-skeleton'
 import { StatCard } from '@/components/stat-card'
+import { PageHeader } from '@/components/page-header'
+import { StatusPill, toneFromBgClass } from '@/components/status-pill'
 import { WhoisDetailModal } from '@/components/whois-detail-modal'
 import { AssignDomainModal } from '@/components/assign-domain-modal'
+import { ManageMenu, ManageAction } from '@/components/manage-menu'
 import { formatIndonesianDate } from '@/lib/utils'
 import { useDebounce } from '@/hooks/use-debounce'
+import { useApiQuery, useRefreshApiData } from '@/hooks/use-api-query'
+import { useConfirm } from '@/components/confirm-dialog'
 import { 
-  Plus, 
-  Search, 
+  Plus,
+  Search,
   RefreshCw,
-  AlertTriangle, 
-  CheckCircle, 
-  Clock, 
-  Globe, 
-  Calendar,
+  AlertTriangle,
+  Globe,
   Filter,
   Eye,
   Edit,
-  AlertCircle,
   Download,
   ChevronLeft,
   ChevronRight,
   Server,
   Link,
-  Trash2
+  Trash2,
+  Loader2,
+  Cloud,
+  ShoppingCart,
+  CalendarClock
 } from 'lucide-react'
 
 interface Domain {
@@ -66,18 +70,42 @@ interface DashboardStats {
   expiring1: number
 }
 
+const EMPTY_STATS: DashboardStats = {
+  total: 0,
+  expired: 0,
+  expiring30: 0,
+  expiring7: 0,
+  expiring1: 0
+}
+
+// Second line under the expiry date
+function describeDaysLeft(days?: number | null) {
+  if (days === undefined || days === null) return null
+  if (days < 0) return `Expired ${Math.abs(days)} days ago`
+  if (days === 0) return 'Expires today'
+  return `${days} days remaining`
+}
+
+function daysLeftColor(days?: number | null) {
+  if (days === undefined || days === null) return 'text-gray-500'
+  if (days <= 1) return 'text-red-600'
+  if (days <= 7) return 'text-orange-600'
+  if (days <= 30) return 'text-yellow-600'
+  return 'text-gray-500'
+}
+
 export default function DomainsPage() {
   const { data: session, status } = useSession()
   const { toast } = useToast()
-  const [domains, setDomains] = useState<Domain[]>([])
-  const [stats, setStats] = useState<DashboardStats>({
-    total: 0,
-    expired: 0,
-    expiring30: 0,
-    expiring7: 0,
-    expiring1: 0
-  })
-  const [loading, setLoading] = useState(true)
+
+  // Cached domain list, shared with the dashboard
+  const domainsQuery = useApiQuery<{ domains: Domain[]; stats: DashboardStats }>('/api/domains', status === 'authenticated')
+  const domains = useMemo(() => domainsQuery.data?.domains ?? [], [domainsQuery.data])
+  const stats = domainsQuery.data?.stats ?? EMPTY_STATS
+  const loading = domainsQuery.isPending && status === 'authenticated'
+  const fetchDomains = useRefreshApiData()
+  const confirm = useConfirm()
+
   const [searchTerm, setSearchTerm] = useState('')
   const [filterExpiring, setFilterExpiring] = useState<string | null>(null)
   const [showAddDomain, setShowAddDomain] = useState(false)
@@ -85,6 +113,7 @@ export default function DomainsPage() {
   const [selectedDomainForEdit, setSelectedDomainForEdit] = useState<Domain | null>(null)
   const [showAssignModal, setShowAssignModal] = useState(false)
   const [selectedDomainForAssign, setSelectedDomainForAssign] = useState<Domain | null>(null)
+  const [whoisDomain, setWhoisDomain] = useState<Domain | null>(null)
   const [newDomain, setNewDomain] = useState({
     domain: '',
     renewalPrice: '',
@@ -107,63 +136,13 @@ export default function DomainsPage() {
   const userRole = session?.user?.role
   const canManageDomains = userRole === 'ADMIN' || userRole === 'STAFF'
 
-  const fetchDomains = useCallback(async () => {
-    try {
-      const response = await fetch('/api/domains', {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        credentials: 'include', // Include cookies for authentication
-      })
-      
-      if (response.ok) {
-        const data = await response.json()
-        setDomains(data.domains || [])
-        setStats(data.stats || { total: 0, expired: 0, expiring30: 0, expiring7: 0, expiring1: 0 })
-      } else {
-        console.error('❌ API Error:', response.status, response.statusText)
-        // Try to get error message from response
-        try {
-          const errorData = await response.json()
-          console.error('Error details:', errorData)
-        } catch (e) {
-          console.error('Could not parse error response')
-        }
-        
-        if (toast) {
-          toast({
-            title: "Error Loading Domains",
-            description: `Failed to load domains (${response.status})`,
-            variant: "destructive",
-          })
-        }
-      }
-    } catch (error) {
-      console.error('🔥 Network/Fetch Error:', error)
-      if (toast) {
-        toast({
-          title: "Network Error",
-          description: 'Unable to connect to server. Please check your connection.',
-          variant: "destructive",
-        })
-      }
-    } finally {
-      setLoading(false)
-    }
-  }, [])
-
+  // Open the add dialog when arriving from the dashboard's "Add Domain" button
   useEffect(() => {
-    if (status === 'authenticated' && session) {
-      // Add small delay to ensure session is fully established
-      const timer = setTimeout(() => {
-        fetchDomains()
-      }, 100)
-      return () => clearTimeout(timer)
-    } else if (status === 'unauthenticated') {
-      setLoading(false)
+    if (canManageDomains && new URLSearchParams(window.location.search).get('add') === '1') {
+      setShowAddDomain(true)
+      window.history.replaceState(null, '', '/domains')
     }
-  }, [status, session, fetchDomains])
+  }, [canManageDomains])
 
   // Listen for domain updates from WHOIS modal
   useEffect(() => {
@@ -235,28 +214,12 @@ export default function DomainsPage() {
 
   // Early returns after all hooks
   if (status === 'loading' || loading) {
-    return (
-      <div className="min-h-screen bg-gray-50">
-        <Navbar />
-        <div className="container mx-auto px-4 py-8">
-          <div className="space-y-6">
-            <Skeleton className="h-12 w-64" />
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-              {[...Array(4)].map((_, i) => (
-                <Skeleton key={i} className="h-32" />
-              ))}
-            </div>
-            <Skeleton className="h-96" />
-          </div>
-        </div>
-      </div>
-    )
+    return <PageSkeleton />
   }
 
   if (status === 'unauthenticated') {
     return (
-      <div className="min-h-screen bg-gray-50">
-        <Navbar />
+      <div>
         <div className="container mx-auto px-4 py-8">
           <Card className="max-w-md mx-auto mt-20">
             <CardHeader>
@@ -408,9 +371,23 @@ export default function DomainsPage() {
     }
   }
 
+  // Actions behind each row's "Manage" button
+  const domainActions = (domain: Domain): ManageAction[] => [
+    { label: 'View WHOIS', icon: Eye, onSelect: () => setWhoisDomain(domain) },
+    ...(canManageDomains ? [
+      { label: 'Edit', icon: Edit, onSelect: () => handleEditDomain(domain) },
+      { label: 'Assign to Server', icon: Link, onSelect: () => handleAssignDomain(domain) },
+      { label: 'Delete', icon: Trash2, onSelect: () => handleDeleteDomain(domain), destructive: true },
+    ] : []),
+  ]
+
   // Handle delete domain
   const handleDeleteDomain = async (domain: Domain) => {
-    if (!confirm(`Are you sure you want to delete domain "${domain.domain}"? This action cannot be undone.`)) {
+    const confirmed = await confirm({
+      title: 'Delete domain?',
+      description: `"${domain.domain}" and any websites linked to it will be permanently deleted. This action cannot be undone.`,
+    })
+    if (!confirmed) {
       return
     }
 
@@ -458,47 +435,51 @@ export default function DomainsPage() {
     {
       title: 'Available to Order',
       value: domains.filter(d => d.daysToExpiry === null || d.daysToExpiry === undefined).length,
-      icon: CheckCircle,
+      icon: ShoppingCart,
       color: 'text-blue-600',
       bgColor: 'bg-blue-50'
     },
     {
       title: 'Akan Expired (30 Hari)',
       value: stats.expiring30,
-      icon: AlertTriangle,
+      icon: CalendarClock,
       color: 'text-orange-600',
       bgColor: 'bg-orange-50'
     },
     {
       title: 'Segera Expired (1 Hari)',
       value: stats.expiring1,
-      icon: Clock,
+      icon: AlertTriangle,
       color: 'text-red-700',
       bgColor: 'bg-red-50'
     }
   ]
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <Navbar />
-      
+    <div>
       <div className="container mx-auto px-4 py-8">
         {/* Page Header */}
-        <div className="mb-8">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900">Domain Management</h1>
-              <p className="text-gray-600 mt-1">Monitor and manage your domain portfolio</p>
-            </div>
-            
-            {canManageDomains && (
-              <Dialog open={showAddDomain} onOpenChange={setShowAddDomain}>
-                <DialogTrigger asChild>
-                  <Button>
-                    <Plus className="w-4 h-4 mr-2" />
-                    Add New Domain
-                  </Button>
-                </DialogTrigger>
+        <PageHeader className="mb-8"
+          title="Domains"
+          description="Monitor and manage your domain portfolio"
+          actions={
+            <>
+              <Button variant="outline" onClick={fetchDomains} disabled={domainsQuery.isFetching}>
+                <RefreshCw className={`w-4 h-4 mr-2 ${domainsQuery.isFetching ? 'animate-spin' : ''}`} />
+                Refresh
+              </Button>
+              {canManageDomains && (
+                <Button onClick={() => setShowAddDomain(true)}>
+                  <Plus className="w-4 h-4 mr-2" />
+                  Add Domain
+                </Button>
+              )}
+            </>
+          }
+        />
+
+        {canManageDomains && (
+          <Dialog open={showAddDomain} onOpenChange={setShowAddDomain}>
                 <DialogContent className="sm:max-w-[425px]">
                   <DialogHeader>
                     <DialogTitle>Add New Domain</DialogTitle>
@@ -566,7 +547,7 @@ export default function DomainsPage() {
                       >
                         {addingDomain ? (
                           <>
-                            <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+                            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                             Adding...
                           </>
                         ) : (
@@ -651,7 +632,7 @@ export default function DomainsPage() {
                       >
                         {editingDomain ? (
                           <>
-                            <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+                            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                             Updating...
                           </>
                         ) : (
@@ -663,11 +644,9 @@ export default function DomainsPage() {
                 </DialogContent>
               </Dialog>
             )}
-          </div>
-        </div>
 
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 mb-8">
           {statsCards.map((card, index) => (
             <StatCard key={index} title={card.title} value={card.value} icon={card.icon} color={card.color} bgColor={card.bgColor} />
           ))}
@@ -722,39 +701,23 @@ export default function DomainsPage() {
         </Card>
 
         {/* Domains Table - Desktop */}
-        <Card className="hidden md:block">
-          <CardHeader>
-            <div className="flex items-center justify-between">
-              <div>
-                <CardTitle>Domains ({filteredDomains.length})</CardTitle>
-                <CardDescription>
-                  Manage your domain portfolio and monitor expiry dates
-                </CardDescription>
-              </div>
-              <Button variant="outline" onClick={fetchDomains} size="sm">
-                <RefreshCw className="w-4 h-4 mr-2" />
-                Refresh
-              </Button>
-            </div>
-          </CardHeader>
-          <CardContent>
+        <Card className="hidden md:block overflow-hidden">
+          <CardContent className="p-0">
             <div className="overflow-x-auto">
               <Table>
                 <TableHeader>
                   <TableRow>
                     <TableHead>Domain</TableHead>
                     <TableHead>Status</TableHead>
-                    <TableHead>Registrar</TableHead>
                     <TableHead>Server</TableHead>
-                    <TableHead>Expiry Date</TableHead>
-                    <TableHead>Days Left</TableHead>
+                    <TableHead>Expiry</TableHead>
                     <TableHead className="text-right">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {filteredDomains.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={7} className="text-center py-8">
+                      <TableCell colSpan={5} className="text-center py-8">
                         <div className="flex flex-col items-center space-y-2">
                           <Globe className="w-8 h-8 text-gray-400" />
                           <p className="text-gray-500">No domains found</p>
@@ -771,21 +734,14 @@ export default function DomainsPage() {
                       const expiryStatus = getExpiryStatus(domain.daysToExpiry)
                       return (
                         <TableRow key={domain.id} className="hover:bg-gray-50">
-                          <TableCell className="font-medium">
-                            <div className="flex items-center space-x-3">
-                              <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
-                                <Globe className="w-4 h-4 text-blue-600" />
-                              </div>
-                              <span>{domain.domain}</span>
+                          <TableCell>
+                            <div className="font-medium text-gray-900">{domain.domain}</div>
+                            <div className="text-sm text-gray-500">
+                              {domain.realRegistrarName || domain.registrar || 'Unknown registrar'}
                             </div>
                           </TableCell>
                           <TableCell>
-                            <Badge variant="secondary" className={`${expiryStatus.color} text-white`}>
-                              {expiryStatus.text}
-                            </Badge>
-                          </TableCell>
-                          <TableCell>
-                            {domain.realRegistrarName || domain.registrar || 'Unknown'}
+                            <StatusPill tone={toneFromBgClass(expiryStatus.color)}>{expiryStatus.text}</StatusPill>
                           </TableCell>
                           <TableCell>
                             {domain.server ? (
@@ -794,7 +750,7 @@ export default function DomainsPage() {
                                   {domain.server.serverType === 'VPS' ? (
                                     <Server className="w-3 h-3 text-green-600" />
                                   ) : (
-                                    <Globe className="w-3 h-3 text-green-600" />
+                                    <Cloud className="w-3 h-3 text-green-600" />
                                   )}
                                 </div>
                                 <div>
@@ -807,69 +763,17 @@ export default function DomainsPage() {
                             )}
                           </TableCell>
                           <TableCell>
-                            {domain.expiryDate ? (
-                              <div className="flex items-center space-x-1">
-                                <Calendar className="w-4 h-4 text-gray-400" />
-                                <span>{formatIndonesianDate(domain.expiryDate)}</span>
-                              </div>
-                            ) : (
-                              'Unknown'
-                            )}
-                          </TableCell>
-                          <TableCell>
-                            {domain.daysToExpiry !== undefined ? (
-                              <span className={`font-medium ${
-                                domain.daysToExpiry <= 1 ? 'text-red-600' :
-                                domain.daysToExpiry <= 7 ? 'text-orange-600' :
-                                domain.daysToExpiry <= 30 ? 'text-yellow-600' :
-                                'text-green-600'
-                              }`}>
-                                {domain.daysToExpiry} days
-                              </span>
-                            ) : (
-                              'Unknown'
-                            )}
-                          </TableCell>
-
-                          <TableCell className="text-right">
-                            <div className="flex items-center justify-end space-x-1">
-                              <WhoisDetailModal domainId={domain.id} domainName={domain.domain}>
-                                <Button variant="ghost" size="sm" title="View WHOIS Details">
-                                  <Eye className="w-4 h-4" />
-                                </Button>
-                              </WhoisDetailModal>
-                              {canManageDomains && (
-                                <>
-                                  <Button 
-                                    variant="ghost" 
-                                    size="sm" 
-                                    className="text-blue-600 hover:text-blue-700 hover:bg-blue-50" 
-                                    title="Edit Domain"
-                                    onClick={() => handleEditDomain(domain)}
-                                  >
-                                    <Edit className="w-4 h-4" />
-                                  </Button>
-                                  <Button 
-                                    variant="ghost" 
-                                    size="sm" 
-                                    className="text-green-600 hover:text-green-700 hover:bg-green-50" 
-                                    title="Assign to Server"
-                                    onClick={() => handleAssignDomain(domain)}
-                                  >
-                                    <Link className="w-4 h-4" />
-                                  </Button>
-                                  <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                                    title="Delete Domain"
-                                    onClick={() => handleDeleteDomain(domain)}
-                                  >
-                                    <Trash2 className="w-4 h-4" />
-                                  </Button>
-                                </>
-                              )}
+                            <div className="text-sm text-gray-900">
+                              {domain.expiryDate ? formatIndonesianDate(domain.expiryDate) : 'Unknown'}
                             </div>
+                            {describeDaysLeft(domain.daysToExpiry) && (
+                              <div className={`text-sm ${daysLeftColor(domain.daysToExpiry)}`}>
+                                {describeDaysLeft(domain.daysToExpiry)}
+                              </div>
+                            )}
+                          </TableCell>
+                          <TableCell className="text-right">
+                            <ManageMenu actions={domainActions(domain)} />
                           </TableCell>
                         </TableRow>
                       )
@@ -929,10 +833,6 @@ export default function DomainsPage() {
         <div className="md:hidden space-y-4">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-lg font-semibold">Domains ({filteredDomains.length})</h3>
-            <Button variant="outline" onClick={fetchDomains} size="sm">
-              <RefreshCw className="w-4 h-4 mr-2" />
-              Refresh
-            </Button>
           </div>
           
           {filteredDomains.length === 0 ? (
@@ -967,9 +867,7 @@ export default function DomainsPage() {
                             <p className="text-sm text-gray-500">{domain.realRegistrarName || domain.registrar || 'Unknown'}</p>
                           </div>
                         </div>
-                        <Badge variant="secondary" className={`${expiryStatus.color} text-white text-xs`}>
-                          {expiryStatus.text}
-                        </Badge>
+                        <StatusPill tone={toneFromBgClass(expiryStatus.color)}>{expiryStatus.text}</StatusPill>
                       </div>
 
                       {/* Domain Details */}
@@ -983,7 +881,7 @@ export default function DomainsPage() {
                                   {domain.server.serverType === 'VPS' ? (
                                     <Server className="w-2 h-2 text-green-600" />
                                   ) : (
-                                    <Globe className="w-2 h-2 text-green-600" />
+                                    <Cloud className="w-2 h-2 text-green-600" />
                                   )}
                                 </div>
                                 <div>
@@ -1015,49 +913,7 @@ export default function DomainsPage() {
 
                       {/* Actions */}
                       <div className="flex items-center justify-between pt-2 border-t">
-                        <div className="flex items-center space-x-2">
-                          <WhoisDetailModal domainId={domain.id} domainName={domain.domain}>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              className="h-8 px-2"
-                              title="View WHOIS Details"
-                            >
-                              <Eye className="w-3 h-3" />
-                            </Button>
-                          </WhoisDetailModal>
-                          {canManageDomains && (
-                            <>
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                className="text-blue-600 hover:text-blue-700 hover:bg-blue-50 h-8 px-2"
-                                title="Edit Domain"
-                                onClick={() => handleEditDomain(domain)}
-                              >
-                                <Edit className="w-3 h-3" />
-                              </Button>
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                className="text-green-600 hover:text-green-700 hover:bg-green-50 h-8 px-2"
-                                title="Assign to Server"
-                                onClick={() => handleAssignDomain(domain)}
-                              >
-                                <Link className="w-3 h-3" />
-                              </Button>
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                className="text-red-600 hover:text-red-700 hover:bg-red-50 h-8 px-2"
-                                title="Delete Domain"
-                                onClick={() => handleDeleteDomain(domain)}
-                              >
-                                <Trash2 className="w-3 h-3" />
-                              </Button>
-                            </>
-                          )}
-                        </div>
+                        <ManageMenu actions={domainActions(domain)} />
                         <div className="text-xs text-gray-400">
                           #{domain.id.slice(-8)}
                         </div>
@@ -1097,6 +953,17 @@ export default function DomainsPage() {
           )}
         </div>
       </div>
+
+      {/* WHOIS details for the row picked in its Manage menu */}
+      {whoisDomain && (
+        <WhoisDetailModal
+          key={whoisDomain.id}
+          domainId={whoisDomain.id}
+          domainName={whoisDomain.domain}
+          open
+          onOpenChange={(open) => { if (!open) setWhoisDomain(null) }}
+        />
+      )}
 
       {/* Assign Domain Modal */}
       <AssignDomainModal

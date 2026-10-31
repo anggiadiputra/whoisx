@@ -1,43 +1,52 @@
 'use client'
 
-import { useState, useEffect, useCallback, useMemo } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { useSession } from 'next-auth/react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Badge } from '@/components/ui/badge'
-import { Skeleton } from '@/components/ui/skeleton'
+
 import { Separator } from '@/components/ui/separator'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import { useToast } from '@/hooks/use-toast'
-import { Navbar } from '@/components/navbar'
+import { PageSkeleton } from '@/components/page-skeleton'
 import { StatCard } from '@/components/stat-card'
+import { PageHeader } from '@/components/page-header'
+import { StatusPill, toneFromBgClass } from '@/components/status-pill'
 import { WhoisDetailModal } from '@/components/whois-detail-modal'
 import { RecentActivity } from '@/components/recent-activity'
 import { formatIndonesianDate } from '@/lib/utils'
 import { useDebounce } from '@/hooks/use-debounce'
+import { useApiQuery, useRefreshApiData } from '@/hooks/use-api-query'
+import NextLink from 'next/link'
+import { useRouter } from 'next/navigation'
+import { ManageMenu } from '@/components/manage-menu'
 import { 
-  Plus, 
-  Search, 
-  RefreshCw, 
-  AlertTriangle, 
-  CheckCircle, 
-  Clock, 
-  Globe, 
-  Calendar,
+  Plus,
+  Search,
+  RefreshCw,
+  AlertTriangle,
+  Clock,
+  Globe,
   Filter,
   Eye,
   Edit,
   ChevronLeft,
   ChevronRight,
-  ExternalLink,
-  AlertCircle,
   Activity,
-  DollarSign,
   Users,
-  Server
+  Server,
+  Cloud,
+  Wallet,
+  Receipt,
+  CalendarClock,
+  Banknote,
+  Download,
+  CalendarPlus,
+  ShoppingCart,
+  CalendarX
 } from 'lucide-react'
 
 interface Domain {
@@ -71,27 +80,30 @@ interface DashboardStats {
   expiring1: number
 }
 
+const EMPTY_STATS: DashboardStats = {
+  total: 0,
+  expired: 0,
+  expiring30: 0,
+  expiring7: 0,
+  expiring1: 0
+}
+
 export default function HomePage() {
   const { data: session, status } = useSession()
   const { toast } = useToast()
   
   // Get user role from session
+  const router = useRouter()
   const userRole = session?.user?.role as string
-  const [domains, setDomains] = useState<Domain[]>([])
-  const [stats, setStats] = useState<DashboardStats>({
-    total: 0,
-    expired: 0,
-    expiring30: 0,
-    expiring7: 0,
-    expiring1: 0
-  })
-  const [renewalCosts, setRenewalCosts] = useState({
-    expiring30: 0,
-    expiring7: 0,
-    expiring1: 0,
-    total: 0
-  })
-  const [loading, setLoading] = useState(true)
+  const [whoisDomain, setWhoisDomain] = useState<Domain | null>(null)
+
+  // Cached domain list, shared with the Domains page
+  const domainsQuery = useApiQuery<{ domains: Domain[]; stats: DashboardStats }>('/api/domains', status === 'authenticated')
+  const domains = useMemo(() => domainsQuery.data?.domains ?? [], [domainsQuery.data])
+  const stats = domainsQuery.data?.stats ?? EMPTY_STATS
+  const loading = domainsQuery.isPending && status === 'authenticated'
+  const fetchDomains = useRefreshApiData()
+
   const [searchTerm, setSearchTerm] = useState('')
   const [filterExpiring, setFilterExpiring] = useState<string | null>(null)
   const [showAddDomain, setShowAddDomain] = useState(false)
@@ -107,8 +119,8 @@ export default function HomePage() {
   // Debounced search term for better performance
   const debouncedSearchTerm = useDebounce(searchTerm, 300)
 
-  // Calculate renewal costs for expiring domains
-  const calculateRenewalCosts = useCallback((domainsList: Domain[]) => {
+  // Renewal costs for expiring domains
+  const renewalCosts = useMemo(() => {
     const costs = {
       expiring30: 0,
       expiring7: 0,
@@ -116,7 +128,7 @@ export default function HomePage() {
       total: 0
     }
 
-    domainsList.forEach(domain => {
+    domains.forEach(domain => {
       const price = domain.renewalPrice ? parseFloat(domain.renewalPrice.toString()) : 0
       const days = domain.daysToExpiry
 
@@ -134,54 +146,8 @@ export default function HomePage() {
       }
     })
 
-    setRenewalCosts(costs)
-  }, [])
-
-  // Move all hooks to the top
-  const fetchDomains = useCallback(async () => {
-    try {
-      const response = await fetch('/api/domains', {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        credentials: 'include', // Include cookies for authentication
-      })
-      
-      if (response.ok) {
-        const data = await response.json()
-        setDomains(data.domains || [])
-        setStats(data.stats || { total: 0, expired: 0, expiring30: 0, expiring7: 0, expiring1: 0 })
-        
-        // Calculate renewal costs
-        calculateRenewalCosts(data.domains || [])
-      } else {
-        console.error('❌ API Error:', response.status, response.statusText)
-        toast({
-          title: "Error Loading Domains",
-          description: `Failed to load domains (${response.status})`,
-          variant: "destructive",
-        })
-      }
-    } catch (error) {
-      console.error('🔥 Network/Fetch Error:', error)
-      toast({
-        title: "Network Error",
-        description: 'Unable to connect to server. Please check your connection.',
-        variant: "destructive",
-      })
-    } finally {
-      setLoading(false)
-    }
-  }, [toast])
-
-  useEffect(() => {
-    if (status === 'authenticated') {
-      fetchDomains()
-    } else if (status === 'unauthenticated') {
-      setLoading(false)
-    }
-  }, [status, fetchDomains])
+    return costs
+  }, [domains])
 
   // Listen for domain updates from WHOIS modal
   useEffect(() => {
@@ -241,43 +207,7 @@ export default function HomePage() {
 
   // Early returns after all hooks
   if (status === 'loading' || loading) {
-    return (
-      <div className="min-h-screen bg-gray-50">
-        <Navbar />
-        <div className="container mx-auto px-4 py-8 space-y-8">
-          <div className="space-y-4">
-            <Skeleton className="h-8 w-64" />
-            <Skeleton className="h-4 w-96" />
-          </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {[1, 2, 3, 4].map((i) => (
-              <Card key={i}>
-                <CardHeader className="pb-3">
-                  <Skeleton className="h-4 w-24" />
-                  <Skeleton className="h-8 w-16" />
-                </CardHeader>
-              </Card>
-            ))}
-          </div>
-          
-          <Card>
-            <CardHeader>
-              <Skeleton className="h-6 w-32" />
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {[1, 2, 3, 4, 5].map((i) => (
-                <div key={i} className="flex items-center space-x-4">
-                  <Skeleton className="h-4 w-48" />
-                  <Skeleton className="h-4 w-24" />
-                  <Skeleton className="h-4 w-16" />
-                </div>
-              ))}
-            </CardContent>
-          </Card>
-        </div>
-      </div>
-    )
+    return <PageSkeleton />
   }
 
   if (status === 'unauthenticated') {
@@ -316,13 +246,6 @@ export default function HomePage() {
     if (!domainRegex.test(domain)) return 'Please enter a valid domain name'
     
     return null
-  }
-
-  const handleEditDomain = (domain: Domain) => {
-    toast({
-      title: 'Edit Domain',
-      description: 'Edit domain functionality will be implemented soon'
-    })
   }
 
   const handleAddDomain = async (e: React.FormEvent) => {
@@ -395,52 +318,53 @@ export default function HomePage() {
     {
       title: 'Available to Order',
       value: domains.filter(d => d.daysToExpiry === null).length,
-      icon: CheckCircle,
+      icon: ShoppingCart,
       color: 'text-blue-600',
       bgColor: 'bg-blue-50'
     },
     {
       title: 'Expiring Soon',
       value: stats.expiring30,
-      icon: AlertTriangle,
+      icon: CalendarClock,
       color: 'text-orange-600',
       bgColor: 'bg-orange-50'
     },
     {
       title: 'Sudah Expired',
       value: stats.expired || 0,
-      icon: AlertCircle,
+      icon: CalendarX,
       color: 'text-red-600',
       bgColor: 'bg-red-50'
     }
   ]
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <Navbar />
-      
+    <div>
       <div className="container mx-auto px-4 py-8 space-y-8">
         {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-4 sm:space-y-0">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
-            <p className="text-gray-600 mt-1">
-              Welcome back, {session?.user?.name || session?.user?.email}
-            </p>
-          </div>
-          
-          {canManageDomains && (
-            <Button
-              onClick={() => setShowAddDomain(true)}
-            >
-              <Plus className="w-4 h-4 mr-2" />
-              Add Domain
-            </Button>
-          )}
-        </div>
+        <PageHeader
+          title="Dashboard"
+          description={`Welcome back, ${session?.user?.name || session?.user?.email}`}
+          actions={
+            <>
+              <Button variant="outline" onClick={fetchDomains} disabled={domainsQuery.isFetching}>
+                <RefreshCw className={`w-4 h-4 mr-2 ${domainsQuery.isFetching ? 'animate-spin' : ''}`} />
+                Refresh
+              </Button>
+              {canManageDomains && (
+                <Button asChild>
+                  <NextLink href="/domains?add=1">
+                    <Plus className="w-4 h-4 mr-2" />
+                    Add Domain
+                  </NextLink>
+                </Button>
+              )}
+            </>
+          }
+        />
 
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
           {statsCards.map((stat, index) => (
             <StatCard key={index} title={stat.title} value={stat.value} icon={stat.icon} color={stat.color} bgColor={stat.bgColor} />
           ))}
@@ -449,9 +373,9 @@ export default function HomePage() {
 
 
         {/* Main Content */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
           {/* Domains Table */}
-          <div className="lg:col-span-2">
+          <div className="xl:col-span-2">
             <Card>
               <CardHeader>
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-4 sm:space-y-0">
@@ -470,13 +394,6 @@ export default function HomePage() {
                         className="pl-10 w-64"
                       />
                     </div>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => fetchDomains()}
-                    >
-                      <RefreshCw className="w-4 h-4" />
-                    </Button>
                   </div>
                 </div>
                 
@@ -542,12 +459,7 @@ export default function HomePage() {
                                 </div>
                               </TableCell>
                               <TableCell>
-                                <Badge 
-                                  variant={expiryStatus.status === 'active' ? 'default' : 'destructive'}
-                                  className={`${expiryStatus.color} text-white`}
-                                >
-                                  {expiryStatus.text}
-                                </Badge>
+                                <StatusPill tone={toneFromBgClass(expiryStatus.color)}>{expiryStatus.text}</StatusPill>
                               </TableCell>
                               <TableCell>
                                 <div className="text-sm">
@@ -590,7 +502,7 @@ export default function HomePage() {
                                       {domain.server.serverType === 'VPS' ? (
                                         <Server className="w-3 h-3 text-green-600" />
                                       ) : (
-                                        <Globe className="w-3 h-3 text-green-600" />
+                                        <Cloud className="w-3 h-3 text-green-600" />
                                       )}
                                     </div>
                                     <div className="text-sm">
@@ -631,12 +543,7 @@ export default function HomePage() {
                                     )}
                                   </div>
                                 </div>
-                                <Badge 
-                                  variant={expiryStatus.status === 'active' ? 'default' : 'destructive'}
-                                  className={`${expiryStatus.color} text-white text-xs`}
-                                >
-                                  {expiryStatus.text}
-                                </Badge>
+                                <StatusPill tone={toneFromBgClass(expiryStatus.color)}>{expiryStatus.text}</StatusPill>
                               </div>
 
                               {/* Details Grid */}
@@ -678,18 +585,12 @@ export default function HomePage() {
 
                               {/* Actions */}
                               <div className="flex justify-end space-x-2 pt-2 border-t">
-                                <WhoisDetailModal domain={domain} />
-                                {canManageDomains && (
-                                  <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    onClick={() => handleEditDomain(domain)}
-                                    className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
-                                  >
-                                    <Edit className="w-4 h-4 mr-1" />
-                                    Edit
-                                  </Button>
-                                )}
+                                <ManageMenu
+                                  actions={[
+                                    { label: 'View WHOIS', icon: Eye, onSelect: () => setWhoisDomain(domain) },
+                                    ...(canManageDomains ? [{ label: 'Manage in Domains', icon: Globe, onSelect: () => router.push('/domains') }] : []),
+                                  ]}
+                                />
                               </div>
                             </div>
                           </Card>
@@ -772,7 +673,7 @@ export default function HomePage() {
                           <p className="text-xs text-orange-600 mt-1">Domain renewals (30 days)</p>
                         </div>
                         <div className="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center">
-                          <DollarSign className="w-6 h-6 text-orange-600" />
+                          <Wallet className="w-6 h-6 text-orange-600" />
                         </div>
                       </div>
                     </CardContent>
@@ -784,7 +685,7 @@ export default function HomePage() {
                   <Dialog>
                     <DialogTrigger asChild>
                       <Button variant="outline" className="w-full justify-start">
-                        <Calendar className="w-4 h-4 mr-2" />
+                        <Receipt className="w-4 h-4 mr-2" />
                         View Payment Breakdown
                       </Button>
                     </DialogTrigger>
@@ -836,7 +737,7 @@ export default function HomePage() {
                                     Rp {renewalCosts.expiring30.toLocaleString('id-ID')}
                                   </p>
                                 </div>
-                                <Calendar className="w-8 h-8 text-yellow-500" />
+                                <CalendarClock className="w-8 h-8 text-yellow-500" />
                               </div>
                             </CardContent>
                           </Card>
@@ -850,7 +751,7 @@ export default function HomePage() {
                                     Rp {renewalCosts.total.toLocaleString('id-ID')}
                                   </p>
                                 </div>
-                                <DollarSign className="w-8 h-8 text-blue-500" />
+                                <Banknote className="w-8 h-8 text-blue-500" />
                               </div>
                             </CardContent>
                           </Card>
@@ -884,11 +785,11 @@ export default function HomePage() {
                         {/* Action Buttons */}
                         <div className="flex gap-2 mt-6">
                           <Button variant="outline" className="flex-1">
-                            <ExternalLink className="w-4 h-4 mr-2" />
+                            <Download className="w-4 h-4 mr-2" />
                             Export Report
                           </Button>
                           <Button className="flex-1">
-                            <Calendar className="w-4 h-4 mr-2" />
+                            <CalendarPlus className="w-4 h-4 mr-2" />
                             Schedule Payments
                           </Button>
                         </div>
@@ -906,6 +807,15 @@ export default function HomePage() {
 
 
       </div>
+      {whoisDomain && (
+        <WhoisDetailModal
+          key={whoisDomain.id}
+          domainId={whoisDomain.id}
+          domainName={whoisDomain.domain}
+          open
+          onOpenChange={(open) => { if (!open) setWhoisDomain(null) }}
+        />
+      )}
     </div>
   )
 }

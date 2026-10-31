@@ -11,18 +11,19 @@ import { Switch } from '@/components/ui/switch'
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { useToast } from '@/hooks/use-toast'
-import { Navbar } from '@/components/navbar'
+import { PageSkeleton } from '@/components/page-skeleton'
+import { PageHeader } from '@/components/page-header'
 import { 
-  Settings,
   MessageSquare,
   Bell,
   Shield,
   Send,
-  TestTube,
   AlertTriangle,
   CheckCircle,
   Clock,
-  Smartphone
+  Smartphone,
+  Loader2,
+  Save
 } from 'lucide-react'
 
 interface WhatsAppSettings {
@@ -75,20 +76,12 @@ export default function SettingsPage() {
 
   // Redirect if not authenticated
   if (status === 'loading') {
-    return (
-      <div className="min-h-screen bg-gray-50">
-        <Navbar />
-        <div className="container mx-auto px-4 py-8">
-          <div className="text-center">Loading...</div>
-        </div>
-      </div>
-    )
+    return <PageSkeleton showStats={false} showTable={false} />
   }
 
   if (status === 'unauthenticated') {
     return (
-      <div className="min-h-screen bg-gray-50">
-        <Navbar />
+      <div>
         <div className="container mx-auto px-4 py-8">
           <Card className="max-w-md mx-auto">
             <CardHeader className="text-center">
@@ -107,8 +100,7 @@ export default function SettingsPage() {
   const userRole = (session?.user as any)?.role
   if (userRole !== 'ADMIN') {
     return (
-      <div className="min-h-screen bg-gray-50">
-        <Navbar />
+      <div>
         <div className="container mx-auto px-4 py-8">
           <Card className="max-w-md mx-auto">
             <CardHeader className="text-center">
@@ -252,18 +244,13 @@ export default function SettingsPage() {
 
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <Navbar />
-      
+    <div>
       <div className="container mx-auto px-4 py-8">
         {/* Page Header */}
-        <div className="mb-8">
-          <div className="flex items-center space-x-3 mb-2">
-            <Settings className="w-8 h-8 text-blue-600" />
-            <h1 className="text-3xl font-bold text-gray-900">Settings</h1>
-          </div>
-          <p className="text-gray-600">Configure your domain management preferences and notifications</p>
-        </div>
+        <PageHeader className="mb-8"
+          title="Settings"
+          description="Configure your domain management preferences and notifications"
+        />
 
         <Tabs defaultValue="whatsapp" className="space-y-6">
           <TabsList className="grid w-full grid-cols-3">
@@ -352,7 +339,7 @@ export default function SettingsPage() {
                       >
                         {testLoading ? (
                           <>
-                            <TestTube className="w-4 h-4 mr-2 animate-spin" />
+                            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                             Sending Test Message...
                           </>
                         ) : (
@@ -559,12 +546,12 @@ export default function SettingsPage() {
           >
             {loading ? (
               <>
-                <Settings className="w-4 h-4 mr-2 animate-spin" />
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                 Saving...
               </>
             ) : (
               <>
-                <CheckCircle className="w-4 h-4 mr-2" />
+                <Save className="w-4 h-4 mr-2" />
                 Save Settings
               </>
             )}

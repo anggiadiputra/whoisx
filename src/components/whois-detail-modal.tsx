@@ -1,13 +1,15 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
 import { useToast } from '@/hooks/use-toast'
+import { useConfirm } from '@/components/confirm-dialog'
 import { 
-  Globe, 
-  RefreshCw
+  Globe,
+  RefreshCw,
+  ExternalLink
 } from 'lucide-react'
 import { formatIndonesianDate } from '@/lib/utils'
 import { sendWhoisUpdateNotification } from '@/lib/whatsapp-notifications'
@@ -15,7 +17,10 @@ import { sendWhoisUpdateNotification } from '@/lib/whatsapp-notifications'
 interface WhoisDetailModalProps {
   domainId: string
   domainName: string
-  children: React.ReactNode
+  // Trigger element; omit it and pass open/onOpenChange to control the modal from outside (e.g. a menu)
+  children?: React.ReactNode
+  open?: boolean
+  onOpenChange?: (open: boolean) => void
 }
 
 interface WhoisDetail {
@@ -44,12 +49,14 @@ interface WhoisDetail {
   rawWhoisData?: any
 }
 
-export function WhoisDetailModal({ domainId, domainName, children }: WhoisDetailModalProps) {
-  const [open, setOpen] = useState(false)
+export function WhoisDetailModal({ domainId, domainName, children, open: controlledOpen, onOpenChange }: WhoisDetailModalProps) {
+  const [uncontrolledOpen, setUncontrolledOpen] = useState(false)
+  const open = controlledOpen ?? uncontrolledOpen
   const [loading, setLoading] = useState(false)
   const [updating, setUpdating] = useState(false)
   const [whoisData, setWhoisData] = useState<WhoisDetail | null>(null)
   const { toast } = useToast()
+  const confirm = useConfirm()
 
   const fetchWhoisDetails = async () => {
     setLoading(true)
@@ -131,19 +138,32 @@ export function WhoisDetailModal({ domainId, domainName, children }: WhoisDetail
   }
 
   const handleOpenChange = (newOpen: boolean) => {
-    setOpen(newOpen)
+    if (controlledOpen === undefined) {
+      setUncontrolledOpen(newOpen)
+    }
+    onOpenChange?.(newOpen)
     if (newOpen && !whoisData) {
       fetchWhoisDetails()
     }
   }
 
+  // Opened from outside: load details on first open
+  useEffect(() => {
+    if (controlledOpen && !whoisData) {
+      fetchWhoisDetails()
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [controlledOpen])
+
 
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogTrigger asChild>
-        {children}
-      </DialogTrigger>
+      {children && (
+        <DialogTrigger asChild>
+          {children}
+        </DialogTrigger>
+      )}
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto p-0">
         {/* Header */}
         <div className="px-6 py-4 border-b">
@@ -412,7 +432,7 @@ export function WhoisDetailModal({ domainId, domainName, children }: WhoisDetail
                     window.open(url, '_blank')
                   }}
                 >
-                  <Globe className="w-4 h-4 mr-2" />
+                  <ExternalLink className="w-4 h-4 mr-2" />
                   Check External WHOIS
                 </Button>
               </div>
@@ -444,7 +464,11 @@ export function WhoisDetailModal({ domainId, domainName, children }: WhoisDetail
           <Button
             variant="destructive"
             onClick={async () => {
-              if (confirm(`Are you sure you want to delete ${domainName}? This action cannot be undone.`)) {
+              const confirmed = await confirm({
+                title: 'Delete domain?',
+                description: `"${domainName}" and any websites linked to it will be permanently deleted. This action cannot be undone.`,
+              })
+              if (confirmed) {
                 try {
                   const response = await fetch(`/api/domains/${domainId}`, {
                     method: 'DELETE',
@@ -461,7 +485,7 @@ export function WhoisDetailModal({ domainId, domainName, children }: WhoisDetail
                     })
                     
                     // Close modal and refresh parent
-                    setOpen(false)
+                    handleOpenChange(false)
                     window.dispatchEvent(new CustomEvent('domainDeleted', { detail: { domainId } }))
                   } else {
                     const result = await response.json()
@@ -482,7 +506,7 @@ export function WhoisDetailModal({ domainId, domainName, children }: WhoisDetail
           
           <Button
             variant="secondary"
-            onClick={() => setOpen(false)}
+            onClick={() => handleOpenChange(false)}
           >
             Close
           </Button>
