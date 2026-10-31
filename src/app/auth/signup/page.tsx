@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
 import { Separator } from '@/components/ui/separator'
-import { AlertCircle, CheckCircle, Eye, EyeOff, Globe, UserPlus, Shield, ArrowRight, Loader2, Check, X } from 'lucide-react'
+import { AlertCircle, CheckCircle, Eye, EyeOff, Globe, UserPlus, Shield, ArrowRight, Loader2, Check, X, Gift, Receipt, Headphones, Undo2 } from 'lucide-react'
 
 export default function SignUpPage() {
   const [formData, setFormData] = useState({
@@ -148,10 +148,10 @@ export default function SignUpPage() {
           {/* Benefits List */}
           <div className="space-y-4">
             {[
-              { icon: CheckCircle, text: "Free 30-day trial with all features" },
-              { icon: CheckCircle, text: "No setup fees or hidden costs" },
-              { icon: CheckCircle, text: "24/7 customer support" },
-              { icon: CheckCircle, text: "Cancel anytime, no questions asked" }
+              { icon: Gift, text: "Free 30-day trial with all features" },
+              { icon: Receipt, text: "No setup fees or hidden costs" },
+              { icon: Headphones, text: "24/7 customer support" },
+              { icon: Undo2, text: "Cancel anytime, no questions asked" }
             ].map((benefit, index) => (
               <div key={index} className="flex items-center space-x-3 group">
                 <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center group-hover:bg-green-200 transition-colors">

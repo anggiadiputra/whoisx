@@ -21,7 +21,7 @@ import {
   EyeOff,
   Edit,
   Trash2,
-  CheckCircle,
+  Activity,
   XCircle,
   Monitor,
   MonitorOff,
@@ -266,7 +266,7 @@ export default function WebsitesPage() {
     {
       title: 'Active Websites',
       value: stats.active,
-      icon: CheckCircle,
+      icon: Activity,
       color: 'text-green-600',
       bgColor: 'bg-green-50'
     },

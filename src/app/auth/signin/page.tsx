@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
 import { Separator } from '@/components/ui/separator'
-import { AlertCircle, Eye, EyeOff, Globe, Shield, User, CheckCircle, Copy, Loader2, ArrowRight, Sparkles, Wallet } from 'lucide-react'
+import { AlertCircle, Eye, EyeOff, Globe, Shield, User, CheckCircle, ClipboardCheck, Copy, Loader2, ArrowRight, Sparkles, Wallet } from 'lucide-react'
 
 const demoAccounts = [
   {
@@ -262,7 +262,7 @@ export default function SignInPage() {
                         title="Copy email"
                       >
                         {copiedEmail === account.email ? (
-                          <CheckCircle className="w-4 h-4 text-green-600" />
+                          <ClipboardCheck className="w-4 h-4 text-green-600" />
                         ) : (
                           <Copy className="w-4 h-4" />
                         )}

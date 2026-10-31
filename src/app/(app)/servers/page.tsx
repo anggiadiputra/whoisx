@@ -14,7 +14,7 @@ import {
   ChevronLeft,
   ChevronRight,
   Globe,
-  CheckCircle,
+  Activity,
   Copy,
   EyeOff,
   Loader2,
@@ -484,7 +484,7 @@ export default function ServersPage() {
     {
       title: 'Active Servers',
       value: stats.active,
-      icon: CheckCircle,
+      icon: Activity,
       color: 'text-green-600',
       bgColor: 'bg-green-50'
     },

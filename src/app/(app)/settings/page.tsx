@@ -19,7 +19,7 @@ import {
   Shield,
   Send,
   AlertTriangle,
-  CheckCircle,
+  FileSearch,
   Clock,
   Smartphone,
   Loader2,
@@ -392,7 +392,7 @@ export default function SettingsPage() {
 
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-3">
-                      <CheckCircle className="w-5 h-5 text-green-500" />
+                      <FileSearch className="w-5 h-5 text-green-500" />
                       <div>
                         <Label className="text-base font-medium">WHOIS Updates</Label>
                         <p className="text-sm text-gray-500">Notifications when WHOIS data changes</p>
