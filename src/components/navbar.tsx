@@ -2,6 +2,7 @@
 
 import { useSession, signOut } from 'next-auth/react'
 import Link from 'next/link'
+import { usePathname } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Separator } from '@/components/ui/separator'
@@ -27,6 +28,10 @@ export function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [userMenuOpen, setUserMenuOpen] = useState(false)
   const [profileModalOpen, setProfileModalOpen] = useState(false)
+  const pathname = usePathname()
+
+  // Highlight the nav link for the current section
+  const isActive = (href: string) => href === '/' ? pathname === '/' : pathname.startsWith(href)
 
   const getRoleInfo = (role: string) => {
     switch (role) {
@@ -76,16 +81,16 @@ export function Navbar() {
   }, [userMenuOpen])
 
   return (
-    <nav className="bg-white border-b border-gray-200 sticky top-0 z-40 backdrop-blur-sm bg-white/95">
+    <nav className="bg-white border-b border-gray-200 sticky top-0 z-40">
       <div className="container mx-auto px-4">
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
           <Link href="/" className="flex items-center space-x-3 group">
-            <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-xl flex items-center justify-center shadow-md group-hover:shadow-lg transition-shadow duration-200">
+            <div className="w-10 h-10 bg-primary rounded-xl flex items-center justify-center">
               <Globe className="w-5 h-5 text-white" />
             </div>
             <div className="hidden sm:block">
-              <h1 className="text-xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
+              <h1 className="text-xl font-bold text-gray-900">
                 Domain Manager
               </h1>
               <p className="text-xs text-gray-500 -mt-1">Professional Management</p>
@@ -99,14 +104,14 @@ export function Navbar() {
                 {/* Navigation Links */}
                 <div className="flex items-center space-x-1">
                   <Link href="/">
-                    <Button variant="ghost" className="text-gray-700 hover:text-gray-900">
+                    <Button variant={isActive('/') ? 'secondary' : 'ghost'} className="text-gray-700 hover:text-gray-900">
                       Dashboard
                     </Button>
                   </Link>
                   
                   {(session.user.role === 'ADMIN' || session.user.role === 'STAFF') && (
                     <Link href="/domains">
-                      <Button variant="ghost" className="text-gray-700 hover:text-gray-900">
+                      <Button variant={isActive('/domains') ? 'secondary' : 'ghost'} className="text-gray-700 hover:text-gray-900">
                         Domains
                       </Button>
                     </Link>
@@ -114,7 +119,7 @@ export function Navbar() {
                   
                   {(session.user.role === 'ADMIN' || session.user.role === 'STAFF') && (
                     <Link href="/servers">
-                      <Button variant="ghost" className="text-gray-700 hover:text-gray-900">
+                      <Button variant={isActive('/servers') ? 'secondary' : 'ghost'} className="text-gray-700 hover:text-gray-900">
                         Servers
                       </Button>
                     </Link>
@@ -122,7 +127,7 @@ export function Navbar() {
                   
                   {(session.user.role === 'ADMIN' || session.user.role === 'STAFF') && (
                     <Link href="/websites">
-                      <Button variant="ghost" className="text-gray-700 hover:text-gray-900">
+                      <Button variant={isActive('/websites') ? 'secondary' : 'ghost'} className="text-gray-700 hover:text-gray-900">
                         Websites
                       </Button>
                     </Link>
@@ -130,7 +135,7 @@ export function Navbar() {
                   
                   {session.user.role === 'ADMIN' && (
                     <Link href="/users">
-                      <Button variant="ghost" className="text-gray-700 hover:text-gray-900">
+                      <Button variant={isActive('/users') ? 'secondary' : 'ghost'} className="text-gray-700 hover:text-gray-900">
                         Users
                       </Button>
                     </Link>
@@ -138,7 +143,7 @@ export function Navbar() {
                   
                   {session.user.role === 'ADMIN' && (
                     <Link href="/settings">
-                      <Button variant="ghost" className="text-gray-700 hover:text-gray-900">
+                      <Button variant={isActive('/settings') ? 'secondary' : 'ghost'} className="text-gray-700 hover:text-gray-900">
                         Settings
                       </Button>
                     </Link>
@@ -174,7 +179,7 @@ export function Navbar() {
                       <p className="text-xs text-gray-500">{session.user.email}</p>
                     </div>
                     
-                    <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center text-white font-medium text-sm shadow-md">
+                    <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center text-white font-medium text-sm">
                       {(session.user.name || session.user.email || '').charAt(0).toUpperCase()}
                     </div>
                     
@@ -217,7 +222,7 @@ export function Navbar() {
                   <Button variant="ghost">Sign In</Button>
                 </Link>
                 <Link href="/auth/signup">
-                  <Button className="bg-blue-600 hover:bg-blue-700 text-white">
+                  <Button>
                     Get Started
                   </Button>
                 </Link>
@@ -248,7 +253,7 @@ export function Navbar() {
               <>
                 {/* User Info */}
                 <div className="flex items-center space-x-3 px-2">
-                  <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center text-white font-medium">
+                  <div className="w-10 h-10 bg-primary rounded-full flex items-center justify-center text-white font-medium">
                     {(session.user.name || session.user.email || '').charAt(0).toUpperCase()}
                   </div>
                   <div className="flex-1">
@@ -272,14 +277,14 @@ export function Navbar() {
                 {/* Navigation Links */}
                 <div className="space-y-2">
                   <Link href="/" onClick={() => setMobileMenuOpen(false)}>
-                    <Button variant="ghost" className="w-full justify-start">
+                    <Button variant={isActive('/') ? 'secondary' : 'ghost'} className="w-full justify-start">
                       Dashboard
                     </Button>
                   </Link>
                   
                   {(session.user.role === 'ADMIN' || session.user.role === 'STAFF') && (
                     <Link href="/domains" onClick={() => setMobileMenuOpen(false)}>
-                      <Button variant="ghost" className="w-full justify-start">
+                      <Button variant={isActive('/domains') ? 'secondary' : 'ghost'} className="w-full justify-start">
                         Domains
                       </Button>
                     </Link>
@@ -287,7 +292,7 @@ export function Navbar() {
                   
                   {(session.user.role === 'ADMIN' || session.user.role === 'STAFF') && (
                     <Link href="/servers" onClick={() => setMobileMenuOpen(false)}>
-                      <Button variant="ghost" className="w-full justify-start">
+                      <Button variant={isActive('/servers') ? 'secondary' : 'ghost'} className="w-full justify-start">
                         <Server className="w-4 h-4 mr-2" />
                         Servers
                       </Button>
@@ -296,7 +301,7 @@ export function Navbar() {
                   
                   {(session.user.role === 'ADMIN' || session.user.role === 'STAFF') && (
                     <Link href="/websites" onClick={() => setMobileMenuOpen(false)}>
-                      <Button variant="ghost" className="w-full justify-start">
+                      <Button variant={isActive('/websites') ? 'secondary' : 'ghost'} className="w-full justify-start">
                         <Globe className="w-4 h-4 mr-2" />
                         Websites
                       </Button>
@@ -305,7 +310,7 @@ export function Navbar() {
                   
                   {session.user.role === 'ADMIN' && (
                     <Link href="/users" onClick={() => setMobileMenuOpen(false)}>
-                      <Button variant="ghost" className="w-full justify-start">
+                      <Button variant={isActive('/users') ? 'secondary' : 'ghost'} className="w-full justify-start">
                         <Users className="w-4 h-4 mr-2" />
                         Users
                       </Button>
@@ -314,7 +319,7 @@ export function Navbar() {
                   
                   {session.user.role === 'ADMIN' && (
                     <Link href="/settings" onClick={() => setMobileMenuOpen(false)}>
-                      <Button variant="ghost" className="w-full justify-start">
+                      <Button variant={isActive('/settings') ? 'secondary' : 'ghost'} className="w-full justify-start">
                         <Settings className="w-4 h-4 mr-2" />
                         Settings
                       </Button>
@@ -366,7 +371,7 @@ export function Navbar() {
                   </Button>
                 </Link>
                 <Link href="/auth/signup" onClick={() => setMobileMenuOpen(false)}>
-                  <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white">
+                  <Button className="w-full">
                     Get Started
                   </Button>
                 </Link>

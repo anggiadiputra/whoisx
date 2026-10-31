@@ -11,6 +11,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import { useToast } from '@/hooks/use-toast'
 import { Navbar } from '@/components/navbar'
+import { StatCard } from '@/components/stat-card'
 import { WhoisDetailModal } from '@/components/whois-detail-modal'
 import { AssignDomainModal } from '@/components/assign-domain-modal'
 import { formatIndonesianDate } from '@/lib/utils'
@@ -235,7 +236,7 @@ export default function DomainsPage() {
   // Early returns after all hooks
   if (status === 'loading' || loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100">
+      <div className="min-h-screen bg-gray-50">
         <Navbar />
         <div className="container mx-auto px-4 py-8">
           <div className="space-y-6">
@@ -254,7 +255,7 @@ export default function DomainsPage() {
 
   if (status === 'unauthenticated') {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100">
+      <div className="min-h-screen bg-gray-50">
         <Navbar />
         <div className="container mx-auto px-4 py-8">
           <Card className="max-w-md mx-auto mt-20">
@@ -270,14 +271,10 @@ export default function DomainsPage() {
     )
   }
 
-  // Get status badge for domain expiry
+  // Domain is active while its registration has not expired
   const getExpiryStatus = (daysToExpiry?: number) => {
-    if (daysToExpiry === undefined || daysToExpiry === null) return { status: 'available', color: 'bg-blue-500', text: 'Available to Order' }
-    if (daysToExpiry < 0) return { status: 'expired', color: 'bg-red-600', text: 'Sudah Expired' }
-    if (daysToExpiry <= 1) return { status: 'critical', color: 'bg-red-500', text: 'Segera Expired' }
-    if (daysToExpiry <= 7) return { status: 'warning', color: 'bg-orange-500', text: 'Perlu Diperpanjang' }
-    if (daysToExpiry <= 30) return { status: 'attention', color: 'bg-yellow-500', text: 'Akan Expired' }
-    return { status: 'good', color: 'bg-green-500', text: 'Masih Aman' }
+    if (daysToExpiry === undefined || daysToExpiry === null || daysToExpiry < 0) return { status: 'inactive', color: 'bg-red-600', text: 'Tidak Aktif' }
+    return { status: 'active', color: 'bg-green-600', text: 'Aktif' }
   }
 
   // Domain validation function
@@ -456,37 +453,33 @@ export default function DomainsPage() {
       value: stats.total,
       icon: Globe,
       color: 'text-blue-600',
-      bgColor: 'bg-blue-50',
-      borderColor: 'border-blue-200'
+      bgColor: 'bg-blue-50'
     },
     {
       title: 'Available to Order',
       value: domains.filter(d => d.daysToExpiry === null || d.daysToExpiry === undefined).length,
       icon: CheckCircle,
       color: 'text-blue-600',
-      bgColor: 'bg-blue-50',
-      borderColor: 'border-blue-200'
+      bgColor: 'bg-blue-50'
     },
     {
       title: 'Akan Expired (30 Hari)',
       value: stats.expiring30,
       icon: AlertTriangle,
       color: 'text-orange-600',
-      bgColor: 'bg-orange-50',
-      borderColor: 'border-orange-200'
+      bgColor: 'bg-orange-50'
     },
     {
       title: 'Segera Expired (1 Hari)',
       value: stats.expiring1,
       icon: Clock,
       color: 'text-red-700',
-      bgColor: 'bg-red-100',
-      borderColor: 'border-red-300'
+      bgColor: 'bg-red-50'
     }
   ]
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100">
+    <div className="min-h-screen bg-gray-50">
       <Navbar />
       
       <div className="container mx-auto px-4 py-8">
@@ -501,7 +494,7 @@ export default function DomainsPage() {
             {canManageDomains && (
               <Dialog open={showAddDomain} onOpenChange={setShowAddDomain}>
                 <DialogTrigger asChild>
-                  <Button className="bg-blue-600 hover:bg-blue-700 text-white shadow-lg hover:shadow-xl transition-all duration-200">
+                  <Button>
                     <Plus className="w-4 h-4 mr-2" />
                     Add New Domain
                   </Button>
@@ -675,24 +668,9 @@ export default function DomainsPage() {
 
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          {statsCards.map((card, index) => {
-            const Icon = card.icon
-            return (
-              <Card key={index} className={`${card.bgColor} ${card.borderColor} border-2 hover:shadow-lg transition-all duration-200`}>
-                <CardContent className="p-6">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm font-medium text-gray-600 mb-1">{card.title}</p>
-                      <p className={`text-2xl font-bold ${card.color}`}>{card.value}</p>
-                    </div>
-                    <div className={`${card.color} ${card.bgColor} p-3 rounded-full`}>
-                      <Icon className="w-6 h-6" />
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            )
-          })}
+          {statsCards.map((card, index) => (
+            <StatCard key={index} title={card.title} value={card.value} icon={card.icon} color={card.color} bgColor={card.bgColor} />
+          ))}
         </div>
 
         {/* Search and Filter */}
@@ -718,7 +696,7 @@ export default function DomainsPage() {
                   All
                 </Button>
                 <Button
-                  variant={filterExpiring === 'critical' ? "destructive" : "outline"}
+                  variant={filterExpiring === 'critical' ? "default" : "outline"}
                   onClick={() => setFilterExpiring(filterExpiring === 'critical' ? null : 'critical')}
                   size="sm"
                 >
@@ -728,7 +706,6 @@ export default function DomainsPage() {
                   variant={filterExpiring === 'warning' ? "default" : "outline"}
                   onClick={() => setFilterExpiring(filterExpiring === 'warning' ? null : 'warning')}
                   size="sm"
-                  className="bg-orange-600 hover:bg-orange-700 text-white"
                 >
                   Warning
                 </Button>
@@ -736,7 +713,6 @@ export default function DomainsPage() {
                   variant={filterExpiring === 'attention' ? "default" : "outline"}
                   onClick={() => setFilterExpiring(filterExpiring === 'attention' ? null : 'attention')}
                   size="sm"
-                  className="bg-yellow-600 hover:bg-yellow-700 text-white"
                 >
                   Attention
                 </Button>
@@ -1044,7 +1020,7 @@ export default function DomainsPage() {
                             <Button
                               variant="ghost"
                               size="sm"
-                              className="text-blue-600 hover:text-blue-700 hover:bg-blue-50 h-8 px-2"
+                              className="h-8 px-2"
                               title="View WHOIS Details"
                             >
                               <Eye className="w-3 h-3" />
@@ -1055,7 +1031,7 @@ export default function DomainsPage() {
                               <Button
                                 variant="ghost"
                                 size="sm"
-                                className="text-green-600 hover:text-green-700 hover:bg-green-50 h-8 px-2"
+                                className="text-blue-600 hover:text-blue-700 hover:bg-blue-50 h-8 px-2"
                                 title="Edit Domain"
                                 onClick={() => handleEditDomain(domain)}
                               >

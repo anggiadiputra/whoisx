@@ -5,6 +5,7 @@ import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import { useToast } from '@/hooks/use-toast'
 import { Navbar } from '@/components/navbar'
+import { StatCard } from '@/components/stat-card'
 import { formatIndonesianDate } from '@/lib/utils'
 import { 
   Globe, 
@@ -302,32 +303,28 @@ export default function WebsitesPage() {
       value: stats.total,
       icon: Globe,
       color: 'text-blue-600',
-      bgColor: 'bg-blue-50',
-      borderColor: 'border-blue-200'
+      bgColor: 'bg-blue-50'
     },
     {
       title: 'Active Websites',
       value: stats.active,
       icon: CheckCircle,
       color: 'text-green-600',
-      bgColor: 'bg-green-50',
-      borderColor: 'border-green-200'
+      bgColor: 'bg-green-50'
     },
     {
       title: 'Live Sites',
       value: stats.live,
       icon: Monitor,
       color: 'text-emerald-600',
-      bgColor: 'bg-emerald-50',
-      borderColor: 'border-emerald-200'
+      bgColor: 'bg-emerald-50'
     },
     {
       title: 'Offline Sites',
       value: stats.offline,
       icon: MonitorOff,
       color: 'text-red-600',
-      bgColor: 'bg-red-50',
-      borderColor: 'border-red-200'
+      bgColor: 'bg-red-50'
     }
   ]
 
@@ -694,22 +691,9 @@ export default function WebsitesPage() {
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        {statsCards.map((card, index) => {
-          const Icon = card.icon
-          return (
-            <Card key={index} className={`border ${card.borderColor} ${card.bgColor}`}>
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-gray-600">{card.title}</p>
-                    <p className="text-2xl font-bold text-gray-900">{card.value}</p>
-                  </div>
-                  <Icon className={`w-8 h-8 ${card.color}`} />
-                </div>
-              </CardContent>
-            </Card>
-          )
-        })}
+        {statsCards.map((card, index) => (
+          <StatCard key={index} title={card.title} value={card.value} icon={card.icon} color={card.color} bgColor={card.bgColor} />
+        ))}
       </div>
 
       {/* Filters */}
@@ -961,7 +945,7 @@ export default function WebsitesPage() {
                         <Button
                           variant="ghost"
                           size="sm"
-                          className="text-blue-600 hover:text-blue-700 hover:bg-blue-50 h-8 px-2"
+                          className="h-8 px-2"
                           title="View Website"
                           onClick={() => handleViewWebsite(website)}
                         >
@@ -972,7 +956,7 @@ export default function WebsitesPage() {
                             <Button
                               variant="ghost"
                               size="sm"
-                              className="text-green-600 hover:text-green-700 hover:bg-green-50 h-8 px-2"
+                              className="text-blue-600 hover:text-blue-700 hover:bg-blue-50 h-8 px-2"
                               title="Edit Website"
                               onClick={() => handleEditWebsite(website)}
                             >

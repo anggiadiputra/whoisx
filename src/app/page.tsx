@@ -13,6 +13,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import { useToast } from '@/hooks/use-toast'
 import { Navbar } from '@/components/navbar'
+import { StatCard } from '@/components/stat-card'
 import { WhoisDetailModal } from '@/components/whois-detail-modal'
 import { RecentActivity } from '@/components/recent-activity'
 import { formatIndonesianDate } from '@/lib/utils'
@@ -301,12 +302,8 @@ export default function HomePage() {
 
 
   const getExpiryStatus = (daysToExpiry: number | null) => {
-    if (daysToExpiry === null) return { status: 'available', color: 'bg-blue-500', text: 'Available to Order' }
-    if (daysToExpiry < 0) return { status: 'expired', color: 'bg-red-600', text: 'Sudah Expired' }
-    if (daysToExpiry <= 1) return { status: 'critical', color: 'bg-red-500', text: 'Segera Expired' }
-    if (daysToExpiry <= 7) return { status: 'warning', color: 'bg-orange-500', text: 'Perlu Diperpanjang' }
-    if (daysToExpiry <= 30) return { status: 'attention', color: 'bg-yellow-500', text: 'Akan Expired' }
-    return { status: 'good', color: 'bg-green-500', text: 'Masih Aman' }
+    if (daysToExpiry === undefined || daysToExpiry === null || daysToExpiry < 0) return { status: 'inactive', color: 'bg-red-600', text: 'Tidak Aktif' }
+    return { status: 'active', color: 'bg-green-600', text: 'Aktif' }
   }
 
   // Domain validation function
@@ -435,7 +432,6 @@ export default function HomePage() {
           {canManageDomains && (
             <Button
               onClick={() => setShowAddDomain(true)}
-              className="bg-blue-600 hover:bg-blue-700 text-white shadow-lg"
             >
               <Plus className="w-4 h-4 mr-2" />
               Add Domain
@@ -445,25 +441,9 @@ export default function HomePage() {
 
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {statsCards.map((stat, index) => {
-            const IconComponent = stat.icon
-            return (
-              <Card key={index} className="hover:shadow-lg transition-shadow duration-200">
-                <CardContent className="p-6">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm font-medium text-gray-600">{stat.title}</p>
-                      <p className="text-3xl font-bold text-gray-900 mt-2">{stat.value}</p>
-
-                    </div>
-                    <div className={`w-12 h-12 ${stat.bgColor} rounded-lg flex items-center justify-center`}>
-                      <IconComponent className={`w-6 h-6 ${stat.color}`} />
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            )
-          })}
+          {statsCards.map((stat, index) => (
+            <StatCard key={index} title={stat.title} value={stat.value} icon={stat.icon} color={stat.color} bgColor={stat.bgColor} />
+          ))}
         </div>
 
 
@@ -563,7 +543,7 @@ export default function HomePage() {
                               </TableCell>
                               <TableCell>
                                 <Badge 
-                                  variant={expiryStatus.status === 'good' || expiryStatus.status === 'available' ? 'default' : 'destructive'}
+                                  variant={expiryStatus.status === 'active' ? 'default' : 'destructive'}
                                   className={`${expiryStatus.color} text-white`}
                                 >
                                   {expiryStatus.text}
@@ -652,7 +632,7 @@ export default function HomePage() {
                                   </div>
                                 </div>
                                 <Badge 
-                                  variant={expiryStatus.status === 'good' || expiryStatus.status === 'available' ? 'default' : 'destructive'}
+                                  variant={expiryStatus.status === 'active' ? 'default' : 'destructive'}
                                   className={`${expiryStatus.color} text-white text-xs`}
                                 >
                                   {expiryStatus.text}
@@ -781,7 +761,7 @@ export default function HomePage() {
               <CardContent className="space-y-3">
                 {/* Total Finance Payment */}
                 {(userRole === 'ADMIN' || userRole === 'FINANCE') && (
-                  <Card className="border-orange-200 bg-gradient-to-r from-orange-50 to-yellow-50">
+                  <Card className="border-orange-200 bg-orange-50">
                     <CardContent className="p-4">
                       <div className="flex items-center justify-between">
                         <div>

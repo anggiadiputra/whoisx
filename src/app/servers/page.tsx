@@ -55,6 +55,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { Navbar } from '@/components/navbar'
+import { StatCard } from '@/components/stat-card'
 import { formatIndonesianDate } from '@/lib/utils'
 
 interface ServerData {
@@ -298,7 +299,7 @@ export default function ServersPage() {
   // Early returns after all hooks
   if (status === 'loading' || loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100">
+      <div className="min-h-screen bg-gray-50">
         <Navbar />
         <div className="container mx-auto px-4 py-8">
           <div className="flex items-center justify-center min-h-[400px]">
@@ -533,32 +534,28 @@ export default function ServersPage() {
       value: stats.total,
       icon: Server,
       color: 'text-blue-600',
-      bgColor: 'bg-blue-50',
-      borderColor: 'border-blue-200'
+      bgColor: 'bg-blue-50'
     },
     {
       title: 'Active Servers',
       value: stats.active,
       icon: CheckCircle,
       color: 'text-green-600',
-      bgColor: 'bg-green-50',
-      borderColor: 'border-green-200'
+      bgColor: 'bg-green-50'
     },
     {
       title: 'Expiring (30 Days)',
       value: stats.expiring30,
       icon: AlertTriangle,
       color: 'text-orange-600',
-      bgColor: 'bg-orange-50',
-      borderColor: 'border-orange-200'
+      bgColor: 'bg-orange-50'
     },
     {
       title: 'Expired Servers',
       value: stats.expired,
       icon: Clock,
       color: 'text-red-700',
-      bgColor: 'bg-red-100',
-      borderColor: 'border-red-300'
+      bgColor: 'bg-red-50'
     }
   ]
 
@@ -689,7 +686,7 @@ export default function ServersPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100">
+    <div className="min-h-screen bg-gray-50">
       <Navbar />
       
       <div className="container mx-auto px-4 py-8">
@@ -902,22 +899,9 @@ export default function ServersPage() {
 
           {/* Stats Cards */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {statsCards.map((card, index) => {
-              const Icon = card.icon
-              return (
-                <Card key={index} className={`border ${card.borderColor} ${card.bgColor}`}>
-                  <CardContent className="p-6">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="text-sm font-medium text-gray-600">{card.title}</p>
-                        <p className="text-2xl font-bold text-gray-900">{card.value}</p>
-                      </div>
-                      <Icon className={`w-8 h-8 ${card.color}`} />
-                    </div>
-                  </CardContent>
-                </Card>
-              )
-            })}
+            {statsCards.map((card, index) => (
+              <StatCard key={index} title={card.title} value={card.value} icon={card.icon} color={card.color} bgColor={card.bgColor} />
+            ))}
           </div>
 
           {/* Filters and Search */}
@@ -1335,7 +1319,7 @@ export default function ServersPage() {
                             <Button
                               variant="ghost"
                               size="sm"
-                              className="text-blue-600 hover:text-blue-700 hover:bg-blue-50 h-8 px-2"
+                              className="h-8 px-2"
                               title="View Server"
                               onClick={() => handleViewServer(server)}
                             >
@@ -1346,7 +1330,7 @@ export default function ServersPage() {
                                 <Button
                                   variant="ghost"
                                   size="sm"
-                                  className="text-green-600 hover:text-green-700 hover:bg-green-50 h-8 px-2"
+                                  className="text-blue-600 hover:text-blue-700 hover:bg-blue-50 h-8 px-2"
                                   title="Edit Server"
                                   onClick={() => handleEditServer(server)}
                                 >

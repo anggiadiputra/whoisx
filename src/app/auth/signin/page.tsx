@@ -110,13 +110,7 @@ export default function SignInPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 flex items-center justify-center p-4">
-      {/* Background Elements */}
-      <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute -top-40 -right-40 w-80 h-80 bg-blue-400 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob"></div>
-        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-purple-400 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob" style={{animationDelay: '2s'}}></div>
-        <div className="absolute top-40 left-40 w-80 h-80 bg-pink-400 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob" style={{animationDelay: '4s'}}></div>
-      </div>
+    <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
 
       <div className="relative w-full max-w-md mx-auto space-y-6">
         {/* Success/Error Messages */}
@@ -135,9 +129,9 @@ export default function SignInPage() {
         )}
 
         {/* Login Card */}
-        <Card className="shadow-xl border-0 bg-white/80 backdrop-blur-sm">
+        <Card>
           <CardHeader className="space-y-2 text-center pb-6">
-            <div className="mx-auto w-12 h-12 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl flex items-center justify-center mb-4 shadow-lg">
+            <div className="mx-auto w-12 h-12 bg-primary rounded-xl flex items-center justify-center mb-4">
               <Globe className="w-6 h-6 text-white" />
             </div>
             <CardTitle className="text-2xl font-bold text-gray-900">Welcome Back</CardTitle>
@@ -194,7 +188,7 @@ export default function SignInPage() {
               <Button
                 type="submit"
                 disabled={loading}
-                className="w-full h-11 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-medium shadow-lg hover:shadow-xl transition-all duration-200"
+                className="w-full"
               >
                 {loading ? (
                   <>
@@ -222,7 +216,7 @@ export default function SignInPage() {
         </Card>
 
         {/* Demo Accounts */}
-        <Card className="shadow-lg border-0 bg-gradient-to-br from-blue-50 to-indigo-50">
+        <Card>
           <CardHeader className="text-center pb-4">
             <div className="flex items-center justify-center space-x-2 mb-2">
               <Sparkles className="w-5 h-5 text-blue-600" />
@@ -240,11 +234,11 @@ export default function SignInPage() {
                 <div
                   key={index}
                   onClick={() => fillDemoCredentials(account)}
-                  className="group relative overflow-hidden border-2 border-gray-100 rounded-xl p-4 hover:border-blue-300 hover:shadow-lg transition-all duration-300 cursor-pointer bg-white/80 backdrop-blur-sm"
+                  className="border border-gray-200 rounded-lg p-4 hover:border-blue-300 hover:bg-gray-50 transition-colors cursor-pointer bg-white"
                 >
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-3">
-                      <div className={`w-10 h-10 ${account.color} rounded-xl flex items-center justify-center text-white shadow-md group-hover:scale-110 transition-transform duration-300`}>
+                      <div className={`w-10 h-10 ${account.color} rounded-lg flex items-center justify-center text-white`}>
                         <IconComponent className="w-5 h-5" />
                       </div>
                       <div className="flex-1">

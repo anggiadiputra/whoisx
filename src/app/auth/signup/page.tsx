@@ -122,24 +122,18 @@ export default function SignUpPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 flex items-center justify-center p-4">
-      {/* Background Elements */}
-      <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute -top-40 -right-40 w-80 h-80 bg-blue-400 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse"></div>
-        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-purple-400 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse" style={{animationDelay: '2s'}}></div>
-        <div className="absolute top-40 left-40 w-80 h-80 bg-pink-400 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse" style={{animationDelay: '4s'}}></div>
-      </div>
+    <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
 
       <div className="relative w-full max-w-6xl mx-auto grid lg:grid-cols-2 gap-8 items-center">
         {/* Left side - Branding */}
         <div className="hidden lg:block space-y-8">
           <div className="space-y-6">
             <div className="flex items-center space-x-4">
-              <div className="w-12 h-12 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-2xl flex items-center justify-center shadow-lg">
+              <div className="w-12 h-12 bg-primary rounded-xl flex items-center justify-center">
                 <Globe className="w-6 h-6 text-white" />
               </div>
               <div>
-                <h1 className="text-3xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
+                <h1 className="text-3xl font-bold text-gray-900">
                   Domain Manager
                 </h1>
                 <p className="text-gray-600 font-medium">Professional Portfolio Management</p>
@@ -188,7 +182,7 @@ export default function SignUpPage() {
           {/* Mobile Header */}
           <div className="text-center lg:hidden">
             <div className="flex items-center justify-center space-x-3 mb-6">
-              <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg">
+              <div className="w-10 h-10 bg-primary rounded-xl flex items-center justify-center">
                 <Globe className="w-5 h-5 text-white" />
               </div>
               <div className="text-left">
@@ -214,9 +208,9 @@ export default function SignUpPage() {
           )}
 
           {/* Signup Card */}
-          <Card className="shadow-xl border-0 bg-white/80 backdrop-blur-sm">
+          <Card>
             <CardHeader className="space-y-2 text-center pb-6">
-              <div className="mx-auto w-12 h-12 bg-gradient-to-br from-green-500 to-emerald-600 rounded-2xl flex items-center justify-center mb-4 shadow-lg">
+              <div className="mx-auto w-12 h-12 bg-primary rounded-xl flex items-center justify-center mb-4">
                 <UserPlus className="w-6 h-6 text-white" />
               </div>
               <CardTitle className="text-2xl font-bold text-gray-900">Create Account</CardTitle>
@@ -360,7 +354,7 @@ export default function SignUpPage() {
                 <Button
                   type="submit"
                   disabled={loading || passwordStrength.score < 3}
-                  className="w-full h-11 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white font-medium shadow-lg hover:shadow-xl transition-all duration-200"
+                  className="w-full"
                 >
                   {loading ? (
                     <>

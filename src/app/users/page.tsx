@@ -5,6 +5,7 @@ import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import { useToast } from '@/hooks/use-toast'
 import { Navbar } from '@/components/navbar'
+import { StatCard } from '@/components/stat-card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -227,32 +228,28 @@ export default function UsersPage() {
       value: stats.total,
       icon: Users,
       color: 'text-blue-600',
-      bgColor: 'bg-blue-50',
-      borderColor: 'border-blue-200'
+      bgColor: 'bg-blue-50'
     },
     {
       title: 'Active Users',
       value: stats.active,
       icon: UserCheck,
       color: 'text-green-600',
-      bgColor: 'bg-green-50',
-      borderColor: 'border-green-200'
+      bgColor: 'bg-green-50'
     },
     {
       title: 'Admin Users',
       value: stats.admin,
       icon: Shield,
       color: 'text-purple-600',
-      bgColor: 'bg-purple-50',
-      borderColor: 'border-purple-200'
+      bgColor: 'bg-purple-50'
     },
     {
       title: 'Suspended Users',
       value: stats.suspended,
       icon: UserX,
       color: 'text-red-600',
-      bgColor: 'bg-red-50',
-      borderColor: 'border-red-200'
+      bgColor: 'bg-red-50'
     }
   ]
 
@@ -472,22 +469,9 @@ export default function UsersPage() {
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        {statsCards.map((card, index) => {
-          const Icon = card.icon
-          return (
-            <Card key={index} className={`${card.bgColor} ${card.borderColor} border-l-4`}>
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-gray-600">{card.title}</p>
-                    <p className="text-3xl font-bold text-gray-900">{card.value}</p>
-                  </div>
-                  <Icon className={`w-8 h-8 ${card.color}`} />
-                </div>
-              </CardContent>
-            </Card>
-          )
-        })}
+        {statsCards.map((card, index) => (
+          <StatCard key={index} title={card.title} value={card.value} icon={card.icon} color={card.color} bgColor={card.bgColor} />
+        ))}
       </div>
 
       {/* Filters */}
@@ -596,7 +580,6 @@ export default function UsersPage() {
                           <Button
                             variant="ghost"
                             size="sm"
-                            className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
                             title="View User"
                             onClick={() => handleViewUser(user)}
                           >
@@ -605,7 +588,7 @@ export default function UsersPage() {
                           <Button
                             variant="ghost"
                             size="sm"
-                            className="text-green-600 hover:text-green-700 hover:bg-green-50"
+                            className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
                             title="Edit User"
                             onClick={() => handleEditUser(user)}
                           >
@@ -765,7 +748,7 @@ export default function UsersPage() {
                         <Button
                           variant="ghost"
                           size="sm"
-                          className="text-blue-600 hover:text-blue-700 hover:bg-blue-50 h-8 px-2"
+                          className="h-8 px-2"
                           title="View User"
                           onClick={() => handleViewUser(user)}
                         >
@@ -774,7 +757,7 @@ export default function UsersPage() {
                         <Button
                           variant="ghost"
                           size="sm"
-                          className="text-green-600 hover:text-green-700 hover:bg-green-50 h-8 px-2"
+                          className="text-blue-600 hover:text-blue-700 hover:bg-blue-50 h-8 px-2"
                           title="Edit User"
                           onClick={() => handleEditUser(user)}
                         >
