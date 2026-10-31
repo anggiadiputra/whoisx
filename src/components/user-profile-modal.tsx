@@ -39,8 +39,7 @@ const EMPTY_ERRORS: Record<FormField, string> = {
   confirmPassword: ''
 }
 
-// Same colors as the role/status pills on the Users page
-const ROLE_TONES: Record<string, PillTone> = { ADMIN: 'purple', STAFF: 'blue', FINANCE: 'green' }
+// Same colors as the status pills on the Users page
 const STATUS_TONES: Record<string, PillTone> = { ACTIVE: 'green', INACTIVE: 'gray', SUSPENDED: 'red' }
 
 const titleCase = (value: string) => value.charAt(0) + value.slice(1).toLowerCase()
@@ -312,7 +311,6 @@ export function UserProfileModal({ open, onOpenChange }: UserProfileModalProps) 
                 </div>
               </div>
               <div className="mt-3 flex flex-wrap items-center gap-2">
-                <StatusPill tone={ROLE_TONES[profile.role] ?? 'gray'}>{titleCase(profile.role)}</StatusPill>
                 <StatusPill tone={STATUS_TONES[profile.status] ?? 'gray'}>{titleCase(profile.status)}</StatusPill>
                 <span className="text-sm text-gray-500">
                   Joined {format(new Date(profile.createdAt), 'd MMM yyyy')} · {formatLastLogin(profile.lastLoginAt)}

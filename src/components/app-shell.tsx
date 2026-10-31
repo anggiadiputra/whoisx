@@ -16,13 +16,10 @@ import {
   PanelLeftOpen,
   Server,
   Settings,
-  Shield,
   User,
   Users,
-  Wallet,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -68,12 +65,6 @@ const NAV_GROUPS: { label: string; items: NavItem[] }[] = [
   },
 ]
 
-const ROLE_INFO: Record<Role, { label: string; color: string; icon: LucideIcon }> = {
-  ADMIN: { label: 'Admin', color: 'bg-red-100 text-red-800', icon: Shield },
-  STAFF: { label: 'Staff', color: 'bg-blue-100 text-blue-800', icon: Users },
-  FINANCE: { label: 'Finance', color: 'bg-green-100 text-green-800', icon: Wallet },
-}
-
 const COLLAPSED_KEY = 'sidebar-collapsed'
 
 export function AppShell({ children }: { children: React.ReactNode }) {
@@ -111,8 +102,6 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
   const isActive = (href: string) => href === '/' ? pathname === '/' : pathname.startsWith(href)
   const role = session?.user?.role as Role | undefined
-  const roleInfo = role ? ROLE_INFO[role] : null
-  const RoleIcon = roleInfo?.icon
   const displayName = session?.user?.name || session?.user?.email || ''
 
   return (
@@ -225,12 +214,6 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                 </div>
                 <div className="hidden text-left sm:block">
                   <p className="text-sm font-medium text-gray-900">{displayName}</p>
-                  {roleInfo && RoleIcon && (
-                    <Badge className={`mt-0.5 border-0 text-xs ${roleInfo.color}`}>
-                      <RoleIcon className="mr-1 h-3 w-3" />
-                      {roleInfo.label}
-                    </Badge>
-                  )}
                 </div>
                 <ChevronDown className="h-4 w-4 text-gray-400" />
               </DropdownMenuTrigger>
