@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
 import { Separator } from '@/components/ui/separator'
-import { AlertCircle, Eye, EyeOff, Globe, Shield, User, DollarSign, CheckCircle, Copy, Loader2, ArrowRight, Sparkles } from 'lucide-react'
+import { AlertCircle, Eye, EyeOff, Globe, Shield, User, CheckCircle, Copy, Loader2, ArrowRight, Sparkles, Wallet } from 'lucide-react'
 
 const demoAccounts = [
   {
@@ -34,7 +34,7 @@ const demoAccounts = [
     role: 'Finance',
     email: 'finance@example.com',
     password: 'password123', 
-    icon: DollarSign,
+    icon: Wallet,
     color: 'bg-green-500',
     description: 'Read-only with pricing access',
     badge: 'Read Only'

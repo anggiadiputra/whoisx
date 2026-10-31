@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Badge } from '@/components/ui/badge'
 import { useToast } from '@/hooks/use-toast'
-import { Server, Globe, Loader2 } from 'lucide-react'
+import { Server, Loader2, Cloud } from 'lucide-react'
 
 interface Domain {
   id: string
@@ -183,7 +183,7 @@ export function AssignDomainModal({ domain, isOpen, onClose, onSuccess }: Assign
                   {domain.server.serverType === 'VPS' ? (
                     <Server className="w-3 h-3 text-blue-600" />
                   ) : (
-                    <Globe className="w-3 h-3 text-blue-600" />
+                    <Cloud className="w-3 h-3 text-blue-600" />
                   )}
                 </div>
                 <div>
@@ -215,7 +215,7 @@ export function AssignDomainModal({ domain, isOpen, onClose, onSuccess }: Assign
                           {server.serverType === 'VPS' ? (
                             <Server className="w-2 h-2 text-gray-600" />
                           ) : (
-                            <Globe className="w-2 h-2 text-gray-600" />
+                            <Cloud className="w-2 h-2 text-gray-600" />
                           )}
                         </div>
                         <span>{server.serverName}</span>
@@ -239,7 +239,7 @@ export function AssignDomainModal({ domain, isOpen, onClose, onSuccess }: Assign
                   {selectedServer.serverType === 'VPS' ? (
                     <Server className="w-3 h-3 text-green-600" />
                   ) : (
-                    <Globe className="w-3 h-3 text-green-600" />
+                    <Cloud className="w-3 h-3 text-green-600" />
                   )}
                 </div>
                 <div>

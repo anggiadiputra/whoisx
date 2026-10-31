@@ -10,7 +10,7 @@ import { Label } from '@/components/ui/label'
 import { Badge } from '@/components/ui/badge'
 import { Separator } from '@/components/ui/separator'
 import { useToast } from '@/hooks/use-toast'
-import { User, Mail, Lock, Eye, EyeOff, Save, X } from 'lucide-react'
+import { User, Mail, Lock, Eye, EyeOff, Save, X, Loader2 } from 'lucide-react'
 
 interface UserProfileModalProps {
   open: boolean
@@ -248,7 +248,7 @@ export function UserProfileModal({ open, onOpenChange }: UserProfileModalProps) 
 
         {loading ? (
           <div className="flex items-center justify-center py-8">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+            <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
           </div>
         ) : profile ? (
           <form onSubmit={handleSubmit} className="space-y-6">
@@ -425,7 +425,7 @@ export function UserProfileModal({ open, onOpenChange }: UserProfileModalProps) 
               >
                 {saving ? (
                   <>
-                    <div className="w-4 h-4 mr-2 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                     Saving...
                   </>
                 ) : (

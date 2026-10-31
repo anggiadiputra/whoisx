@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { RefreshCw, User, Globe, Server, Monitor, Users } from 'lucide-react'
+import { RefreshCw, Globe, Server, Users, LogIn, LogOut, AppWindow } from 'lucide-react'
 import { formatDistanceToNow } from 'date-fns'
 
 interface Activity {
@@ -57,8 +57,9 @@ export function RecentActivity() {
   const getActivityIcon = (type: string) => {
     switch (type) {
       case 'USER_LOGIN':
+        return LogIn
       case 'USER_LOGOUT':
-        return User
+        return LogOut
       case 'DOMAIN_ADDED':
       case 'DOMAIN_UPDATED':
       case 'DOMAIN_DELETED':
@@ -70,7 +71,7 @@ export function RecentActivity() {
       case 'WEBSITE_ADDED':
       case 'WEBSITE_UPDATED':
       case 'WEBSITE_DELETED':
-        return Monitor
+        return AppWindow
       case 'USER_CREATED':
       case 'USER_UPDATED':
       case 'USER_DELETED':
