@@ -85,8 +85,10 @@ export async function PUT(request: NextRequest) {
         return NextResponse.json({ error: 'Current password is required to set new password' }, { status: 400 })
       }
 
-      // Verify current password
-      const isCurrentPasswordValid = await bcrypt.compare(currentPassword, currentUser.password)
+      // Verify current password (the column is passwordHash; `password` does not exist)
+      const isCurrentPasswordValid = currentUser.passwordHash
+        ? await bcrypt.compare(currentPassword, currentUser.passwordHash)
+        : false
       if (!isCurrentPasswordValid) {
         return NextResponse.json({ error: 'Current password is incorrect' }, { status: 400 })
       }
@@ -97,7 +99,7 @@ export async function PUT(request: NextRequest) {
       }
 
       // Hash new password
-      updateData.password = await bcrypt.hash(newPassword, 12)
+      updateData.passwordHash = await bcrypt.hash(newPassword, 12)
     }
 
     // Update user
