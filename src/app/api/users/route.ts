@@ -43,18 +43,17 @@ export async function GET(request: NextRequest) {
       where.status = status as UserStatus
     }
     
+    // SQLite's LIKE is already case-insensitive for ASCII; Prisma rejects `mode` on SQLite
     if (search) {
       where.OR = [
         {
           name: {
-            contains: search,
-            mode: 'insensitive'
+            contains: search
           }
         },
         {
           email: {
-            contains: search,
-            mode: 'insensitive'
+            contains: search
           }
         }
       ]

@@ -34,10 +34,10 @@ export async function GET(request: NextRequest) {
       }
     }
     
+    // SQLite's LIKE is already case-insensitive for ASCII; Prisma rejects `mode` on SQLite
     if (registrar) {
       where.registrar = {
-        contains: registrar,
-        mode: 'insensitive'
+        contains: registrar
       }
     }
     
@@ -49,14 +49,12 @@ export async function GET(request: NextRequest) {
       where.OR = [
         {
           domain: {
-            contains: search,
-            mode: 'insensitive'
+            contains: search
           }
         },
         {
           notes: {
-            contains: search,
-            mode: 'insensitive'
+            contains: search
           }
         }
       ]
