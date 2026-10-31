@@ -385,13 +385,13 @@ export default function HomePage() {
                   </div>
                   
                   <div className="flex items-center space-x-2">
-                    <div className="relative">
+                    <div className="relative w-full sm:w-auto">
                       <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
                       <Input
                         placeholder="Search domains..."
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
-                        className="pl-10 w-64"
+                        className="pl-10 w-full sm:w-64"
                       />
                     </div>
                   </div>
@@ -400,7 +400,9 @@ export default function HomePage() {
                 {/* Filter Tabs */}
                 <Tabs value={filterExpiring || 'all'} onValueChange={(value) => setFilterExpiring(value === 'all' ? null : value)}>
                   <TabsList className="grid w-full grid-cols-4">
-                    <TabsTrigger value="all">All Domains</TabsTrigger>
+                    <TabsTrigger value="all">
+                      All<span className="hidden sm:inline">&nbsp;Domains</span>
+                    </TabsTrigger>
                     <TabsTrigger value="30">30 Days</TabsTrigger>
                     <TabsTrigger value="7">7 Days</TabsTrigger>
                     <TabsTrigger value="1">1 Day</TabsTrigger>
@@ -434,7 +436,6 @@ export default function HomePage() {
                             <TableHead>Status</TableHead>
                             <TableHead>Expiry</TableHead>
                             {canViewPrices && <TableHead>Price</TableHead>}
-                            <TableHead>Registrar</TableHead>
                             <TableHead>Server</TableHead>
                           </TableRow>
                         </TableHeader>
@@ -443,13 +444,18 @@ export default function HomePage() {
                           const expiryStatus = getExpiryStatus(domain.daysToExpiry)
                           return (
                             <TableRow key={domain.id} className="hover:bg-gray-50">
-                              <TableCell>
+                              {/* Wraps so a long registrar name does not push the table past the card */}
+                              <TableCell className="whitespace-normal">
                                 <div className="flex items-center space-x-3">
-                                  <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
+                                  <div className="w-8 h-8 shrink-0 bg-blue-100 rounded-lg flex items-center justify-center">
                                     <Globe className="w-4 h-4 text-blue-600" />
                                   </div>
                                   <div>
                                     <div className="font-medium text-gray-900">{domain.domain}</div>
+                                    {/* Registrar sits under the name (as on the Domains page) so the table fits beside the sidebar */}
+                                    <div className="text-sm text-gray-500">
+                                      {domain.realRegistrarName || domain.registrar || 'Unknown registrar'}
+                                    </div>
                                     {domain.notes && (
                                       <div className="text-sm text-gray-500 truncate max-w-[200px]">
                                         {domain.notes}
@@ -490,11 +496,6 @@ export default function HomePage() {
                                   )}
                                 </TableCell>
                               )}
-                              <TableCell>
-                                <span className="text-sm text-gray-600">
-                                  {domain.realRegistrarName || domain.registrar || 'Unknown'}
-                                </span>
-                              </TableCell>
                               <TableCell>
                                 {domain.server ? (
                                   <div className="flex items-center space-x-2">
@@ -699,7 +700,7 @@ export default function HomePage() {
                       
                       <div className="space-y-4 mt-4">
                         {/* Cost Summary Cards */}
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                           <Card>
                             <CardContent className="p-4">
                               <div className="flex items-center justify-between">

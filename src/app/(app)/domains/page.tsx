@@ -676,7 +676,7 @@ export default function DomainsPage() {
                 />
               </div>
               
-              <div className="flex gap-2">
+              <div className="flex flex-wrap gap-2">
                 <Button
                   variant={filterExpiring === null ? "default" : "outline"}
                   onClick={() => setFilterExpiring(null)}

@@ -681,7 +681,7 @@ export default function ServersPage() {
                   
                   <div className="grid gap-4 py-4">
                     {/* Basic Information */}
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div className="space-y-2">
                         <Label htmlFor="serverName">Server Name *</Label>
                         <Input
@@ -702,7 +702,7 @@ export default function ServersPage() {
                       </div>
                     </div>
 
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div className="space-y-2">
                         <Label htmlFor="serverType">Server Type</Label>
                         <Select value={newServer.serverType} onValueChange={(value: any) => setNewServer(prev => ({ ...prev, serverType: value }))}>
@@ -732,13 +732,13 @@ export default function ServersPage() {
                     </div>
 
                     {/* Server Details */}
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     </div>
 
 
 
                     {/* Dates */}
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div className="space-y-2">
                         <Label htmlFor="createdDate">Created Date</Label>
                         <Input
@@ -760,7 +760,7 @@ export default function ServersPage() {
                     </div>
 
                     {/* Access Details */}
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div className="space-y-2">
                         <Label htmlFor="username">Username</Label>
                         <Input
@@ -885,7 +885,7 @@ export default function ServersPage() {
                   </div>
                 </div>
                 
-                <div className="flex gap-2">
+                <div className="flex flex-wrap gap-2">
                   <Select value={filterType} onValueChange={setFilterType}>
                     <SelectTrigger className="w-[140px]">
                       <Filter className="w-4 h-4 mr-2" />
@@ -1280,7 +1280,7 @@ export default function ServersPage() {
               {/* Basic Information */}
               <div className="space-y-4">
                 <h3 className="text-lg font-medium">Basic Information</h3>
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <Label className="text-sm font-medium text-gray-500">Server Name</Label>
                     <p className="mt-1 text-sm">{selectedServer.serverName}</p>
@@ -1308,7 +1308,7 @@ export default function ServersPage() {
               {/* Access Details */}
               <div className="space-y-4">
                 <h3 className="text-lg font-medium">Access Details</h3>
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <Label className="text-sm font-medium text-gray-500">Username</Label>
                     <p className="mt-1 text-sm font-mono">{selectedServer.username || 'N/A'}</p>
@@ -1354,7 +1354,7 @@ export default function ServersPage() {
               {/* Dates */}
               <div className="space-y-4">
                 <h3 className="text-lg font-medium">Important Dates</h3>
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <Label className="text-sm font-medium text-gray-500">Created Date</Label>
                     <p className="mt-1 text-sm">
@@ -1421,7 +1421,7 @@ export default function ServersPage() {
             {/* Basic Information */}
             <div className="space-y-4">
               <h3 className="text-lg font-medium">Basic Information</h3>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="edit-serverName">Server Name *</Label>
                   <Input
@@ -1474,7 +1474,7 @@ export default function ServersPage() {
             {/* Dates */}
             <div className="space-y-4">
               <h3 className="text-lg font-medium">Important Dates</h3>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="edit-createdDate">Created Date</Label>
                   <Input
@@ -1499,7 +1499,7 @@ export default function ServersPage() {
             {/* Access Details */}
             <div className="space-y-4">
               <h3 className="text-lg font-medium">Access Details</h3>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="edit-username">Username</Label>
                   <Input

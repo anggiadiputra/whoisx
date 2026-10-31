@@ -372,20 +372,21 @@ export default function SettingsPage() {
         />
 
         <Tabs defaultValue="general" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4">
-            <TabsTrigger value="general" className="flex items-center space-x-2">
+          {/* Two rows on phones, where four labels do not fit side by side */}
+          <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4 h-auto sm:h-9">
+            <TabsTrigger value="general" className="flex items-center space-x-2 h-8">
               <SlidersHorizontal className="w-4 h-4" />
               <span>General</span>
             </TabsTrigger>
-            <TabsTrigger value="whatsapp" className="flex items-center space-x-2">
+            <TabsTrigger value="whatsapp" className="flex items-center space-x-2 h-8">
               <MessageSquare className="w-4 h-4" />
               <span>WhatsApp</span>
             </TabsTrigger>
-            <TabsTrigger value="notifications" className="flex items-center space-x-2">
+            <TabsTrigger value="notifications" className="flex items-center space-x-2 h-8">
               <Bell className="w-4 h-4" />
               <span>Notifications</span>
             </TabsTrigger>
-            <TabsTrigger value="security" className="flex items-center space-x-2">
+            <TabsTrigger value="security" className="flex items-center space-x-2 h-8">
               <Shield className="w-4 h-4" />
               <span>Security</span>
             </TabsTrigger>

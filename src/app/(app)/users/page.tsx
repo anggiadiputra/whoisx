@@ -469,7 +469,7 @@ export default function UsersPage() {
                 />
               </div>
             </div>
-            <div className="flex gap-2">
+            <div className="flex flex-wrap gap-2">
               <Select value={filterRole || 'none'} onValueChange={handleRoleChange}>
                 <SelectTrigger className="w-[140px]">
                   <Filter className="w-4 h-4 mr-2" />
@@ -913,7 +913,7 @@ export default function UsersPage() {
           
           {selectedUser && (
             <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <Label className="text-sm font-medium text-gray-500">Name</Label>
                   <p className="text-sm">{selectedUser.name || 'No Name'}</p>
