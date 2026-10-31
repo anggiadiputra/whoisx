@@ -32,7 +32,8 @@ import {
   ChevronLeft,
   ChevronRight,
   Server,
-  Link
+  Link,
+  Trash2
 } from 'lucide-react'
 
 interface Domain {
@@ -407,6 +408,43 @@ export default function DomainsPage() {
       })
     } finally {
       setEditingDomain(false)
+    }
+  }
+
+  // Handle delete domain
+  const handleDeleteDomain = async (domain: Domain) => {
+    if (!confirm(`Are you sure you want to delete domain "${domain.domain}"? This action cannot be undone.`)) {
+      return
+    }
+
+    try {
+      const response = await fetch(`/api/domains/${domain.id}`, {
+        method: 'DELETE',
+        credentials: 'include'
+      })
+
+      const result = await response.json()
+
+      if (response.ok && result.success) {
+        toast({
+          title: "Success",
+          description: `Domain "${domain.domain}" deleted successfully`,
+        })
+        fetchDomains()
+      } else {
+        toast({
+          title: "Error",
+          description: result.error || 'Failed to delete domain',
+          variant: "destructive",
+        })
+      }
+    } catch (error) {
+      console.error('❌ Error deleting domain:', error)
+      toast({
+        title: "Error",
+        description: "Failed to delete domain",
+        variant: "destructive",
+      })
     }
   }
 
@@ -844,6 +882,15 @@ export default function DomainsPage() {
                                   >
                                     <Link className="w-4 h-4" />
                                   </Button>
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                                    title="Delete Domain"
+                                    onClick={() => handleDeleteDomain(domain)}
+                                  >
+                                    <Trash2 className="w-4 h-4" />
+                                  </Button>
                                 </>
                               )}
                             </div>
@@ -1022,6 +1069,15 @@ export default function DomainsPage() {
                                 onClick={() => handleAssignDomain(domain)}
                               >
                                 <Link className="w-3 h-3" />
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="text-red-600 hover:text-red-700 hover:bg-red-50 h-8 px-2"
+                                title="Delete Domain"
+                                onClick={() => handleDeleteDomain(domain)}
+                              >
+                                <Trash2 className="w-3 h-3" />
                               </Button>
                             </>
                           )}
