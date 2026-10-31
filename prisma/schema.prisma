@@ -3,13 +3,15 @@
 
 generator client {
   provider        = "prisma-client-js"
-  // Queries go through @prisma/adapter-pg so the same client runs on Node and Cloudflare Workers.
+  // Queries go through @prisma/adapter-d1 (Cloudflare D1).
   // No custom output path: OpenNext patches the default generated client.
   previewFeatures = ["driverAdapters"]
 }
 
+// D1 is SQLite. The app always connects through the D1 binding (see src/lib/prisma.ts);
+// schema changes are applied with `wrangler d1 migrations`, not `prisma migrate`.
 datasource db {
-  provider = "postgresql"
+  provider = "sqlite"
   url      = env("DATABASE_URL")
 }
 

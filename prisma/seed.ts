@@ -1,9 +1,17 @@
 import { PrismaClient, UserRole } from '@prisma/client'
+import { PrismaD1 } from '@prisma/adapter-d1'
+import type { D1Database } from '@cloudflare/workers-types'
 import bcrypt from 'bcryptjs'
+import { getPlatformProxy } from 'wrangler'
 
-const prisma = new PrismaClient()
+// Seeds the local D1 database (.wrangler/state) through the binding in wrangler.jsonc
+const platformPromise = getPlatformProxy<{ DB: D1Database }>()
+let prisma: PrismaClient
 
 async function main() {
+  const platform = await platformPromise
+  prisma = new PrismaClient({ adapter: new PrismaD1(platform.env.DB) })
+
   console.log('Seeding database...')
 
   // Create demo users
@@ -60,5 +68,6 @@ main()
     process.exit(1)
   })
   .finally(async () => {
-    await prisma.$disconnect()
+    await prisma?.$disconnect()
+    await (await platformPromise).dispose()
   })

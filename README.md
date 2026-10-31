@@ -15,16 +15,15 @@ A comprehensive domain management web application built with Next.js that centra
 
 - **Frontend**: Next.js 15 + TypeScript + Tailwind CSS + shadcn/ui
 - **Backend**: Next.js API Routes + Prisma ORM
-- **Database**: PostgreSQL
+- **Database**: Cloudflare D1 (SQLite)
 - **RDAP Providers**: Verisign, IDNIC, Neustar, Afilias, PIR
-- **Deployment**: Cloudflare Workers (OpenNext + Hyperdrive) or any Node.js host
+- **Deployment**: Cloudflare Workers (OpenNext)
 
 ## Quick Start
 
 ### Prerequisites
 
 - Node.js 18+ 
-- PostgreSQL database
 - npm or yarn
 
 ### Installation
@@ -37,20 +36,17 @@ A comprehensive domain management web application built with Next.js that centra
    ```
 
 2. **Environment Configuration**:
-   Put `DATABASE_URL` in `.env` (the Prisma CLI does not read `.env.local`):
-   ```bash
-   DATABASE_URL="postgresql://username:password@localhost:5432/domain_manager"
-   ```
-   and the auth settings in `.env.local`:
+   Create `.env.local`:
    ```bash
    NEXTAUTH_SECRET="your-secret-key-here"
    NEXTAUTH_URL="http://localhost:3000"
    ```
 
-3. **Database Setup** (`npm install` already runs `prisma generate`):
+3. **Database Setup**: `npm run dev` uses a local D1 database that wrangler keeps in `.wrangler/`
+   (`npm install` already runs `prisma generate`):
    ```bash
-   npm run db:migrate
-   npm run db:seed      # optional sample users
+   npm run db:migrate:local
+   npm run db:seed      # optional sample users (password123), local only
    ```
 
 4. **Start Development Server**:
@@ -139,51 +135,50 @@ src/
 ```bash
 npm run dev          # Start development server
 npm run build        # Build for production
-npm run start        # Start production server
-npx prisma studio    # Open database browser
-npx prisma migrate   # Run database migrations
+npm run preview      # Run the production Worker locally (http://localhost:8787)
+npm run db:migrate:local    # Apply migrations/ to the local D1 database
+npm run db:migrate:remote   # Apply migrations/ to the production D1 database
+```
+
+### Changing the database schema
+Prisma Migrate does not run against D1. After editing `prisma/schema.prisma`:
+```bash
+npx wrangler d1 migrations create DB describe_the_change
+npx prisma migrate diff --from-local-d1 --to-schema-datamodel prisma/schema.prisma --script \
+  --output migrations/<the file wrangler created>.sql
+npm run db:migrate:local
 ```
 
 ## Production Deployment
 
 ### Cloudflare Workers
 
-The app runs on Workers through [OpenNext](https://opennext.js.org/cloudflare). PostgreSQL is reached through
-[Hyperdrive](https://developers.cloudflare.com/hyperdrive/), and `src/lib/prisma.ts` creates a Prisma client per
-request because Workers cannot share database connections between requests.
+The app runs on Workers through [OpenNext](https://opennext.js.org/cloudflare) with a
+[D1](https://developers.cloudflare.com/d1/) database bound as `DB` in `wrangler.jsonc`.
 
-1. Apply migrations to the production database (from your machine or CI):
-   ```bash
-   DATABASE_URL="postgresql://..." npm run db:migrate
-   ```
-2. Create a Hyperdrive config and copy its id into `wrangler.jsonc` (`hyperdrive[0].id`):
-   ```bash
-   npx wrangler hyperdrive create whoisx-db --connection-string="postgresql://user:password@host:5432/db"
-   ```
-3. Set `NEXTAUTH_URL` in `wrangler.jsonc` (`vars`) to the Worker URL or your custom domain, then add the secret:
-   ```bash
-   npx wrangler secret put NEXTAUTH_SECRET
-   ```
-4. Build and deploy:
-   ```bash
-   npm run deploy
-   ```
+**Deploy from GitHub (Workers Builds)**, in the Worker's Settings → Build:
+- Build command: `npx opennextjs-cloudflare build`
+- Deploy command: `npm run db:migrate:remote && npx wrangler deploy` (applies new migrations, then deploys)
 
-To try the Worker locally, copy `.dev.vars.example` to `.dev.vars` and run `npm run preview` (http://localhost:8787).
-It connects to the `localConnectionString` in `wrangler.jsonc`, which can be overridden with
-`CLOUDFLARE_HYPERDRIVE_LOCAL_CONNECTION_STRING_HYPERDRIVE`.
+**Or deploy from your machine** (after `npx wrangler login`):
+```bash
+npm run db:migrate:remote
+npm run deploy
+```
+
+Before the first deploy:
+1. Set `NEXTAUTH_URL` in `wrangler.jsonc` (`vars`) to the Worker URL or your custom domain.
+2. Add the `NEXTAUTH_SECRET` secret (dashboard → Settings → Variables and Secrets, or `npx wrangler secret put NEXTAUTH_SECRET`).
+
+New sign-ups get the STAFF role. To make the first admin, sign up and then run:
+```bash
+npx wrangler d1 execute DB --remote --command "UPDATE users SET role = 'ADMIN' WHERE email = 'you@example.com'"
+```
+
+To try the Worker locally, copy `.dev.vars.example` to `.dev.vars` and run `npm run preview`.
 
 Password hashing (login, password changes) uses more CPU than the Workers Free plan allows per request, so plan on
 Workers Paid.
-
-### Other Node.js hosts
-
-`npm run build && npm start` with these environment variables:
-```bash
-DATABASE_URL="postgresql://..."
-NEXTAUTH_SECRET="production-secret"
-NEXTAUTH_URL="https://yourdomain.com"
-```
 
 ## Contributing
 

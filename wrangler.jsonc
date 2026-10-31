@@ -16,14 +16,13 @@
       "service": "assetdev"
     }
   ],
-  "hyperdrive": [
+  "d1_databases": [
     {
-      // Connection pool in front of PostgreSQL; read by src/lib/prisma.ts.
-      // Create it with: npx wrangler hyperdrive create whoisx-db --connection-string="postgres://..."
-      "binding": "HYPERDRIVE",
-      "id": "00000000000000000000000000000000",
-      // Used by `npm run preview` instead of the real Hyperdrive
-      "localConnectionString": "postgresql://postgres:postgres@localhost:5432/whoisx"
+      // Read by src/lib/prisma.ts. Schema changes: SQL files in migrations/, applied with `npm run db:migrate:*`
+      "binding": "DB",
+      "database_name": "assetdev",
+      "database_id": "8862ea90-16a9-4624-a4f0-5d7b8d3f0c3e",
+      "migrations_dir": "migrations"
     }
   ],
   "vars": {

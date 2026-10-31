@@ -1,4 +1,8 @@
 import type { NextConfig } from "next";
+import { initOpenNextCloudflareForDev } from "@opennextjs/cloudflare";
+
+// Gives `next dev` the bindings from wrangler.jsonc (a local D1 database in .wrangler/)
+initOpenNextCloudflareForDev();
 
 const nextConfig: NextConfig = {
   // Keep Prisma out of the server bundle so OpenNext can ship its workerd build
