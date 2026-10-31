@@ -37,7 +37,8 @@ export async function GET(
     }
 
     // Format the response with all available WHOIS data
-    const whoisData = domain.whoisCache[0]?.whoisData || null
+    // whoisData is a Json column; its shape depends on the RDAP provider
+    const whoisData = (domain.whoisCache[0]?.whoisData || null) as Record<string, any> | null
 
     const detailedInfo = {
       // Basic domain info

@@ -43,7 +43,6 @@ export async function GET(
       server: {
         ...withoutPassword(server, session.user.role),
         daysToExpiry,
-        monthlyPrice: server.monthlyPrice ? Number(server.monthlyPrice) : null,
         uptimePercent: server.uptimePercent ? Number(server.uptimePercent) : null
       }
     }, { headers: { 'Cache-Control': PRIVATE_CACHE_CONTROL } })
@@ -172,7 +171,6 @@ export async function PUT(
       message: 'Server updated successfully',
       server: {
         ...updatedServer,
-        monthlyPrice: updatedServer.monthlyPrice ? Number(updatedServer.monthlyPrice) : null,
         uptimePercent: updatedServer.uptimePercent ? Number(updatedServer.uptimePercent) : null
       }
     })

@@ -72,7 +72,7 @@ const DomainTableRow = memo(({
       </TableCell>
       <TableCell>
         <div className="flex space-x-2">
-          <WhoisDetailModal domain={domain}>
+          <WhoisDetailModal domainId={domain.id} domainName={domain.domain}>
             <Button variant="ghost" size="sm" className="text-blue-600 hover:text-blue-700 hover:bg-blue-50">
               <Eye className="w-4 h-4" />
             </Button>

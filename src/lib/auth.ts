@@ -80,7 +80,7 @@ export const authOptions: NextAuthOptions = {
         session.user.id = token.sub!
         session.user.role = token.role as UserRole
         session.user.name = token.name
-        session.user.email = token.email
+        session.user.email = token.email ?? session.user.email
       }
       return session
     },
@@ -113,9 +113,7 @@ export const authOptions: NextAuthOptions = {
       }
     },
     warn(code) {
-      if (code !== 'CLIENT_FETCH_ERROR') {
-        console.warn('NextAuth Warning:', code)
-      }
+      console.warn('NextAuth Warning:', code)
     },
     debug(code, metadata) {
       // Only log in development and suppress CLIENT_FETCH_ERROR

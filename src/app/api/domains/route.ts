@@ -115,7 +115,7 @@ export async function GET(request: NextRequest) {
       // Extract real registrar name from WHOIS cache
       let realRegistrarName = domain.registrar
       if (domain.whoisCache && domain.whoisCache.length > 0) {
-        const whoisData = domain.whoisCache[0].whoisData
+        const whoisData = domain.whoisCache[0].whoisData as { entities?: any[] } | null
         if (whoisData?.entities) {
           const registrarEntity = whoisData.entities.find((entity: any) => 
             entity.roles && entity.roles.includes('registrar')

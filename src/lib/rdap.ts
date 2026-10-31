@@ -328,7 +328,7 @@ export async function batchLookupDomains(
   error?: string
   provider?: string
 }>> {
-  const results = []
+  const results: Awaited<ReturnType<typeof batchLookupDomains>> = []
   const maxConcurrent = 5 // Limit concurrent requests to avoid rate limiting
   
   for (let i = 0; i < domains.length; i += maxConcurrent) {
