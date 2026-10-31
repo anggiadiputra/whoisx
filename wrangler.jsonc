@@ -1,0 +1,35 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "whoisx",
+  "main": ".open-next/worker.js",
+  "compatibility_date": "2026-10-20",
+  // nodejs_compat is required by OpenNext; global_fetch_strictly_public lets the app call RDAP servers
+  "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
+  "assets": {
+    "directory": ".open-next/assets",
+    "binding": "ASSETS"
+  },
+  "services": [
+    {
+      // Must match "name" above
+      "binding": "WORKER_SELF_REFERENCE",
+      "service": "whoisx"
+    }
+  ],
+  "hyperdrive": [
+    {
+      // Connection pool in front of PostgreSQL; read by src/lib/prisma.ts.
+      // Create it with: npx wrangler hyperdrive create whoisx-db --connection-string="postgres://..."
+      "binding": "HYPERDRIVE",
+      "id": "00000000000000000000000000000000",
+      // Used by `npm run preview` instead of the real Hyperdrive
+      "localConnectionString": "postgresql://postgres:postgres@localhost:5432/whoisx"
+    }
+  ],
+  "vars": {
+    "NEXTAUTH_URL": "https://whoisx.example.workers.dev"
+  },
+  "observability": {
+    "enabled": true
+  }
+}

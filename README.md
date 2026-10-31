@@ -17,7 +17,7 @@ A comprehensive domain management web application built with Next.js that centra
 - **Backend**: Next.js API Routes + Prisma ORM
 - **Database**: PostgreSQL
 - **RDAP Providers**: Verisign, IDNIC, Neustar, Afilias, PIR
-- **Deployment**: Vercel-ready
+- **Deployment**: Cloudflare Workers (OpenNext + Hyperdrive) or any Node.js host
 
 ## Quick Start
 
@@ -37,17 +37,20 @@ A comprehensive domain management web application built with Next.js that centra
    ```
 
 2. **Environment Configuration**:
-   Create `.env.local` file:
+   Put `DATABASE_URL` in `.env` (the Prisma CLI does not read `.env.local`):
    ```bash
    DATABASE_URL="postgresql://username:password@localhost:5432/domain_manager"
+   ```
+   and the auth settings in `.env.local`:
+   ```bash
    NEXTAUTH_SECRET="your-secret-key-here"
    NEXTAUTH_URL="http://localhost:3000"
    ```
 
-3. **Database Setup**:
+3. **Database Setup** (`npm install` already runs `prisma generate`):
    ```bash
-   npx prisma migrate dev --name init
-   npx prisma generate
+   npm run db:migrate
+   npm run db:seed      # optional sample users
    ```
 
 4. **Start Development Server**:
@@ -143,13 +146,39 @@ npx prisma migrate   # Run database migrations
 
 ## Production Deployment
 
-### Vercel Deployment
-1. Connect repository to Vercel
-2. Configure environment variables
-3. Setup PostgreSQL database (Supabase/Railway/Neon)
-4. Deploy
+### Cloudflare Workers
 
-### Environment Variables for Production
+The app runs on Workers through [OpenNext](https://opennext.js.org/cloudflare). PostgreSQL is reached through
+[Hyperdrive](https://developers.cloudflare.com/hyperdrive/), and `src/lib/prisma.ts` creates a Prisma client per
+request because Workers cannot share database connections between requests.
+
+1. Apply migrations to the production database (from your machine or CI):
+   ```bash
+   DATABASE_URL="postgresql://..." npm run db:migrate
+   ```
+2. Create a Hyperdrive config and copy its id into `wrangler.jsonc` (`hyperdrive[0].id`):
+   ```bash
+   npx wrangler hyperdrive create whoisx-db --connection-string="postgresql://user:password@host:5432/db"
+   ```
+3. Set `NEXTAUTH_URL` in `wrangler.jsonc` (`vars`) to the Worker URL or your custom domain, then add the secret:
+   ```bash
+   npx wrangler secret put NEXTAUTH_SECRET
+   ```
+4. Build and deploy:
+   ```bash
+   npm run deploy
+   ```
+
+To try the Worker locally, copy `.dev.vars.example` to `.dev.vars` and run `npm run preview` (http://localhost:8787).
+It connects to the `localConnectionString` in `wrangler.jsonc`, which can be overridden with
+`CLOUDFLARE_HYPERDRIVE_LOCAL_CONNECTION_STRING_HYPERDRIVE`.
+
+Password hashing (login, password changes) uses more CPU than the Workers Free plan allows per request, so plan on
+Workers Paid.
+
+### Other Node.js hosts
+
+`npm run build && npm start` with these environment variables:
 ```bash
 DATABASE_URL="postgresql://..."
 NEXTAUTH_SECRET="production-secret"

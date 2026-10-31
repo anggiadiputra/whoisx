@@ -2,7 +2,10 @@
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
 generator client {
-  provider = "prisma-client-js"
+  provider        = "prisma-client-js"
+  // Queries go through @prisma/adapter-pg so the same client runs on Node and Cloudflare Workers.
+  // No custom output path: OpenNext patches the default generated client.
+  previewFeatures = ["driverAdapters"]
 }
 
 datasource db {

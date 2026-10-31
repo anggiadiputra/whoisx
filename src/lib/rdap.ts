@@ -155,6 +155,8 @@ async function makeRequest(url: string, retries = 3, delay = 1000): Promise<Axio
   for (let attempt = 1; attempt <= retries; attempt++) {
     try {
       const response = await axios.get<RDAPResponse>(url, {
+        // fetch works on both Node and Cloudflare Workers (the default http adapter is Node-only)
+        adapter: 'fetch',
         timeout: 10000,
         headers: {
           'User-Agent': 'Domain-Manager/1.0',

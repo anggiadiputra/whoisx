@@ -1,0 +1,4 @@
+# Copy to .dev.vars for `npm run preview` (Workers runtime on this machine)
+NEXTJS_ENV=development
+NEXTAUTH_SECRET=replace-with-a-long-random-string
+NEXTAUTH_URL=http://localhost:8787
