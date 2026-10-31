@@ -1,12 +1,15 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Lato, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { Providers } from "@/components/providers";
 import { Toaster } from "@/components/ui/toaster";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+// Lato has no 500/600 weights: font-medium renders as 400 and font-semibold as 700
+const lato = Lato({
+  variable: "--font-lato",
   subsets: ["latin"],
+  weight: ["300", "400", "700", "900"],
+  display: "swap",
 });
 
 const geistMono = Geist_Mono({
@@ -25,10 +28,9 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased bg-gray-50`}
-      >
+    // Font variables live on <html> because Tailwind's base font-family is applied there
+    <html lang="en" className={`${lato.variable} ${geistMono.variable}`}>
+      <body className="antialiased bg-gray-50">
         <Providers>
           {children}
         </Providers>
