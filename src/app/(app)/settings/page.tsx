@@ -28,7 +28,9 @@ import {
   Clock,
   Smartphone,
   Loader2,
-  Save
+  Save,
+  UserPlus,
+  ShieldCheck
 } from 'lucide-react'
 
 interface WhatsAppSettings {
@@ -54,6 +56,10 @@ export default function SettingsPage() {
   const router = useRouter()
   const appName = useAppName()
   const [appNameInput, setAppNameInput] = useState(appName)
+  // Sign-up and Turnstile state live on the server; null until loaded
+  const [registrationEnabled, setRegistrationEnabled] = useState<boolean | null>(null)
+  const [savedRegistrationEnabled, setSavedRegistrationEnabled] = useState<boolean | null>(null)
+  const [turnstileEnabled, setTurnstileEnabled] = useState(false)
   const [loading, setLoading] = useState(false)
   const [testLoading, setTestLoading] = useState(false)
   
@@ -81,6 +87,21 @@ export default function SettingsPage() {
       setWhatsappSettings(JSON.parse(savedSettings))
     }
   }, [])
+
+  useEffect(() => {
+    if ((session?.user as any)?.role !== 'ADMIN') return
+    fetch('/api/settings/general')
+      .then(response => response.ok ? response.json() : null)
+      .then(result => {
+        if (!result) return
+        setRegistrationEnabled(result.registrationEnabled)
+        setSavedRegistrationEnabled(result.registrationEnabled)
+        setTurnstileEnabled(result.turnstileEnabled)
+      })
+      .catch(() => {
+        // Leave the sign-up switch disabled; saving other settings still works
+      })
+  }, [session])
 
   // Redirect if not authenticated
   if (status === 'loading') {
@@ -140,20 +161,31 @@ export default function SettingsPage() {
 
     setLoading(true)
     try {
-      // App name is stored on the server; only send it when it changed
-      if (trimmedAppName !== appName) {
+      // App name and sign-up are stored on the server; only send what changed
+      const changes: { appName?: string; registrationEnabled?: boolean } = {}
+      if (trimmedAppName !== appName) changes.appName = trimmedAppName
+      if (registrationEnabled !== null && registrationEnabled !== savedRegistrationEnabled) {
+        changes.registrationEnabled = registrationEnabled
+      }
+
+      if (Object.keys(changes).length > 0) {
         const response = await fetch('/api/settings/general', {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ appName: trimmedAppName }),
+          body: JSON.stringify(changes),
         })
         const result = await response.json().catch(() => ({}))
         if (!response.ok) {
-          throw new Error(result.error || 'Failed to save application name')
+          throw new Error(result.error || 'Failed to save settings')
         }
-        setAppNameInput(result.appName)
-        // Re-render the root layout so the sidebar and page title use the new name
-        router.refresh()
+        if (result.appName !== undefined) {
+          setAppNameInput(result.appName)
+          // Re-render the root layout so the sidebar and page title use the new name
+          router.refresh()
+        }
+        if (result.registrationEnabled !== undefined) {
+          setSavedRegistrationEnabled(result.registrationEnabled)
+        }
       }
 
       // WhatsApp settings are still kept in this browser only
@@ -586,16 +618,43 @@ export default function SettingsPage() {
                   <span>Security Settings</span>
                 </CardTitle>
                 <CardDescription>
-                  Manage security preferences and API access
+                  Who can sign up, and bot protection on sign in
                 </CardDescription>
               </CardHeader>
-              <CardContent>
-                <div className="text-center py-8">
-                  <Shield className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                  <h3 className="text-lg font-medium text-gray-900 mb-2">Security Features</h3>
-                  <p className="text-gray-600">
-                    Additional security settings will be available in future updates
-                  </p>
+              <CardContent className="space-y-6">
+                {/* Public sign-up */}
+                <div className="flex items-center justify-between gap-4">
+                  <div className="flex items-center space-x-3">
+                    <UserPlus className="w-5 h-5 text-blue-500" />
+                    <div>
+                      <Label htmlFor="registrationEnabled" className="text-base font-medium">Public Sign Up</Label>
+                      <p className="text-sm text-gray-500">
+                        Let anyone create a Staff account from the sign-in page. When off, add users from the Users page.
+                      </p>
+                    </div>
+                  </div>
+                  <Switch
+                    id="registrationEnabled"
+                    checked={registrationEnabled ?? false}
+                    disabled={registrationEnabled === null}
+                    onCheckedChange={setRegistrationEnabled}
+                  />
+                </div>
+
+                {/* Turnstile */}
+                <div className="flex items-center justify-between gap-4">
+                  <div className="flex items-center space-x-3">
+                    <ShieldCheck className="w-5 h-5 text-orange-500" />
+                    <div>
+                      <Label className="text-base font-medium">Cloudflare Turnstile</Label>
+                      <p className="text-sm text-gray-500">
+                        Bot check on the sign-in form. Turn it on by adding the <code className="font-mono text-xs">TURNSTILE_SITE_KEY</code> and <code className="font-mono text-xs">TURNSTILE_SECRET_KEY</code> secrets to the Worker.
+                      </p>
+                    </div>
+                  </div>
+                  <Badge variant={turnstileEnabled ? 'default' : 'secondary'} className="shrink-0">
+                    {turnstileEnabled ? 'Active' : 'Not configured'}
+                  </Badge>
                 </div>
               </CardContent>
             </Card>

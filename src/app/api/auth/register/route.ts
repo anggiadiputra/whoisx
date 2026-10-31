@@ -2,9 +2,17 @@ import { NextRequest, NextResponse } from 'next/server'
 import bcrypt from 'bcryptjs'
 import { prisma } from '@/lib/prisma'
 import { UserRole } from '@prisma/client'
+import { getRegistrationEnabled } from '@/lib/app-settings'
 
 export async function POST(request: NextRequest) {
   try {
+    if (!(await getRegistrationEnabled())) {
+      return NextResponse.json({
+        success: false,
+        error: 'Sign up is closed. Ask an administrator for an account.'
+      }, { status: 403 })
+    }
+
     const body = await request.json()
     // Role is intentionally not read from the body: self-registration must never
     // grant elevated access. Admins change roles via /api/users/[id].
