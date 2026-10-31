@@ -32,6 +32,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { UserProfileModal } from '@/components/user-profile-modal'
+import { useAppName } from '@/components/app-name-provider'
 
 type Role = 'ADMIN' | 'STAFF' | 'FINANCE'
 
@@ -78,6 +79,7 @@ const COLLAPSED_KEY = 'sidebar-collapsed'
 export function AppShell({ children }: { children: React.ReactNode }) {
   const { data: session } = useSession()
   const pathname = usePathname()
+  const appName = useAppName()
   // Desktop: sidebar can collapse to an icon rail. Mobile: sidebar is a drawer.
   const [collapsed, setCollapsed] = useState(false)
   const [drawerOpen, setDrawerOpen] = useState(false)
@@ -131,13 +133,13 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       >
         <Link
           href="/"
-          title="Domain Manager"
+          title={appName}
           className={`flex h-16 shrink-0 items-center gap-3 border-b border-gray-200 px-5 ${collapsed ? 'lg:justify-center lg:px-0' : ''}`}
         >
           <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-primary">
             <Globe className="h-4 w-4 text-white" />
           </div>
-          <span className={`whitespace-nowrap text-lg font-bold text-gray-900 ${collapsed ? 'lg:hidden' : ''}`}>Domain Manager</span>
+          <span className={`whitespace-nowrap text-lg font-bold text-gray-900 ${collapsed ? 'lg:hidden' : ''}`}>{appName}</span>
         </Link>
 
         <nav className="flex-1 overflow-y-auto px-3 pb-6">

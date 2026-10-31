@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import { useSession } from 'next-auth/react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -13,9 +14,13 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { useToast } from '@/hooks/use-toast'
 import { PageSkeleton } from '@/components/page-skeleton'
 import { PageHeader } from '@/components/page-header'
+import { useAppName } from '@/components/app-name-provider'
+import { APP_NAME_MAX_LENGTH } from '@/lib/app-name'
 import { 
   MessageSquare,
   Bell,
+  SlidersHorizontal,
+  Globe,
   Shield,
   Send,
   AlertTriangle,
@@ -46,6 +51,9 @@ interface WhatsAppSettings {
 export default function SettingsPage() {
   const { data: session, status } = useSession()
   const { toast } = useToast()
+  const router = useRouter()
+  const appName = useAppName()
+  const [appNameInput, setAppNameInput] = useState(appName)
   const [loading, setLoading] = useState(false)
   const [testLoading, setTestLoading] = useState(false)
   
@@ -118,22 +126,48 @@ export default function SettingsPage() {
     )
   }
 
+  const trimmedAppName = appNameInput.trim()
+
   const handleSaveSettings = async () => {
+    if (!trimmedAppName) {
+      toast({
+        title: "Application Name Required",
+        description: "Please enter a name for the application",
+        variant: "destructive",
+      })
+      return
+    }
+
     setLoading(true)
     try {
-      // Here you would save settings to your backend
-      // For now, we'll just simulate saving to localStorage
+      // App name is stored on the server; only send it when it changed
+      if (trimmedAppName !== appName) {
+        const response = await fetch('/api/settings/general', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ appName: trimmedAppName }),
+        })
+        const result = await response.json().catch(() => ({}))
+        if (!response.ok) {
+          throw new Error(result.error || 'Failed to save application name')
+        }
+        setAppNameInput(result.appName)
+        // Re-render the root layout so the sidebar and page title use the new name
+        router.refresh()
+      }
+
+      // WhatsApp settings are still kept in this browser only
       localStorage.setItem('whatsappSettings', JSON.stringify(whatsappSettings))
       
       toast({
         title: "Settings Saved",
-        description: "WhatsApp notification settings have been saved successfully",
+        description: "Your settings have been saved successfully",
         variant: "default",
       })
-    } catch (error) {
+    } catch (error: any) {
       toast({
         title: "Save Failed",
-        description: "Failed to save settings. Please try again.",
+        description: error.message || "Failed to save settings. Please try again.",
         variant: "destructive",
       })
     } finally {
@@ -155,7 +189,7 @@ export default function SettingsPage() {
     try {
       const data = new FormData()
       data.append("target", whatsappSettings.phoneNumber)
-      data.append("message", "🔔 Test notification from Domain Management System\n\nThis is a test message to verify your WhatsApp integration is working correctly.\n\n✅ Configuration successful!")
+      data.append("message", `🔔 Test notification from ${appName}\n\nThis is a test message to verify your WhatsApp integration is working correctly.\n\n✅ Configuration successful!`)
       data.append("countryCode", "62")
 
       const response = await fetch("https://api.fonnte.com/send", {
@@ -252,8 +286,12 @@ export default function SettingsPage() {
           description="Configure your domain management preferences and notifications"
         />
 
-        <Tabs defaultValue="whatsapp" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-3">
+        <Tabs defaultValue="general" className="space-y-6">
+          <TabsList className="grid w-full grid-cols-4">
+            <TabsTrigger value="general" className="flex items-center space-x-2">
+              <SlidersHorizontal className="w-4 h-4" />
+              <span>General</span>
+            </TabsTrigger>
             <TabsTrigger value="whatsapp" className="flex items-center space-x-2">
               <MessageSquare className="w-4 h-4" />
               <span>WhatsApp</span>
@@ -267,6 +305,34 @@ export default function SettingsPage() {
               <span>Security</span>
             </TabsTrigger>
           </TabsList>
+
+          {/* General Settings Tab */}
+          <TabsContent value="general" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center space-x-2">
+                  <Globe className="w-5 h-5 text-blue-600" />
+                  <span>Application</span>
+                </CardTitle>
+                <CardDescription>
+                  Name shown in the sidebar, sign-up page and browser tab
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-2">
+                <Label htmlFor="appName">Application Name</Label>
+                <Input
+                  id="appName"
+                  placeholder="e.g., Domain Manager"
+                  maxLength={APP_NAME_MAX_LENGTH}
+                  value={appNameInput}
+                  onChange={(e) => setAppNameInput(e.target.value)}
+                />
+                <p className="text-xs text-gray-500">
+                  Browser tabs read as &ldquo;Page | {trimmedAppName || appName}&rdquo;, e.g. &ldquo;Domains | {trimmedAppName || appName}&rdquo;
+                </p>
+              </CardContent>
+            </Card>
+          </TabsContent>
 
           {/* WhatsApp Settings Tab */}
           <TabsContent value="whatsapp" className="space-y-6">

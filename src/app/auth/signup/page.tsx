@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import { useAppName } from '@/components/app-name-provider'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -11,6 +12,7 @@ import { Separator } from '@/components/ui/separator'
 import { AlertCircle, CheckCircle, Eye, EyeOff, Globe, UserPlus, Shield, ArrowRight, Loader2, Check, X, Gift, Receipt, Headphones, Undo2 } from 'lucide-react'
 
 export default function SignUpPage() {
+  const appName = useAppName()
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -134,7 +136,7 @@ export default function SignUpPage() {
               </div>
               <div>
                 <h1 className="text-3xl font-bold text-gray-900">
-                  Domain Manager
+                  {appName}
                 </h1>
                 <p className="text-gray-600 font-medium">Professional Portfolio Management</p>
               </div>
@@ -186,7 +188,7 @@ export default function SignUpPage() {
                 <Globe className="w-5 h-5 text-white" />
               </div>
               <div className="text-left">
-                <h1 className="text-2xl font-bold text-gray-900">Domain Manager</h1>
+                <h1 className="text-2xl font-bold text-gray-900">{appName}</h1>
                 <p className="text-sm text-gray-600">Professional Management</p>
               </div>
             </div>

@@ -252,3 +252,11 @@ model Activity {
   
   @@map("activities")
 }
+// App-wide key/value settings (e.g. appName), editable by admins
+model AppSetting {
+  key       String   @id
+  value     String
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("app_settings")
+}
