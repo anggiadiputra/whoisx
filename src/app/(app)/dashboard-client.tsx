@@ -24,6 +24,7 @@ import NextLink from 'next/link'
 import { useRouter } from 'next/navigation'
 import { ManageMenu } from '@/components/manage-menu'
 import { PaginationBar } from '@/components/pagination-bar'
+import { DomainBulkActions, SelectCheckbox, useBulkSelection } from '@/components/domain-bulk-actions'
 import { 
   Plus,
   Search,
@@ -203,6 +204,7 @@ export default function HomePage() {
   }, [filteredDomains, currentPage, itemsPerPage])
 
   const { totalPages, startIndex, endIndex, paginatedDomains } = paginationData
+  const selection = useBulkSelection(filteredDomains, paginatedDomains)
 
   // Early returns after all hooks
   if (status === 'loading' || loading) {
@@ -426,11 +428,32 @@ export default function HomePage() {
                   </div>
                 ) : (
                   <>
+                    {canManageDomains && selection.selected.length > 0 && (
+                      <div className="mb-4">
+                        <DomainBulkActions
+                          selected={selection.selected}
+                          onClear={selection.clear}
+                          totalMatching={filteredDomains.length}
+                          onSelectAllMatching={selection.selectAllMatching}
+                        />
+                      </div>
+                    )}
+
                     {/* Desktop Table */}
                     <div className="hidden md:block overflow-x-auto">
                       <Table>
                         <TableHeader>
                           <TableRow>
+                            {canManageDomains && (
+                              <TableHead className="w-10 pr-0">
+                                <SelectCheckbox
+                                  checked={selection.pageAllSelected}
+                                  indeterminate={selection.pageSomeSelected}
+                                  onChange={selection.togglePage}
+                                  label="Select all domains on this page"
+                                />
+                              </TableHead>
+                            )}
                             <TableHead>Domain</TableHead>
                             <TableHead>Status</TableHead>
                             <TableHead>Expiry</TableHead>
@@ -442,7 +465,16 @@ export default function HomePage() {
                         {paginatedDomains.map((domain) => {
                           const expiryStatus = getExpiryStatus(domain.daysToExpiry)
                           return (
-                            <TableRow key={domain.id} className="hover:bg-gray-50">
+                            <TableRow key={domain.id} className={selection.isSelected(domain.id) ? 'bg-blue-50/60' : 'hover:bg-gray-50'}>
+                              {canManageDomains && (
+                                <TableCell className="w-10 pr-0">
+                                  <SelectCheckbox
+                                    checked={selection.isSelected(domain.id)}
+                                    onChange={(checked) => selection.toggle(domain.id, checked)}
+                                    label={`Select ${domain.domain}`}
+                                  />
+                                </TableCell>
+                              )}
                               {/* Wraps so a long registrar name does not push the table past the card */}
                               <TableCell className="whitespace-normal">
                                 <div className="flex items-center space-x-3">
@@ -531,6 +563,13 @@ export default function HomePage() {
                               {/* Header */}
                               <div className="flex items-center justify-between">
                                 <div className="flex items-center space-x-3">
+                                  {canManageDomains && (
+                                    <SelectCheckbox
+                                      checked={selection.isSelected(domain.id)}
+                                      onChange={(checked) => selection.toggle(domain.id, checked)}
+                                      label={`Select ${domain.domain}`}
+                                    />
+                                  )}
                                   <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
                                     <Globe className="w-5 h-5 text-blue-600" />
                                   </div>

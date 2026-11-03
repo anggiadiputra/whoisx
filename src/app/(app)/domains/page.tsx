@@ -5,6 +5,8 @@ import { useSession } from 'next-auth/react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { Textarea } from '@/components/ui/textarea'
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog'
@@ -17,9 +19,11 @@ import { WhoisDetailModal } from '@/components/whois-detail-modal'
 import { AssignDomainModal } from '@/components/assign-domain-modal'
 import { ManageMenu, ManageAction } from '@/components/manage-menu'
 import { PaginationBar } from '@/components/pagination-bar'
+import { DomainBulkActions, SelectCheckbox, useBulkSelection } from '@/components/domain-bulk-actions'
 import { formatIndonesianDate } from '@/lib/utils'
 import { useDebounce } from '@/hooks/use-debounce'
 import { useApiQuery, useRefreshApiData } from '@/hooks/use-api-query'
+import { runBatch } from '@/lib/run-batch'
 import { useConfirm } from '@/components/confirm-dialog'
 import { 
   Plus,
@@ -95,6 +99,16 @@ function daysLeftColor(days?: number | null) {
   return 'text-gray-500'
 }
 
+// Bulk add: one domain per line (commas and spaces work too). Pasted URLs are reduced to their
+// host, and repeats are dropped.
+function parseDomainList(text: string): string[] {
+  const domains = text
+    .split(/[\s,;]+/)
+    .map(entry => entry.trim().toLowerCase().replace(/^https?:\/\//, '').replace(/[/?#].*$/, '').replace(/\.$/, ''))
+    .filter(Boolean)
+  return [...new Set(domains)]
+}
+
 export default function DomainsPage() {
   const { data: session, status } = useSession()
   const { toast } = useToast()
@@ -121,6 +135,9 @@ export default function DomainsPage() {
     notes: ''
   })
   const [addingDomain, setAddingDomain] = useState(false)
+  const [addMode, setAddMode] = useState<'single' | 'bulk'>('single')
+  const [bulkDomainsText, setBulkDomainsText] = useState('')
+  const [bulkProgress, setBulkProgress] = useState<{ done: number; total: number } | null>(null)
   const [editingDomain, setEditingDomain] = useState(false)
   const [editDomain, setEditDomain] = useState({
     domain: '',
@@ -202,6 +219,7 @@ export default function DomainsPage() {
   }, [filteredDomains, currentPage, itemsPerPage])
 
   const { totalPages, startIndex, endIndex, paginatedDomains } = paginationData
+  const selection = useBulkSelection(filteredDomains, paginatedDomains)
 
   // Handle assign domain
   const handleAssignDomain = (domain: Domain) => {
@@ -310,6 +328,66 @@ export default function DomainsPage() {
     } finally {
       setAddingDomain(false)
     }
+  }
+
+  const handleBulkAdd = async (e: React.FormEvent) => {
+    e.preventDefault()
+
+    const entries = parseDomainList(bulkDomainsText)
+    const invalid = entries.filter(domain => validateDomain(domain) !== null)
+    const existing = new Set(domains.map(domain => domain.domain))
+    const alreadyAdded = entries.filter(domain => !invalid.includes(domain) && existing.has(domain))
+    const toAdd = entries.filter(domain => !invalid.includes(domain) && !existing.has(domain))
+
+    if (toAdd.length === 0) {
+      toast({
+        title: "Nothing to Add",
+        description: invalid.length
+          ? `Not valid domain names: ${invalid.slice(0, 5).join(', ')}`
+          : 'Every domain in the list is already added.',
+        variant: "destructive",
+      })
+      return
+    }
+
+    setAddingDomain(true)
+    setBulkProgress({ done: 0, total: toAdd.length })
+    const results = await runBatch(toAdd, async (domain) => {
+      const response = await fetch('/api/domains', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ domain }),
+      })
+      // 409: added in the meantime (e.g. by someone else); not a failure
+      if (response.status === 409) return 'exists'
+      if (!response.ok) throw new Error((await response.json().catch(() => null))?.error || 'Failed')
+      return 'added'
+    }, {
+      onProgress: (done) => setBulkProgress({ done, total: toAdd.length }),
+    })
+    setBulkProgress(null)
+    setAddingDomain(false)
+
+    const added = results.filter(r => r.status === 'fulfilled' && r.value === 'added').length
+    const skipped = alreadyAdded.length + results.filter(r => r.status === 'fulfilled' && r.value === 'exists').length
+    const failed = toAdd.filter((_, i) => results[i].status === 'rejected')
+    // Leave what still needs attention in the box so it can be fixed and retried
+    const leftOver = [...invalid, ...failed]
+
+    const notes = [
+      skipped ? `${skipped} already added` : '',
+      invalid.length ? `${invalid.length} not valid` : '',
+      failed.length ? `${failed.length} failed` : '',
+    ].filter(Boolean)
+    toast({
+      title: `Added ${added} domain${added === 1 ? '' : 's'}`,
+      description: notes.length ? `${notes.join(', ')}.${leftOver.length ? ' Those still in the list need another look.' : ''}` : undefined,
+      variant: leftOver.length ? "destructive" : "default",
+    })
+
+    fetchDomains()
+    setBulkDomainsText(leftOver.join('\n'))
+    if (leftOver.length === 0) setShowAddDomain(false)
   }
 
   // Handle edit domain
@@ -488,7 +566,64 @@ export default function DomainsPage() {
                       Enter domain details to start monitoring. WHOIS data will be automatically fetched.
                     </DialogDescription>
                   </DialogHeader>
-                  <form onSubmit={handleAddDomain} className="space-y-4 mt-4">
+                  <Tabs value={addMode} onValueChange={(value) => setAddMode(value as 'single' | 'bulk')}>
+                    <TabsList className="grid w-full grid-cols-2">
+                      <TabsTrigger value="single" disabled={addingDomain}>Single</TabsTrigger>
+                      <TabsTrigger value="bulk" disabled={addingDomain}>Bulk</TabsTrigger>
+                    </TabsList>
+                  </Tabs>
+                  {addMode === 'bulk' ? (
+                  <form onSubmit={handleBulkAdd} className="space-y-4">
+                    <div className="space-y-2">
+                      <label htmlFor="bulkDomains" className="text-sm font-medium text-gray-700">
+                        Domain Names
+                      </label>
+                      <Textarea
+                        id="bulkDomains"
+                        rows={8}
+                        placeholder={'example.com\nexample.org\nexample.id'}
+                        value={bulkDomainsText}
+                        onChange={(e) => setBulkDomainsText(e.target.value)}
+                        disabled={addingDomain}
+                        className="font-mono text-sm"
+                      />
+                      <p className="text-xs text-gray-500">
+                        One domain per line. {parseDomainList(bulkDomainsText).length} detected; ones already added are skipped. Set prices and notes afterwards with Edit.
+                      </p>
+                    </div>
+
+                    <div className="flex space-x-3 pt-4">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={() => setShowAddDomain(false)}
+                        className="flex-1"
+                        disabled={addingDomain}
+                      >
+                        <X className="w-4 h-4 mr-2" />
+                        Cancel
+                      </Button>
+                      <Button
+                        type="submit"
+                        disabled={addingDomain || parseDomainList(bulkDomainsText).length === 0}
+                        className="flex-1"
+                      >
+                        {bulkProgress ? (
+                          <>
+                            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                            Adding {bulkProgress.done}/{bulkProgress.total}...
+                          </>
+                        ) : (
+                          <>
+                            <Plus className="w-4 h-4 mr-2" />
+                            Add Domains
+                          </>
+                        )}
+                      </Button>
+                    </div>
+                  </form>
+                  ) : (
+                  <form onSubmit={handleAddDomain} className="space-y-4">
                     <div className="space-y-2">
                       <label htmlFor="domain" className="text-sm font-medium text-gray-700">
                         Domain Name
@@ -561,6 +696,7 @@ export default function DomainsPage() {
                       </Button>
                     </div>
                   </form>
+                  )}
                 </DialogContent>
               </Dialog>
             )}
@@ -709,6 +845,17 @@ export default function DomainsPage() {
           </CardContent>
         </Card>
 
+        {canManageDomains && selection.selected.length > 0 && (
+          <div className="mb-6">
+            <DomainBulkActions
+              selected={selection.selected}
+              onClear={selection.clear}
+              totalMatching={filteredDomains.length}
+              onSelectAllMatching={selection.selectAllMatching}
+            />
+          </div>
+        )}
+
         {/* Domains Table - Desktop */}
         <Card className="hidden md:block overflow-hidden">
           <CardContent className="p-0">
@@ -716,6 +863,16 @@ export default function DomainsPage() {
               <Table>
                 <TableHeader>
                   <TableRow>
+                    {canManageDomains && (
+                      <TableHead className="w-10 pr-0">
+                        <SelectCheckbox
+                          checked={selection.pageAllSelected}
+                          indeterminate={selection.pageSomeSelected}
+                          onChange={selection.togglePage}
+                          label="Select all domains on this page"
+                        />
+                      </TableHead>
+                    )}
                     <TableHead>Domain</TableHead>
                     <TableHead>Status</TableHead>
                     <TableHead>Server</TableHead>
@@ -726,7 +883,7 @@ export default function DomainsPage() {
                 <TableBody>
                   {filteredDomains.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={5} className="text-center py-8">
+                      <TableCell colSpan={canManageDomains ? 6 : 5} className="text-center py-8">
                         <div className="flex flex-col items-center space-y-2">
                           <Globe className="w-8 h-8 text-gray-400" />
                           <p className="text-gray-500">No domains found</p>
@@ -742,7 +899,16 @@ export default function DomainsPage() {
                     paginatedDomains.map((domain) => {
                       const expiryStatus = getExpiryStatus(domain.daysToExpiry)
                       return (
-                        <TableRow key={domain.id} className="hover:bg-gray-50">
+                        <TableRow key={domain.id} className={selection.isSelected(domain.id) ? 'bg-blue-50/60' : 'hover:bg-gray-50'}>
+                          {canManageDomains && (
+                            <TableCell className="w-10 pr-0">
+                              <SelectCheckbox
+                                checked={selection.isSelected(domain.id)}
+                                onChange={(checked) => selection.toggle(domain.id, checked)}
+                                label={`Select ${domain.domain}`}
+                              />
+                            </TableCell>
+                          )}
                           <TableCell>
                             <div className="font-medium text-gray-900">{domain.domain}</div>
                             <div className="text-sm text-gray-500">
@@ -834,6 +1000,13 @@ export default function DomainsPage() {
                       {/* Domain Header */}
                       <div className="flex items-center justify-between">
                         <div className="flex items-center space-x-3">
+                          {canManageDomains && (
+                            <SelectCheckbox
+                              checked={selection.isSelected(domain.id)}
+                              onChange={(checked) => selection.toggle(domain.id, checked)}
+                              label={`Select ${domain.domain}`}
+                            />
+                          )}
                           <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
                             <Globe className="w-4 h-4 text-blue-600" />
                           </div>
