@@ -16,6 +16,7 @@ import { StatusPill, toneFromBgClass } from '@/components/status-pill'
 import { WhoisDetailModal } from '@/components/whois-detail-modal'
 import { AssignDomainModal } from '@/components/assign-domain-modal'
 import { ManageMenu, ManageAction } from '@/components/manage-menu'
+import { PaginationBar } from '@/components/pagination-bar'
 import { formatIndonesianDate } from '@/lib/utils'
 import { useDebounce } from '@/hooks/use-debounce'
 import { useApiQuery, useRefreshApiData } from '@/hooks/use-api-query'
@@ -30,8 +31,6 @@ import {
   Eye,
   Edit,
   Download,
-  ChevronLeft,
-  ChevronRight,
   Server,
   Link,
   Trash2,
@@ -793,49 +792,15 @@ export default function DomainsPage() {
               </Table>
             </div>
 
-            {/* Pagination Controls */}
-            {filteredDomains.length > 0 && totalPages > 1 && (
-              <div className="flex items-center justify-between px-6 py-4 border-t">
-                <div className="text-sm text-gray-700">
-                  Showing {startIndex + 1} to {Math.min(endIndex, filteredDomains.length)} of {filteredDomains.length} domains
-                </div>
-                <div className="flex items-center space-x-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
-                    disabled={currentPage === 1}
-                  >
-                    <ChevronLeft className="w-4 h-4" />
-                    Previous
-                  </Button>
-                  
-                  <div className="flex items-center space-x-1">
-                    {Array.from({ length: totalPages }, (_, i) => i + 1).map((pageNum) => (
-                      <Button
-                        key={pageNum}
-                        variant={currentPage === pageNum ? "default" : "outline"}
-                        size="sm"
-                        onClick={() => setCurrentPage(pageNum)}
-                        className="w-8 h-8 p-0"
-                      >
-                        {pageNum}
-                      </Button>
-                    ))}
-                  </div>
-                  
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
-                    disabled={currentPage === totalPages}
-                  >
-                    Next
-                    <ChevronRight className="w-4 h-4" />
-                  </Button>
-                </div>
-              </div>
-            )}
+            <PaginationBar
+              currentPage={currentPage}
+              totalPages={totalPages}
+              totalItems={filteredDomains.length}
+              pageSize={itemsPerPage}
+              onPageChange={setCurrentPage}
+              itemLabel="domains"
+              className="px-6 py-4 border-t"
+            />
           </CardContent>
         </Card>
 
@@ -933,32 +898,15 @@ export default function DomainsPage() {
                 )
               })}
 
-              {/* Mobile Pagination */}
-              {totalPages > 1 && (
-                <div className="flex items-center justify-between mt-6">
-                  <div className="text-sm text-gray-500">
-                    Page {currentPage} of {totalPages}
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
-                      disabled={currentPage === 1}
-                    >
-                      <ChevronLeft className="w-4 h-4" />
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
-                      disabled={currentPage === totalPages}
-                    >
-                      <ChevronRight className="w-4 h-4" />
-                    </Button>
-                  </div>
-                </div>
-              )}
+              <PaginationBar
+                currentPage={currentPage}
+                totalPages={totalPages}
+                totalItems={filteredDomains.length}
+                pageSize={itemsPerPage}
+                onPageChange={setCurrentPage}
+                itemLabel="domains"
+                className="mt-6"
+              />
             </>
           )}
         </div>

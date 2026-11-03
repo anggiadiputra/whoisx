@@ -61,6 +61,7 @@ import { PageSkeleton } from '@/components/page-skeleton'
 import { StatCard } from '@/components/stat-card'
 import { PageHeader } from '@/components/page-header'
 import { ManageMenu, ManageAction } from '@/components/manage-menu'
+import { PaginationBar } from '@/components/pagination-bar'
 import { StatusPill, toneFromBgClass } from '@/components/status-pill'
 import { formatIndonesianDate } from '@/lib/utils'
 
@@ -1053,49 +1054,15 @@ export default function ServersPage() {
                 </Table>
               </div>
 
-              {/* Pagination Controls */}
-              {filteredServers.length > 0 && totalPages > 1 && (
-                <div className="flex items-center justify-between px-6 py-4 border-t">
-                  <div className="text-sm text-gray-700">
-                    Showing {startIndex + 1} to {Math.min(endIndex, filteredServers.length)} of {filteredServers.length} servers
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
-                      disabled={currentPage === 1}
-                    >
-                      <ChevronLeft className="w-4 h-4" />
-                      Previous
-                    </Button>
-                    
-                    <div className="flex items-center space-x-1">
-                      {Array.from({ length: totalPages }, (_, i) => i + 1).map((pageNum) => (
-                        <Button
-                          key={pageNum}
-                          variant={currentPage === pageNum ? "default" : "outline"}
-                          size="sm"
-                          onClick={() => setCurrentPage(pageNum)}
-                          className="w-8 h-8 p-0"
-                        >
-                          {pageNum}
-                        </Button>
-                      ))}
-                    </div>
-                    
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
-                      disabled={currentPage === totalPages}
-                    >
-                      Next
-                      <ChevronRight className="w-4 h-4" />
-                    </Button>
-                  </div>
-                </div>
-              )}
+              <PaginationBar
+                currentPage={currentPage}
+                totalPages={totalPages}
+                totalItems={filteredServers.length}
+                pageSize={itemsPerPage}
+                onPageChange={setCurrentPage}
+                itemLabel="servers"
+                className="px-6 py-4 border-t"
+              />
             </CardContent>
           </Card>
 

@@ -23,6 +23,7 @@ import { useApiQuery, useRefreshApiData } from '@/hooks/use-api-query'
 import NextLink from 'next/link'
 import { useRouter } from 'next/navigation'
 import { ManageMenu } from '@/components/manage-menu'
+import { PaginationBar } from '@/components/pagination-bar'
 import { 
   Plus,
   Search,
@@ -33,8 +34,6 @@ import {
   Filter,
   Eye,
   Edit,
-  ChevronLeft,
-  ChevronRight,
   Activity,
   Users,
   Server,
@@ -601,54 +600,15 @@ export default function HomePage() {
                   </>
                 )}
 
-                {/* Pagination Controls */}
-                {filteredDomains.length > 0 && totalPages > 1 && (
-                  <div className="flex flex-col md:flex-row items-center justify-between px-6 py-4 border-t space-y-3 md:space-y-0">
-                    <div className="text-sm text-gray-700 order-2 md:order-1">
-                      Showing {startIndex + 1} to {Math.min(endIndex, filteredDomains.length)} of {filteredDomains.length} domains
-                    </div>
-                    <div className="flex items-center space-x-2 order-1 md:order-2">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
-                        disabled={currentPage === 1}
-                      >
-                        <ChevronLeft className="w-4 h-4" />
-                        <span className="hidden sm:inline ml-1">Previous</span>
-                      </Button>
-                      
-                      <div className="hidden md:flex items-center space-x-1">
-                        {Array.from({ length: totalPages }, (_, i) => i + 1).map((pageNum) => (
-                          <Button
-                            key={pageNum}
-                            variant={currentPage === pageNum ? "default" : "outline"}
-                            size="sm"
-                            onClick={() => setCurrentPage(pageNum)}
-                            className="w-8 h-8 p-0"
-                          >
-                            {pageNum}
-                          </Button>
-                        ))}
-                      </div>
-                      
-                      {/* Mobile page indicator */}
-                      <div className="md:hidden text-sm text-gray-600 px-3">
-                        {currentPage} / {totalPages}
-                      </div>
-                      
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
-                        disabled={currentPage === totalPages}
-                      >
-                        <span className="hidden sm:inline mr-1">Next</span>
-                        <ChevronRight className="w-4 h-4" />
-                      </Button>
-                    </div>
-                  </div>
-                )}
+                <PaginationBar
+                  currentPage={currentPage}
+                  totalPages={totalPages}
+                  totalItems={filteredDomains.length}
+                  pageSize={itemsPerPage}
+                  onPageChange={setCurrentPage}
+                  itemLabel="domains"
+                  className="mt-4 pt-4 border-t"
+                />
               </CardContent>
             </Card>
           </div>

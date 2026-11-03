@@ -10,6 +10,7 @@ import { PageSkeleton } from '@/components/page-skeleton'
 import { StatCard } from '@/components/stat-card'
 import { PageHeader } from '@/components/page-header'
 import { ManageMenu, ManageAction } from '@/components/manage-menu'
+import { PaginationBar } from '@/components/pagination-bar'
 import { StatusPill, toneFromBgClass } from '@/components/status-pill'
 import { formatIndonesianDate } from '@/lib/utils'
 import { 
@@ -899,44 +900,16 @@ export default function WebsitesPage() {
       </div>
 
       {/* Pagination - Desktop */}
-      {totalPages > 1 && (
-        <div className="hidden md:flex items-center justify-between mt-6">
-          <div className="text-sm text-gray-600">
-            Showing {startIndex + 1} to {Math.min(endIndex, filteredWebsites.length)} of {filteredWebsites.length} websites
-          </div>
-          <div className="flex items-center gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
-              disabled={currentPage === 1}
-            >
-              Previous
-            </Button>
-            
-            {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
-              <Button
-                key={page}
-                variant={currentPage === page ? "default" : "outline"}
-                size="sm"
-                onClick={() => setCurrentPage(page)}
-                className="w-8 h-8 p-0"
-              >
-                {page}
-              </Button>
-            ))}
-            
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
-              disabled={currentPage === totalPages}
-            >
-              Next
-            </Button>
-          </div>
-        </div>
-      )}
+      <div className="hidden md:block mt-6">
+        <PaginationBar
+          currentPage={currentPage}
+          totalPages={totalPages}
+          totalItems={filteredWebsites.length}
+          pageSize={itemsPerPage}
+          onPageChange={setCurrentPage}
+          itemLabel="websites"
+        />
+      </div>
 
       {/* Add Website Modal */}
       <Dialog open={showAddModal} onOpenChange={setShowAddModal}>
