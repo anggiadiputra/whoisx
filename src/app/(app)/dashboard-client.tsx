@@ -348,9 +348,9 @@ export default function HomePage() {
           description={`Selamat datang lagi, ${session?.user?.name || session?.user?.email}`}
           actions={
             <>
-              <Button variant="outline" onClick={fetchDomains} disabled={domainsQuery.isFetching}>
-                <RefreshCw className={`w-4 h-4 mr-2 ${domainsQuery.isFetching ? 'animate-spin' : ''}`} />
-                Muat ulang
+              <Button variant="outline" onClick={fetchDomains} disabled={domainsQuery.isFetching} aria-label="Muat ulang" className="w-12 px-0 sm:w-auto sm:px-5">
+                <RefreshCw className={`w-4 h-4 sm:mr-2 ${domainsQuery.isFetching ? 'animate-spin' : ''}`} />
+                <span className="sr-only sm:not-sr-only">Muat ulang</span>
               </Button>
               {canManageDomains && (
                 <Button asChild>
@@ -482,8 +482,8 @@ export default function HomePage() {
                                   <div className="grid size-11 shrink-0 place-items-center rounded-[16px] bg-lilac">
                                     <Globe className="size-5 text-violet" />
                                   </div>
-                                  <div>
-                                    <div className="text-[15px] font-extrabold leading-snug">{domain.domain}</div>
+                                  <div className="min-w-0">
+                                    <div className="break-all text-[15px] font-extrabold leading-snug">{domain.domain}</div>
                                     {/* Registrar sits under the name (as on the Domains page) so the table fits beside the sidebar */}
                                     <div className="text-sm text-muted">
                                       {domain.realRegistrarName || domain.registrar || 'Registrar tidak diketahui'}
@@ -562,8 +562,8 @@ export default function HomePage() {
                           <Card key={domain.id} className="rounded-card border-2 border-sand p-4 shadow-none">
                             <div className="space-y-3">
                               {/* Header */}
-                              <div className="flex items-center justify-between">
-                                <div className="flex items-center space-x-3">
+                              <div className="flex items-start gap-3">
+                                <div className="flex min-w-0 flex-1 items-start gap-3">
                                   {canManageDomains && (
                                     <SelectCheckbox
                                       checked={selection.isSelected(domain.id)}
@@ -574,20 +574,22 @@ export default function HomePage() {
                                   <div className="grid size-11 shrink-0 place-items-center rounded-[16px] bg-lilac">
                                     <Globe className="size-5 text-violet" />
                                   </div>
-                                  <div>
-                                    <div className="text-[15px] font-extrabold leading-snug">{domain.domain}</div>
+                                  <div className="min-w-0">
+                                    <div className="break-all text-[15px] font-extrabold leading-snug">{domain.domain}</div>
                                     {domain.notes && (
-                                      <div className="text-sm text-muted truncate max-w-[200px]">
+                                      <div className="truncate text-sm text-muted">
                                         {domain.notes}
                                       </div>
                                     )}
+                                    <div className="mt-1.5 flex">
+                                      <StatusPill tone={toneFromBgClass(expiryStatus.color)}>{expiryStatus.text}</StatusPill>
+                                    </div>
                                   </div>
                                 </div>
-                                <StatusPill tone={toneFromBgClass(expiryStatus.color)}>{expiryStatus.text}</StatusPill>
                               </div>
 
                               {/* Details Grid */}
-                              <div className="grid grid-cols-2 gap-3 text-sm">
+                              <div className="grid grid-cols-2 gap-3 text-sm [&>div]:min-w-0 [&>div]:break-words">
                                 <div>
                                   <span className="text-muted">Kedaluwarsa:</span>
                                   <div className="font-medium">

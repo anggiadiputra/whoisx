@@ -52,10 +52,8 @@ const nextConfig: NextConfig = {
     },
   },
   
-  // Development configuration
-  devIndicators: {
-    position: 'bottom-right',
-  },
+  // The "N" dev badge sat on top of the phone tab bar; build errors still open the overlay
+  devIndicators: false,
   
   // Image optimization
   images: {

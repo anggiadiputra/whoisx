@@ -655,9 +655,9 @@ export default function ServersPage() {
             description="Kelola server hosting dan VPS kamu"
             actions={
               <>
-                <Button variant="outline" onClick={fetchServers} disabled={serversQuery.isFetching}>
-                  <RefreshCw className={`w-4 h-4 mr-2 ${serversQuery.isFetching ? 'animate-spin' : ''}`} />
-                  Muat ulang
+                <Button variant="outline" onClick={fetchServers} disabled={serversQuery.isFetching} aria-label="Muat ulang" className="w-12 px-0 sm:w-auto sm:px-5">
+                  <RefreshCw className={`w-4 h-4 sm:mr-2 ${serversQuery.isFetching ? 'animate-spin' : ''}`} />
+                  <span className="sr-only sm:not-sr-only">Muat ulang</span>
                 </Button>
                 {canManageServers && (
                   <Button onClick={handleShowAddModal}>
@@ -1107,26 +1107,26 @@ export default function ServersPage() {
                     <Card key={server.id} className="p-4">
                       <div className="space-y-3">
                         {/* Server Header */}
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center space-x-3">
-                            <div className="w-8 h-8 bg-lilac rounded-2xl flex items-center justify-center">
+                        <div className="flex items-start gap-3">
+                          <div className="flex min-w-0 flex-1 items-start gap-3">
+                            <div className="grid size-9 shrink-0 place-items-center rounded-[14px] bg-lilac">
                               <ServerIcon className="w-4 h-4 text-violet" />
                             </div>
-                            <div>
-                              <h4 className="text-[15px] font-extrabold leading-snug">{server.serverName}</h4>
-                              <p className="text-sm text-muted">{server.provider}</p>
+                            <div className="min-w-0">
+                              <h4 className="text-[15px] font-extrabold leading-snug break-words">{server.serverName}</h4>
+                              <p className="truncate text-sm text-muted">{server.provider}</p>
+                              <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
+                                <Badge variant="outline" className="text-xs">
+                                  {server.serverType}
+                                </Badge>
+                                <StatusPill tone={toneFromBgClass(serverStatus.color)}>{serverStatus.text}</StatusPill>
+                              </div>
                             </div>
-                          </div>
-                          <div className="flex flex-col items-end space-y-1">
-                            <Badge variant="outline" className="text-xs">
-                              {server.serverType}
-                            </Badge>
-                            <StatusPill tone={toneFromBgClass(serverStatus.color)}>{serverStatus.text}</StatusPill>
                           </div>
                         </div>
 
                         {/* Server Details */}
-                        <div className="grid grid-cols-2 gap-3 text-sm">
+                        <div className="grid grid-cols-2 gap-3 text-sm [&>div]:min-w-0 [&>div]:break-words">
                           <div>
                             <span className="text-muted">Username:</span>
                             <div className="mt-1 font-medium">

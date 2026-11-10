@@ -436,9 +436,9 @@ export default function UsersPage() {
         description="Kelola pengguna dan hak aksesnya"
         actions={
           <>
-            <Button variant="outline" onClick={fetchUsers} disabled={usersQuery.isFetching}>
-              <RefreshCw className={`w-4 h-4 mr-2 ${usersQuery.isFetching ? 'animate-spin' : ''}`} />
-              Muat ulang
+            <Button variant="outline" onClick={fetchUsers} disabled={usersQuery.isFetching} aria-label="Muat ulang" className="w-12 px-0 sm:w-auto sm:px-5">
+              <RefreshCw className={`w-4 h-4 sm:mr-2 ${usersQuery.isFetching ? 'animate-spin' : ''}`} />
+              <span className="sr-only sm:not-sr-only">Muat ulang</span>
             </Button>
             <Button onClick={() => setShowAddModal(true)}>
               <Plus className="w-4 h-4 mr-2" />
@@ -589,24 +589,24 @@ export default function UsersPage() {
                 <Card key={user.id} className="p-4">
                   <div className="space-y-3">
                     {/* User Header */}
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center space-x-3">
-                        <div className="w-8 h-8 bg-lilac rounded-2xl flex items-center justify-center">
+                    <div className="flex items-start gap-3">
+                      <div className="flex min-w-0 flex-1 items-start gap-3">
+                        <div className="grid size-9 shrink-0 place-items-center rounded-[14px] bg-lilac">
                           <User className="w-4 h-4 text-violet" />
                         </div>
-                        <div>
-                          <h4 className="text-[15px] font-extrabold leading-snug">{user.name || 'Tanpa nama'}</h4>
-                          <p className="text-sm text-muted">{user.email}</p>
+                        <div className="min-w-0">
+                          <h4 className="text-[15px] font-extrabold leading-snug break-words">{user.name || 'Tanpa nama'}</h4>
+                          <p className="truncate text-sm text-muted">{user.email}</p>
+                          <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
+                            <StatusPill tone={toneFromBgClass(roleBadge.color)}>{roleBadge.text}</StatusPill>
+                            <StatusPill tone={toneFromBgClass(statusBadge.color)}>{statusBadge.text}</StatusPill>
+                          </div>
                         </div>
-                      </div>
-                      <div className="flex flex-col items-end space-y-1">
-                        <StatusPill tone={toneFromBgClass(roleBadge.color)}>{roleBadge.text}</StatusPill>
-                        <StatusPill tone={toneFromBgClass(statusBadge.color)}>{statusBadge.text}</StatusPill>
                       </div>
                     </div>
 
                     {/* User Details */}
-                    <div className="grid grid-cols-2 gap-3 text-sm">
+                    <div className="grid grid-cols-2 gap-3 text-sm [&>div]:min-w-0 [&>div]:break-words">
                       <div>
                         <span className="text-muted">Terakhir masuk:</span>
                         <div className="mt-1 flex items-center text-xs">
