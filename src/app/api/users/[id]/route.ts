@@ -16,7 +16,7 @@ export async function GET(
     
     if (!session?.user) {
       return NextResponse.json(
-        { success: false, error: 'Unauthorized' },
+        { success: false, error: 'Kamu perlu masuk dulu' },
         { status: 401 }
       )
     }
@@ -24,7 +24,7 @@ export async function GET(
     // Only ADMIN can view user details, or user can view their own profile
     if (session.user.role !== 'ADMIN' && session.user.id !== id) {
       return NextResponse.json(
-        { success: false, error: 'Forbidden' },
+        { success: false, error: 'Kamu nggak punya akses untuk ini' },
         { status: 403 }
       )
     }
@@ -51,7 +51,7 @@ export async function GET(
 
     if (!user) {
       return NextResponse.json(
-        { success: false, error: 'User not found' },
+        { success: false, error: 'Pengguna tidak ditemukan' },
         { status: 404 }
       )
     }
@@ -64,7 +64,7 @@ export async function GET(
   } catch (error) {
     console.error('Error fetching user:', error)
     return NextResponse.json(
-      { success: false, error: 'Internal server error' },
+      { success: false, error: 'Gagal memproses permintaan. Coba lagi, ya.' },
       { status: 500 }
     )
   }
@@ -81,7 +81,7 @@ export async function PUT(
     
     if (!session?.user) {
       return NextResponse.json(
-        { success: false, error: 'Unauthorized' },
+        { success: false, error: 'Kamu perlu masuk dulu' },
         { status: 401 }
       )
     }
@@ -92,7 +92,7 @@ export async function PUT(
 
     if (!isAdmin && !isOwnProfile) {
       return NextResponse.json(
-        { success: false, error: 'Forbidden' },
+        { success: false, error: 'Kamu nggak punya akses untuk ini' },
         { status: 403 }
       )
     }
@@ -113,7 +113,7 @@ export async function PUT(
 
     if (!existingUser) {
       return NextResponse.json(
-        { success: false, error: 'User not found' },
+        { success: false, error: 'Pengguna tidak ditemukan' },
         { status: 404 }
       )
     }
@@ -130,7 +130,7 @@ export async function PUT(
     if (email !== undefined && email !== existingUser.email) {
       if (!isAdmin && !isOwnProfile) {
         return NextResponse.json(
-          { success: false, error: 'Cannot update email' },
+          { success: false, error: 'Email nggak bisa diubah' },
           { status: 403 }
         )
       }
@@ -142,7 +142,7 @@ export async function PUT(
 
       if (emailExists) {
         return NextResponse.json(
-          { success: false, error: 'Email already exists' },
+          { success: false, error: 'Email sudah ada' },
           { status: 400 }
         )
       }
@@ -167,7 +167,7 @@ export async function PUT(
       if (isOwnProfile && !isAdmin) {
         if (!currentPassword) {
           return NextResponse.json(
-            { success: false, error: 'Current password is required' },
+            { success: false, error: 'Kata sandi saat ini wajib diisi' },
             { status: 400 }
           )
         }
@@ -177,7 +177,7 @@ export async function PUT(
           const isValidPassword = await bcrypt.compare(currentPassword, existingUser.passwordHash)
           if (!isValidPassword) {
             return NextResponse.json(
-              { success: false, error: 'Current password is incorrect' },
+              { success: false, error: 'Kata sandi saat ini salah' },
               { status: 400 }
             )
           }
@@ -215,7 +215,7 @@ export async function PUT(
   } catch (error) {
     console.error('❌ Error updating user:', error)
     return NextResponse.json(
-      { success: false, error: 'Internal server error' },
+      { success: false, error: 'Gagal memproses permintaan. Coba lagi, ya.' },
       { status: 500 }
     )
   }
@@ -232,7 +232,7 @@ export async function DELETE(
     
     if (!session?.user) {
       return NextResponse.json(
-        { success: false, error: 'Unauthorized' },
+        { success: false, error: 'Kamu perlu masuk dulu' },
         { status: 401 }
       )
     }
@@ -240,7 +240,7 @@ export async function DELETE(
     // Only ADMIN can delete users
     if (session.user.role !== 'ADMIN') {
       return NextResponse.json(
-        { success: false, error: 'Forbidden - Admin access required' },
+        { success: false, error: 'Kamu nggak punya akses untuk ini' },
         { status: 403 }
       )
     }
@@ -248,7 +248,7 @@ export async function DELETE(
     // Prevent deleting self
     if (session.user.id === id) {
       return NextResponse.json(
-        { success: false, error: 'Cannot delete your own account' },
+        { success: false, error: 'Kamu nggak bisa menghapus akunmu sendiri' },
         { status: 400 }
       )
     }
@@ -266,7 +266,7 @@ export async function DELETE(
 
     if (!existingUser) {
       return NextResponse.json(
-        { success: false, error: 'User not found' },
+        { success: false, error: 'Pengguna tidak ditemukan' },
         { status: 404 }
       )
     }
@@ -280,13 +280,13 @@ export async function DELETE(
 
     return NextResponse.json({
       success: true,
-      message: 'User deleted successfully'
+      message: 'Pengguna dihapus'
     })
 
   } catch (error) {
     console.error('❌ Error deleting user:', error)
     return NextResponse.json(
-      { success: false, error: 'Internal server error' },
+      { success: false, error: 'Gagal memproses permintaan. Coba lagi, ya.' },
       { status: 500 }
     )
   }

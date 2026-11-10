@@ -25,7 +25,7 @@ export async function GET(
     if (!domain) {
       return NextResponse.json({
         success: false,
-        error: 'Domain not found'
+        error: 'Domain tidak ditemukan'
       }, { status: 404 })
     }
     
@@ -48,7 +48,7 @@ export async function GET(
     console.error('Error fetching domain:', error)
     return NextResponse.json({
       success: false,
-      error: 'Failed to fetch domain'
+      error: 'Gagal memuat domain. Coba lagi, ya.'
     }, { status: 500 })
   }
 }
@@ -77,7 +77,7 @@ export async function PUT(
     if (!existingDomain) {
       return NextResponse.json({
         success: false,
-        error: 'Domain not found'
+        error: 'Domain tidak ditemukan'
       }, { status: 404 })
     }
     
@@ -151,7 +151,7 @@ export async function PUT(
     console.error('Error updating domain:', error)
     return NextResponse.json({
       success: false,
-      error: 'Failed to update domain'
+      error: 'Gagal memperbarui domain. Coba lagi, ya.'
     }, { status: 500 })
   }
 }
@@ -177,7 +177,7 @@ export async function DELETE(
     if (!existingDomain) {
       return NextResponse.json({
         success: false,
-        error: 'Domain not found'
+        error: 'Domain tidak ditemukan'
       }, { status: 404 })
     }
     
@@ -188,13 +188,13 @@ export async function DELETE(
     
     return NextResponse.json({
       success: true,
-      message: 'Domain deleted successfully'
+      message: 'Domain dihapus'
     })
   } catch (error: any) {
     console.error('Error deleting domain:', error)
     return NextResponse.json({
       success: false,
-      error: 'Failed to delete domain'
+      error: 'Gagal menghapus domain. Coba lagi, ya.'
     }, { status: 500 })
   }
 }

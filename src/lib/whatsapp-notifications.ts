@@ -129,12 +129,12 @@ export class WhatsAppNotificationService {
     const criticalDomains = domains.filter(d => d.daysToExpiry !== null && d.daysToExpiry! <= this.settings!.expiryThresholds.critical).length
     const warningDomains = domains.filter(d => d.daysToExpiry !== null && d.daysToExpiry! <= this.settings!.expiryThresholds.warning).length
 
-    const reportMessage = `📊 Daily Domain Report Summary\n\n` +
-                         `Total Domains: ${totalDomains}\n` +
-                         `Expired: ${expiredDomains}\n` +
-                         `Critical (≤${this.settings.expiryThresholds.critical} days): ${criticalDomains}\n` +
-                         `Warning (≤${this.settings.expiryThresholds.warning} days): ${warningDomains}\n\n` +
-                         `Generated: ${new Date().toLocaleString('id-ID')}`
+    const reportMessage = `📊 Ringkasan laporan harian domain\n\n` +
+                         `Total domain: ${totalDomains}\n` +
+                         `Kedaluwarsa: ${expiredDomains}\n` +
+                         `Kritis (≤${this.settings.expiryThresholds.critical} hari): ${criticalDomains}\n` +
+                         `Peringatan (≤${this.settings.expiryThresholds.warning} hari): ${warningDomains}\n\n` +
+                         `Dibuat: ${new Date().toLocaleString('id-ID')}`
 
     return await this.sendNotification('daily_report', {
       message: reportMessage

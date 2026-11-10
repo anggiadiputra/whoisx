@@ -27,7 +27,7 @@ export function ManageMenu({ actions }: { actions: ManageAction[] }) {
     <DropdownMenu modal={false}>
       <DropdownMenuTrigger asChild>
         <Button variant="secondary" size="sm">
-          Manage
+          Kelola
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
@@ -38,7 +38,7 @@ export function ManageMenu({ actions }: { actions: ManageAction[] }) {
               {action.destructive && index > 0 && <DropdownMenuSeparator />}
               <DropdownMenuItem
                 onSelect={action.onSelect}
-                className={action.destructive ? 'text-red-600 focus:bg-red-50 focus:text-red-700' : ''}
+                className={action.destructive ? 'text-st-no focus:bg-rose focus:text-st-no' : ''}
               >
                 <Icon />
                 {action.label}

@@ -9,7 +9,7 @@ export async function POST(request: NextRequest) {
     if (!(await getRegistrationEnabled())) {
       return NextResponse.json({
         success: false,
-        error: 'Sign up is closed. Ask an administrator for an account.'
+        error: 'Pendaftaran sedang ditutup. Minta akun ke admin, ya.'
       }, { status: 403 })
     }
 
@@ -22,7 +22,7 @@ export async function POST(request: NextRequest) {
     if (!name || !email || !password) {
       return NextResponse.json({
         success: false,
-        error: 'Name, email, and password are required'
+        error: 'Nama, email, dan kata sandi wajib diisi'
       }, { status: 400 })
     }
 
@@ -31,7 +31,7 @@ export async function POST(request: NextRequest) {
     if (!emailRegex.test(email)) {
       return NextResponse.json({
         success: false,
-        error: 'Invalid email format'
+        error: 'Format email tidak valid'
       }, { status: 400 })
     }
 
@@ -39,7 +39,7 @@ export async function POST(request: NextRequest) {
     if (password.length < 6) {
       return NextResponse.json({
         success: false,
-        error: 'Password must be at least 6 characters long'
+        error: 'Kata sandi minimal 6 karakter'
       }, { status: 400 })
     }
 
@@ -51,7 +51,7 @@ export async function POST(request: NextRequest) {
     if (existingUser) {
       return NextResponse.json({
         success: false,
-        error: 'User with this email already exists'
+        error: 'Pengguna dengan email ini sudah ada'
       }, { status: 409 })
     }
 
@@ -79,13 +79,13 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       success: true,
       data: user,
-      message: 'User created successfully'
+      message: 'Akun berhasil dibuat'
     })
   } catch (error: any) {
     console.error('Error creating user:', error)
     return NextResponse.json({
       success: false,
-      error: 'Failed to create user'
+      error: 'Gagal membuat akun. Coba lagi, ya.'
     }, { status: 500 })
   }
 }

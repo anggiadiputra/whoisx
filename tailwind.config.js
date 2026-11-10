@@ -1,5 +1,6 @@
 const defaultTheme = require('tailwindcss/defaultTheme')
 
+// Design system "Berani" (see design.md). Colors are added here first, never as loose hex in components.
 /** @type {import('tailwindcss').Config} */
 module.exports = {
   darkMode: ["class"],
@@ -11,110 +12,67 @@ module.exports = {
   ],
   prefix: "",
   theme: {
-    container: {
-      center: true,
-      padding: "2rem",
-      screens: {
-        "2xl": "1400px",
-      },
-    },
     extend: {
       fontFamily: {
-        sans: ['var(--font-lato)', ...defaultTheme.fontFamily.sans],
+        sans: ['var(--font-jakarta)', ...defaultTheme.fontFamily.sans],
+        mono: ['var(--font-geist-mono)', ...defaultTheme.fontFamily.mono],
       },
       colors: {
-        border: "hsl(var(--border))",
-        input: "hsl(var(--input))",
-        ring: "hsl(var(--ring))",
-        background: "hsl(var(--background))",
-        foreground: "hsl(var(--foreground))",
-        primary: {
-          DEFAULT: "hsl(var(--primary))",
-          foreground: "hsl(var(--primary-foreground))",
-        },
-        secondary: {
-          DEFAULT: "hsl(var(--secondary))",
-          foreground: "hsl(var(--secondary-foreground))",
-        },
-        destructive: {
-          DEFAULT: "hsl(var(--destructive))",
-          foreground: "hsl(var(--destructive-foreground))",
-        },
-        muted: {
-          DEFAULT: "hsl(var(--muted))",
-          foreground: "hsl(var(--muted-foreground))",
-        },
-        accent: {
-          DEFAULT: "hsl(var(--accent))",
-          foreground: "hsl(var(--accent-foreground))",
-        },
-        popover: {
-          DEFAULT: "hsl(var(--popover))",
-          foreground: "hsl(var(--popover-foreground))",
-        },
-        card: {
-          DEFAULT: "hsl(var(--card))",
-          foreground: "hsl(var(--card-foreground))",
-        },
+        // Text, and the single dark surface per page
+        ink: { DEFAULT: '#111318', soft: '#1e212b', line: '#2e323e' },
+        cream: '#f3f1ec',
+        sand: '#e8e4da',
+        // Secondary text (AA on cream and white)
+        muted: { DEFAULT: '#5a5d69', foreground: '#5a5d69' },
+
+        violet: { DEFAULT: '#5b3df5', dark: '#4526d9' },
+        lime: { DEFAULT: '#c6f432' },
+        lilac: '#e6e0ff',
+        mint: '#d9f5e5',
+        peach: '#ffe3d3',
+        sky: { DEFAULT: '#dbeeff' },
+        butter: '#fff0b8',
+        rose: { DEFAULT: '#ffd9dc', dark: '#ffc4c9' },
+
+        // Status text on its pastel fill (contrast >= 4.5:1)
+        st: { wait: '#6b4a00', rev: '#8f3300', no: '#a3122a', draft: '#3d404b' },
+        // Text on pastel
+        on: { mint: '#17603b', peach: '#9a3b0b', sky: '#135a8c' },
+
+        // shadcn names used by the ui primitives, mapped onto the tokens above
+        border: '#e8e4da',
+        input: '#e8e4da',
+        ring: '#5b3df5',
+        background: '#f3f1ec',
+        foreground: '#111318',
+        primary: { DEFAULT: '#5b3df5', foreground: '#ffffff' },
+        secondary: { DEFAULT: '#f3f1ec', foreground: '#111318' },
+        destructive: { DEFAULT: '#ffd9dc', foreground: '#a3122a' },
+        accent: { DEFAULT: '#e6e0ff', foreground: '#4526d9' },
+        popover: { DEFAULT: '#ffffff', foreground: '#111318' },
+        card: { DEFAULT: '#ffffff', foreground: '#111318' },
       },
       borderRadius: {
-        lg: "var(--radius)",
-        md: "calc(var(--radius) - 2px)",
-        sm: "calc(var(--radius) - 4px)",
+        tile: '20px',
+        card: '24px',
+        hero: '28px',
       },
       boxShadow: {
-        '3xl': '0 35px 60px -12px rgba(0, 0, 0, 0.25)',
+        card: '0 1px 2px rgb(17 19 24 / 0.04), 0 14px 32px -18px rgb(17 19 24 / 0.22)',
+        float: '0 18px 40px -14px rgb(17 19 24 / 0.38)',
       },
       keyframes: {
-        "accordion-down": {
-          from: { height: "0" },
-          to: { height: "var(--radix-accordion-content-height)" },
-        },
-        "accordion-up": {
-          from: { height: "var(--radix-accordion-content-height)" },
-          to: { height: "0" },
-        },
-        "blob": {
-          "0%": {
-            transform: "translate(0px, 0px) scale(1)",
-          },
-          "33%": {
-            transform: "translate(30px, -50px) scale(1.1)",
-          },
-          "66%": {
-            transform: "translate(-20px, 20px) scale(0.9)",
-          },
-          "100%": {
-            transform: "translate(0px, 0px) scale(1)",
-          },
-        },
-        "fadeIn": {
-          from: {
-            opacity: "0",
-            transform: "translateY(20px)",
-          },
-          to: {
-            opacity: "1",
-            transform: "translateY(0)",
-          },
-        },
-        "fadeInUp": {
-          from: {
-            opacity: "0",
-            transform: "translateY(30px)",
-          },
-          to: {
-            opacity: "1",
-            transform: "translateY(0)",
-          },
+        wave: {
+          '0%, 100%': { transform: 'rotate(0)' },
+          '15%': { transform: 'rotate(16deg)' },
+          '30%': { transform: 'rotate(-8deg)' },
+          '45%': { transform: 'rotate(14deg)' },
+          '60%': { transform: 'rotate(-4deg)' },
+          '75%': { transform: 'rotate(10deg)' },
         },
       },
       animation: {
-        "accordion-down": "accordion-down 0.2s ease-out",
-        "accordion-up": "accordion-up 0.2s ease-out",
-        "blob": "blob 7s infinite",
-        "fade-in": "fadeIn 0.8s ease-out",
-        "fade-in-up": "fadeInUp 0.8s ease-out",
+        wave: 'wave 2.2s ease-in-out 1',
       },
     },
   },

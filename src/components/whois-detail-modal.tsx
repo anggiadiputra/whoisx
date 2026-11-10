@@ -68,16 +68,16 @@ export function WhoisDetailModal({ domainId, domainName, children, open: control
         setWhoisData(result.data)
       } else {
         toast({
-          title: "Error",
-          description: result.error || 'Failed to fetch WHOIS details',
+          title: "Gagal",
+          description: result.error || 'Detail WHOIS gagal diambil',
           variant: "destructive",
         })
       }
     } catch (error) {
       console.error('Error fetching WHOIS details:', error)
       toast({
-        title: "Network Error",
-        description: 'Unable to fetch WHOIS details',
+        title: "Koneksi bermasalah",
+        description: 'Nggak bisa mengambil detail WHOIS',
         variant: "destructive",
       })
     } finally {
@@ -98,8 +98,8 @@ export function WhoisDetailModal({ domainId, domainName, children, open: control
 
       if (response.ok && result.success) {
         toast({
-          title: "WHOIS Updated",
-          description: `WHOIS data for ${domainName} has been updated successfully`,
+          title: "WHOIS diperbarui",
+          description: `Data WHOIS ${domainName} berhasil diperbarui`,
           variant: "default",
         })
         
@@ -120,16 +120,16 @@ export function WhoisDetailModal({ domainId, domainName, children, open: control
         
       } else {
         toast({
-          title: "Update Failed",
-          description: result.error || 'Failed to update WHOIS data',
+          title: "Gagal memperbarui",
+          description: result.error || 'Data WHOIS gagal diperbarui',
           variant: "destructive",
         })
       }
     } catch (error) {
       console.error('Error updating WHOIS data:', error)
       toast({
-        title: "Network Error",
-        description: 'Unable to update WHOIS data',
+        title: "Koneksi bermasalah",
+        description: 'Nggak bisa memperbarui data WHOIS',
         variant: "destructive",
       })
     } finally {
@@ -168,8 +168,8 @@ export function WhoisDetailModal({ domainId, domainName, children, open: control
         {/* Header */}
         <div className="px-6 py-4 border-b">
           <DialogHeader>
-            <DialogTitle className="text-lg font-medium text-gray-900">
-              Domain Information
+            <DialogTitle className="text-lg font-medium text-ink">
+              Informasi domain
             </DialogTitle>
           </DialogHeader>
         </div>
@@ -190,25 +190,25 @@ export function WhoisDetailModal({ domainId, domainName, children, open: control
               <div className="space-y-4">
                 {/* Domain ID */}
                 <div className="flex justify-between items-start py-2">
-                  <span className="text-sm font-medium text-gray-900 min-w-[140px]">Domain ID:</span>
-                  <span className="text-sm text-gray-900 text-right font-mono">
+                  <span className="text-sm font-medium text-ink min-w-[140px]">ID domain:</span>
+                  <span className="text-sm text-ink text-right font-mono">
                     {whoisData.rawWhoisData?.handle || 
                      whoisData.rawWhoisData?.domainId || 
                      whoisData.rawWhoisData?.['Domain ID'] || 
-                     'N/A'}
+                     '–'}
                   </span>
                 </div>
                 
                 {/* Domain Name */}
                 <div className="flex justify-between items-start py-2">
-                  <span className="text-sm font-medium text-gray-900 min-w-[140px]">Domain Name:</span>
-                  <span className="text-sm text-gray-900 text-right font-medium">{whoisData.domain}</span>
+                  <span className="text-sm font-medium text-ink min-w-[140px]">Nama domain:</span>
+                  <span className="text-sm text-ink text-right font-medium">{whoisData.domain}</span>
                 </div>
                 
                 {/* Created On */}
                 <div className="flex justify-between items-start py-2">
-                  <span className="text-sm font-medium text-gray-900 min-w-[140px]">Created On:</span>
-                  <span className="text-sm text-gray-900 text-right">
+                  <span className="text-sm font-medium text-ink min-w-[140px]">Dibuat:</span>
+                  <span className="text-sm text-ink text-right">
                     {(() => {
                       // Try to get from multiple sources
                       let createdDate = whoisData.createdDate
@@ -230,8 +230,8 @@ export function WhoisDetailModal({ domainId, domainName, children, open: control
                 
                 {/* Last Update On */}
                 <div className="flex justify-between items-start py-2">
-                  <span className="text-sm font-medium text-gray-900 min-w-[140px]">Last Update On:</span>
-                  <span className="text-sm text-gray-900 text-right">
+                  <span className="text-sm font-medium text-ink min-w-[140px]">Terakhir diperbarui:</span>
+                  <span className="text-sm text-ink text-right">
                     {(() => {
                       // Try to get from multiple sources
                       let updatedDate = whoisData.updatedDate
@@ -253,8 +253,8 @@ export function WhoisDetailModal({ domainId, domainName, children, open: control
                 
                 {/* Expiration Date */}
                 <div className="flex justify-between items-start py-2">
-                  <span className="text-sm font-medium text-gray-900 min-w-[140px]">Expiration Date:</span>
-                  <span className="text-sm text-gray-900 text-right font-medium">
+                  <span className="text-sm font-medium text-ink min-w-[140px]">Tanggal kedaluwarsa:</span>
+                  <span className="text-sm text-ink text-right font-medium">
                     {(() => {
                       // Try to get from multiple sources
                       let expiryDate = whoisData.expiryDate
@@ -276,8 +276,8 @@ export function WhoisDetailModal({ domainId, domainName, children, open: control
                 
                 {/* Status */}
                 <div className="flex justify-between items-start py-2">
-                  <span className="text-sm font-medium text-gray-900 min-w-[140px]">Status:</span>
-                  <span className="text-sm text-gray-900 text-right">
+                  <span className="text-sm font-medium text-ink min-w-[140px]">Status:</span>
+                  <span className="text-sm text-ink text-right">
                     {(() => {
                       // Try to get from multiple sources
                       let status = whoisData.domainStatus && whoisData.domainStatus.length > 0 
@@ -289,7 +289,7 @@ export function WhoisDetailModal({ domainId, domainName, children, open: control
                         status = whoisData.rawWhoisData.status[0] || whoisData.rawWhoisData.status
                       }
                       
-                      return status || 'N/A'
+                      return status || '–'
                     })()}
                   </span>
                 </div>
@@ -309,15 +309,15 @@ export function WhoisDetailModal({ domainId, domainName, children, open: control
                   if (nameServers.length > 0) {
                     return nameServers.slice(0, 4).map((ns: string, index: number) => (
                       <div key={index} className="flex justify-between items-start py-2">
-                        <span className="text-sm font-medium text-gray-900 min-w-[140px]">Nameserver {index + 1}:</span>
-                        <span className="text-sm text-gray-900 text-right font-mono">{ns}</span>
+                        <span className="text-sm font-medium text-ink min-w-[140px]">Nameserver {index + 1}:</span>
+                        <span className="text-sm text-ink text-right font-mono">{ns}</span>
                       </div>
                     ))
                   } else {
                     return (
                       <div className="flex justify-between items-start py-2">
-                        <span className="text-sm font-medium text-gray-900 min-w-[140px]">Nameservers:</span>
-                        <span className="text-sm text-gray-500 text-right">No nameservers found</span>
+                        <span className="text-sm font-medium text-ink min-w-[140px]">Nameservers:</span>
+                        <span className="text-sm text-muted text-right">Nameserver tidak ditemukan</span>
                       </div>
                     )
                   }
@@ -325,9 +325,9 @@ export function WhoisDetailModal({ domainId, domainName, children, open: control
                 
                 {/* Registrar Name */}
                 <div className="flex justify-between items-start py-2">
-                  <span className="text-sm font-medium text-gray-900 min-w-[140px]">Registrar Name:</span>
+                  <span className="text-sm font-medium text-ink min-w-[140px]">Nama registrar:</span>
                   <div className="text-right">
-                    <div className="text-sm text-gray-900 font-medium">
+                    <div className="text-sm text-ink font-medium">
                       {(() => {
                         // PRIORITIZE RDAP data over database registrar ID
                         let registrar = null
@@ -357,17 +357,17 @@ export function WhoisDetailModal({ domainId, domainName, children, open: control
                           }
                         }
                         
-                        return registrar || 'Unknown'
+                        return registrar || 'Tidak diketahui'
                       })()}
                     </div>
-                    <div className="text-xs text-gray-500">From WHOIS data</div>
+                    <div className="text-xs text-muted">Dari data WHOIS</div>
                   </div>
                 </div>
                 
                 {/* DNSSEC */}
                 <div className="flex justify-between items-start py-2">
-                  <span className="text-sm font-medium text-gray-900 min-w-[140px]">DNSSEC:</span>
-                  <span className="text-sm text-gray-900 text-right">
+                  <span className="text-sm font-medium text-ink min-w-[140px]">DNSSEC:</span>
+                  <span className="text-sm text-ink text-right">
                     {(() => {
                       // Try to get DNSSEC from multiple sources
                       let dnssec = whoisData.dnssec || whoisData.rawWhoisData?.dnssec || whoisData.rawWhoisData?.['DNSSEC']
@@ -384,46 +384,46 @@ export function WhoisDetailModal({ domainId, domainName, children, open: control
                 
                 {/* Renewal Price */}
                 <div className="flex justify-between items-start py-2">
-                  <span className="text-sm font-medium text-gray-900 min-w-[140px]">Renewal Price:</span>
-                  <span className="text-sm text-gray-900 text-right font-medium">
+                  <span className="text-sm font-medium text-ink min-w-[140px]">Harga perpanjangan:</span>
+                  <span className="text-sm text-ink text-right font-medium">
                     {whoisData.renewalPrice 
                       ? `Rp ${parseInt(whoisData.renewalPrice.toString()).toLocaleString('id-ID')}`
-                      : 'N/A'
+                      : '–'
                     }
                   </span>
                 </div>
 
                 {/* Hosting/VPS Info */}
                 <div className="flex justify-between items-start py-2">
-                  <span className="text-sm font-medium text-gray-900 min-w-[140px]">Hosting/VPS Info:</span>
-                  <span className="text-sm text-blue-600 text-right">N/A</span>
+                  <span className="text-sm font-medium text-ink min-w-[140px]">Info hosting/VPS:</span>
+                  <span className="text-sm text-violet text-right">–</span>
                 </div>
               </div>
             </div>
           ) : (
             <div className="text-center py-8">
               <div className="mb-4">
-                <Globe className="w-12 h-12 text-gray-400 mx-auto mb-3" />
-                <h3 className="text-lg font-medium text-gray-900 mb-2">No WHOIS Data Available</h3>
-                <p className="text-gray-500 text-sm mb-4">
-                  This domain may not be registered or WHOIS data is not accessible.
+                <Globe className="w-12 h-12 text-muted mx-auto mb-3" />
+                <h3 className="text-lg font-extrabold tracking-[-0.02em] text-ink mb-2">Data WHOIS belum tersedia</h3>
+                <p className="text-muted text-sm mb-4">
+                  Domain ini mungkin belum terdaftar, atau data WHOIS-nya nggak bisa diakses.
                 </p>
-                <div className="bg-yellow-50 border border-yellow-200 rounded-md p-3 mb-4">
-                  <p className="text-yellow-800 text-sm">
-                    <strong>Possible reasons:</strong>
+                <div className="bg-butter border border-butter rounded-2xl p-3 mb-4">
+                  <p className="text-st-wait text-sm">
+                    <strong>Kemungkinan penyebabnya:</strong>
                   </p>
-                  <ul className="text-yellow-700 text-sm mt-1 list-disc list-inside">
-                    <li>Domain is not registered</li>
-                    <li>Domain has privacy protection enabled</li>
-                    <li>WHOIS lookup failed during domain addition</li>
-                    <li>Domain uses a registry that doesn't provide RDAP data</li>
+                  <ul className="text-st-wait text-sm mt-1 list-disc list-inside">
+                    <li>Domain belum terdaftar</li>
+                    <li>Perlindungan privasi domain sedang aktif</li>
+                    <li>Pengecekan WHOIS gagal waktu domain ditambahkan</li>
+                    <li>Registry domain ini nggak menyediakan data RDAP</li>
                   </ul>
                 </div>
               </div>
               <div className="flex justify-center space-x-2">
                 <Button variant="outline" onClick={fetchWhoisDetails}>
                   <RefreshCw className="w-4 h-4 mr-2" />
-                  Retry WHOIS Lookup
+                  Cek WHOIS lagi
                 </Button>
                 <Button 
                   variant="outline" 
@@ -433,7 +433,7 @@ export function WhoisDetailModal({ domainId, domainName, children, open: control
                   }}
                 >
                   <ExternalLink className="w-4 h-4 mr-2" />
-                  Check External WHOIS
+                  Cek WHOIS eksternal
                 </Button>
               </div>
             </div>
@@ -441,22 +441,22 @@ export function WhoisDetailModal({ domainId, domainName, children, open: control
         </div>
 
         {/* Footer with Action Buttons */}
-        <div className="px-6 py-4 border-t bg-gray-50 flex justify-between">
+        <div className="px-6 py-4 border-t bg-cream flex justify-between">
           <Button
             variant="outline"
             onClick={updateWhoisData}
             disabled={updating || loading}
-            className="text-red-600 border-red-300 hover:bg-red-50 disabled:opacity-50"
+            className="text-st-no border-rose hover:bg-rose disabled:opacity-50"
           >
             {updating ? (
               <>
                 <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
-                Updating...
+                Memperbarui…
               </>
             ) : (
               <>
                 <RefreshCw className="w-4 h-4 mr-2" />
-                Update WHOIS
+                Perbarui WHOIS
               </>
             )}
           </Button>
@@ -465,8 +465,8 @@ export function WhoisDetailModal({ domainId, domainName, children, open: control
             variant="destructive"
             onClick={async () => {
               const confirmed = await confirm({
-                title: 'Delete domain?',
-                description: `"${domainName}" and any websites linked to it will be permanently deleted. This action cannot be undone.`,
+                title: 'Hapus domain?',
+                description: `"${domainName}" dan semua website yang terhubung akan dihapus permanen. Tindakan ini nggak bisa dibatalkan.`,
               })
               if (confirmed) {
                 try {
@@ -479,8 +479,8 @@ export function WhoisDetailModal({ domainId, domainName, children, open: control
 
                   if (response.ok) {
                     toast({
-                      title: "Domain Deleted",
-                      description: `${domainName} has been deleted successfully`,
+                      title: "Domain dihapus",
+                      description: `${domainName} berhasil dihapus`,
                       variant: "default",
                     })
                     
@@ -489,26 +489,26 @@ export function WhoisDetailModal({ domainId, domainName, children, open: control
                     window.dispatchEvent(new CustomEvent('domainDeleted', { detail: { domainId } }))
                   } else {
                     const result = await response.json()
-                    throw new Error(result.error || 'Failed to delete domain')
+                    throw new Error(result.error || 'Domain gagal dihapus')
                   }
                 } catch (error: any) {
                   toast({
-                    title: "Delete Failed",
-                    description: error.message || 'Failed to delete domain',
+                    title: "Gagal menghapus",
+                    description: error.message || 'Domain gagal dihapus',
                     variant: "destructive",
                   })
                 }
               }
             }}
           >
-            Delete Domain
+            Hapus domain
           </Button>
           
           <Button
             variant="secondary"
             onClick={() => handleOpenChange(false)}
           >
-            Close
+            Tutup
           </Button>
         </div>
       </DialogContent>

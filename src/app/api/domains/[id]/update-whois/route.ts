@@ -24,7 +24,7 @@ export async function POST(
     if (!domain) {
       return NextResponse.json({
         success: false,
-        error: 'Domain not found'
+        error: 'Domain tidak ditemukan'
       }, { status: 404 })
     }
 
@@ -37,7 +37,7 @@ export async function POST(
       // console.log(`❌ WHOIS update failed for ${domain.domain}: ${whoisResult.error}`)
       return NextResponse.json({
         success: false,
-        error: whoisResult.error || 'Failed to fetch WHOIS data'
+        error: whoisResult.error || 'Gagal mengambil data WHOIS. Coba lagi, ya.'
       }, { status: 500 })
     }
 
@@ -83,7 +83,7 @@ export async function POST(
     return NextResponse.json({
       success: true,
       data: updatedDomain,
-      message: 'WHOIS data updated successfully',
+      message: 'Data WHOIS diperbarui',
       provider: whoisResult.provider
     })
 
@@ -91,7 +91,7 @@ export async function POST(
     console.error('Error updating WHOIS:', error)
     return NextResponse.json({
       success: false,
-      error: 'Failed to update WHOIS data'
+      error: 'Gagal memperbarui data WHOIS. Coba lagi, ya.'
     }, { status: 500 })
   }
 }

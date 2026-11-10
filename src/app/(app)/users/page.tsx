@@ -142,8 +142,8 @@ export default function UsersPage() {
     // Only ADMIN can access user management
     if (session.user.role !== 'ADMIN') {
       toast({
-        title: "Access Denied",
-        description: "You don't have permission to access user management",
+        title: "Akses ditolak",
+        description: "Kamu nggak punya izin buat kelola pengguna",
         variant: "destructive",
       })
       router.push('/')
@@ -171,11 +171,11 @@ export default function UsersPage() {
       case 'ADMIN':
         return { status: 'admin', color: 'bg-purple-500', text: 'Admin' }
       case 'STAFF':
-        return { status: 'staff', color: 'bg-blue-500', text: 'Staff' }
+        return { status: 'staff', color: 'bg-blue-500', text: 'Staf' }
       case 'FINANCE':
-        return { status: 'finance', color: 'bg-green-500', text: 'Finance' }
+        return { status: 'finance', color: 'bg-green-500', text: 'Keuangan' }
       default:
-        return { status: 'unknown', color: 'bg-gray-400', text: 'Unknown' }
+        return { status: 'unknown', color: 'bg-gray-400', text: 'Tidak diketahui' }
     }
   }
 
@@ -183,45 +183,45 @@ export default function UsersPage() {
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'ACTIVE':
-        return { status: 'active', color: 'bg-green-500', text: 'Active' }
+        return { status: 'active', color: 'bg-green-500', text: 'Aktif' }
       case 'INACTIVE':
-        return { status: 'inactive', color: 'bg-gray-500', text: 'Inactive' }
+        return { status: 'inactive', color: 'bg-gray-500', text: 'Nonaktif' }
       case 'SUSPENDED':
-        return { status: 'suspended', color: 'bg-red-500', text: 'Suspended' }
+        return { status: 'suspended', color: 'bg-red-500', text: 'Ditangguhkan' }
       default:
-        return { status: 'unknown', color: 'bg-gray-400', text: 'Unknown' }
+        return { status: 'unknown', color: 'bg-gray-400', text: 'Tidak diketahui' }
     }
   }
 
   // Stats cards configuration
   const statsCards = [
     {
-      title: 'Total Users',
+      title: 'Total pengguna',
       value: stats.total,
       icon: Users,
-      color: 'text-blue-600',
-      bgColor: 'bg-blue-50'
+      color: 'text-violet',
+      bgColor: 'bg-lilac'
     },
     {
-      title: 'Active Users',
+      title: 'Pengguna aktif',
       value: stats.active,
       icon: UserCheck,
-      color: 'text-green-600',
-      bgColor: 'bg-green-50'
+      color: 'text-on-mint',
+      bgColor: 'bg-mint'
     },
     {
-      title: 'Admin Users',
+      title: 'Admin',
       value: stats.admin,
       icon: Shield,
-      color: 'text-purple-600',
-      bgColor: 'bg-purple-50'
+      color: 'text-on-sky',
+      bgColor: 'bg-sky'
     },
     {
-      title: 'Suspended Users',
+      title: 'Pengguna ditangguhkan',
       value: stats.suspended,
       icon: UserX,
-      color: 'text-red-600',
-      bgColor: 'bg-red-50'
+      color: 'text-st-no',
+      bgColor: 'bg-rose'
     }
   ]
 
@@ -251,8 +251,8 @@ export default function UsersPage() {
       // Basic validation
       if (!newUser.name || !newUser.email || !newUser.password) {
         toast({
-          title: "Validation Error",
-          description: "Please fill in all required fields",
+          title: "Cek lagi, ya",
+          description: "Isi dulu semua kolom yang wajib",
           variant: "destructive",
         })
         return
@@ -270,13 +270,13 @@ export default function UsersPage() {
       const data = await response.json()
 
       if (!response.ok) {
-        throw new Error(data.error || 'Failed to create user')
+        throw new Error(data.error || 'Gagal membuat pengguna')
       }
 
       if (data.success) {
         toast({
-          title: "Success",
-          description: "User created successfully",
+          title: "Beres!",
+          description: "Pengguna berhasil dibuat",
         })
         
         // Reset form and close modal
@@ -295,8 +295,8 @@ export default function UsersPage() {
     } catch (error: any) {
       console.error('Error creating user:', error)
       toast({
-        title: "Error",
-        description: error.message || "Failed to create user",
+        title: "Gagal",
+        description: error.message || "Gagal membuat pengguna",
         variant: "destructive",
       })
     } finally {
@@ -346,13 +346,13 @@ export default function UsersPage() {
       const data = await response.json()
 
       if (!response.ok) {
-        throw new Error(data.error || 'Failed to update user')
+        throw new Error(data.error || 'Gagal memperbarui pengguna')
       }
 
       if (data.success) {
         toast({
-          title: "Success",
-          description: "User updated successfully",
+          title: "Beres!",
+          description: "Pengguna berhasil diperbarui",
         })
         
         setShowEditModal(false)
@@ -361,8 +361,8 @@ export default function UsersPage() {
     } catch (error: any) {
       console.error('Error updating user:', error)
       toast({
-        title: "Error",
-        description: error.message || "Failed to update user",
+        title: "Gagal",
+        description: error.message || "Gagal memperbarui pengguna",
         variant: "destructive",
       })
     } finally {
@@ -372,16 +372,16 @@ export default function UsersPage() {
 
   // Actions behind each row's "Manage" button; admins cannot delete themselves
   const userActions = (user: User): ManageAction[] => [
-    { label: 'View Details', icon: Eye, onSelect: () => handleViewUser(user) },
-    { label: 'Edit', icon: Edit, onSelect: () => handleEditUser(user) },
-    ...(session?.user?.id !== user.id ? [{ label: 'Delete', icon: Trash2, onSelect: () => handleDeleteUser(user), destructive: true }] : []),
+    { label: 'Lihat detail', icon: Eye, onSelect: () => handleViewUser(user) },
+    { label: 'Ubah', icon: Edit, onSelect: () => handleEditUser(user) },
+    ...(session?.user?.id !== user.id ? [{ label: 'Hapus', icon: Trash2, onSelect: () => handleDeleteUser(user), destructive: true }] : []),
   ]
 
   // Handle delete user
   const handleDeleteUser = async (user: User) => {
     const confirmed = await confirm({
-      title: 'Delete user?',
-      description: `"${user.name || user.email}" will be permanently deleted and can no longer sign in. This action cannot be undone.`,
+      title: 'Hapus pengguna?',
+      description: `"${user.name || user.email}" akan dihapus permanen dan nggak bisa masuk lagi. Tindakan ini nggak bisa dibatalkan.`,
     })
     if (!confirmed) {
       return
@@ -396,13 +396,13 @@ export default function UsersPage() {
       const data = await response.json()
 
       if (!response.ok) {
-        throw new Error(data.error || 'Failed to delete user')
+        throw new Error(data.error || 'Gagal menghapus pengguna')
       }
 
       if (data.success) {
         toast({
-          title: "Success",
-          description: "User deleted successfully",
+          title: "Beres!",
+          description: "Pengguna berhasil dihapus",
         })
         
         fetchUsers()
@@ -410,8 +410,8 @@ export default function UsersPage() {
     } catch (error: any) {
       console.error('Error deleting user:', error)
       toast({
-        title: "Error",
-        description: error.message || "Failed to delete user",
+        title: "Gagal",
+        description: error.message || "Gagal menghapus pengguna",
         variant: "destructive",
       })
     }
@@ -419,7 +419,7 @@ export default function UsersPage() {
 
   // Format date
   const formatDate = (dateString: string | null) => {
-    if (!dateString) return 'Never'
+    if (!dateString) return 'Belum pernah'
     return new Date(dateString).toLocaleDateString('id-ID')
   }
 
@@ -429,27 +429,27 @@ export default function UsersPage() {
 
   return (
     <>
-      <div className="container mx-auto px-4 py-8">
+      <div className="w-full">
       {/* Header */}
       <PageHeader className="mb-8"
-        title="Users"
-        description="Manage system users and their permissions"
+        title="Pengguna"
+        description="Kelola pengguna dan hak aksesnya"
         actions={
           <>
             <Button variant="outline" onClick={fetchUsers} disabled={usersQuery.isFetching}>
               <RefreshCw className={`w-4 h-4 mr-2 ${usersQuery.isFetching ? 'animate-spin' : ''}`} />
-              Refresh
+              Muat ulang
             </Button>
             <Button onClick={() => setShowAddModal(true)}>
               <Plus className="w-4 h-4 mr-2" />
-              Add User
+              Tambah pengguna
             </Button>
           </>
         }
       />
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 mb-8">
+      <div className="grid grid-cols-2 gap-4 lg:gap-5 xl:grid-cols-4 mb-8">
         {statsCards.map((card, index) => (
           <StatCard key={index} title={card.title} value={card.value} icon={card.icon} color={card.color} bgColor={card.bgColor} />
         ))}
@@ -461,9 +461,9 @@ export default function UsersPage() {
           <div className="flex flex-col md:flex-row gap-4">
             <div className="flex-1">
               <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted w-4 h-4" />
                 <Input
-                  placeholder="Search users by name or email..."
+                  placeholder="Cari pengguna dari nama atau email…"
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="pl-10"
@@ -472,28 +472,28 @@ export default function UsersPage() {
             </div>
             <div className="flex flex-wrap gap-2">
               <Select value={filterRole || 'none'} onValueChange={handleRoleChange}>
-                <SelectTrigger className="w-[140px]">
+                <SelectTrigger className="w-full sm:w-[190px]">
                   <Filter className="w-4 h-4 mr-2" />
-                  <SelectValue placeholder="Role" />
+                  <SelectValue placeholder="Peran" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="none">All Roles</SelectItem>
+                  <SelectItem value="none">Semua peran</SelectItem>
                   <SelectItem value="ADMIN">Admin</SelectItem>
-                  <SelectItem value="STAFF">Staff</SelectItem>
-                  <SelectItem value="FINANCE">Finance</SelectItem>
+                  <SelectItem value="STAFF">Staf</SelectItem>
+                  <SelectItem value="FINANCE">Keuangan</SelectItem>
                 </SelectContent>
               </Select>
               
               <Select value={filterStatus || 'none'} onValueChange={handleStatusChange}>
-                <SelectTrigger className="w-[140px]">
+                <SelectTrigger className="w-full sm:w-[190px]">
                   <Filter className="w-4 h-4 mr-2" />
                   <SelectValue placeholder="Status" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="none">All Status</SelectItem>
-                  <SelectItem value="ACTIVE">Active</SelectItem>
-                  <SelectItem value="INACTIVE">Inactive</SelectItem>
-                  <SelectItem value="SUSPENDED">Suspended</SelectItem>
+                  <SelectItem value="none">Semua status</SelectItem>
+                  <SelectItem value="ACTIVE">Aktif</SelectItem>
+                  <SelectItem value="INACTIVE">Nonaktif</SelectItem>
+                  <SelectItem value="SUSPENDED">Ditangguhkan</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -508,11 +508,11 @@ export default function UsersPage() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>User</TableHead>
-                  <TableHead>Role</TableHead>
+                  <TableHead>Pengguna</TableHead>
+                  <TableHead>Peran</TableHead>
                   <TableHead>Status</TableHead>
-                  <TableHead>Activity</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
+                  <TableHead>Aktivitas</TableHead>
+                  <TableHead className="text-right">Aksi</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -524,8 +524,8 @@ export default function UsersPage() {
                     <TableRow key={user.id}>
                       <TableCell>
                         <div>
-                          <div className="font-medium">{user.name || 'No Name'}</div>
-                          <div className="text-sm text-gray-500">{user.email}</div>
+                          <div className="font-medium">{user.name || 'Tanpa nama'}</div>
+                          <div className="text-sm text-muted">{user.email}</div>
                         </div>
                       </TableCell>
                       <TableCell>
@@ -535,8 +535,8 @@ export default function UsersPage() {
                         <StatusPill tone={toneFromBgClass(statusBadge.color)}>{statusBadge.text}</StatusPill>
                       </TableCell>
                       <TableCell>
-                        <div className="text-sm text-gray-900">Last login: {formatDate(user.lastLoginAt)}</div>
-                        <div className="text-sm text-gray-500">Joined {formatDate(user.createdAt)}</div>
+                        <div className="text-sm text-ink">Terakhir masuk: {formatDate(user.lastLoginAt)}</div>
+                        <div className="text-sm text-muted">Bergabung {formatDate(user.createdAt)}</div>
                       </TableCell>
                       <TableCell className="text-right">
                         <ManageMenu actions={userActions(user)} />
@@ -554,7 +554,7 @@ export default function UsersPage() {
             totalItems={filteredUsers.length}
             pageSize={itemsPerPage}
             onPageChange={setCurrentPage}
-            itemLabel="users"
+            itemLabel="pengguna"
             className="mt-6"
           />
         </CardContent>
@@ -563,10 +563,10 @@ export default function UsersPage() {
       {/* Users Cards - Mobile */}
       <div className="md:hidden space-y-4">
         <div className="flex items-center justify-between mb-4">
-          <h3 className="text-lg font-semibold">Users ({filteredUsers.length})</h3>
+          <h3 className="text-lg font-extrabold tracking-[-0.02em]">Pengguna ({filteredUsers.length})</h3>
           <Button onClick={() => setShowAddModal(true)} size="sm">
             <Plus className="w-4 h-4 mr-2" />
-            Add
+            Tambah
           </Button>
         </div>
         
@@ -574,8 +574,8 @@ export default function UsersPage() {
           <Card>
             <CardContent className="text-center py-8">
               <div className="flex flex-col items-center space-y-2">
-                <Users className="w-8 h-8 text-gray-400" />
-                <p className="text-gray-500">No users found</p>
+                <Users className="w-8 h-8 text-muted" />
+                <p className="text-muted">Belum ada pengguna yang cocok. Coba ubah pencarian atau filternya.</p>
               </div>
             </CardContent>
           </Card>
@@ -591,12 +591,12 @@ export default function UsersPage() {
                     {/* User Header */}
                     <div className="flex items-center justify-between">
                       <div className="flex items-center space-x-3">
-                        <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
-                          <User className="w-4 h-4 text-blue-600" />
+                        <div className="w-8 h-8 bg-lilac rounded-2xl flex items-center justify-center">
+                          <User className="w-4 h-4 text-violet" />
                         </div>
                         <div>
-                          <h4 className="font-medium text-gray-900">{user.name || 'No Name'}</h4>
-                          <p className="text-sm text-gray-500">{user.email}</p>
+                          <h4 className="text-[15px] font-extrabold leading-snug">{user.name || 'Tanpa nama'}</h4>
+                          <p className="text-sm text-muted">{user.email}</p>
                         </div>
                       </div>
                       <div className="flex flex-col items-end space-y-1">
@@ -608,7 +608,7 @@ export default function UsersPage() {
                     {/* User Details */}
                     <div className="grid grid-cols-2 gap-3 text-sm">
                       <div>
-                        <span className="text-gray-500">Last Login:</span>
+                        <span className="text-muted">Terakhir masuk:</span>
                         <div className="mt-1 flex items-center text-xs">
                           <Clock className="w-3 h-3 mr-1" />
                           {formatDate(user.lastLoginAt)}
@@ -616,23 +616,23 @@ export default function UsersPage() {
                       </div>
                       
                       <div>
-                        <span className="text-gray-500">Created:</span>
+                        <span className="text-muted">Dibuat:</span>
                         <div className="mt-1 font-medium text-xs">
                           {formatDate(user.createdAt)}
                         </div>
                       </div>
                       
                       <div>
-                        <span className="text-gray-500">Email Verified:</span>
+                        <span className="text-muted">Email terverifikasi:</span>
                         <div className="mt-1 font-medium text-xs">
-                          {user.emailVerified ? 'Yes' : 'No'}
+                          {user.emailVerified ? 'Sudah' : 'Belum'}
                         </div>
                       </div>
                       
                       <div>
-                        <span className="text-gray-500">Sessions:</span>
+                        <span className="text-muted">Sesi:</span>
                         <div className="mt-1 font-medium text-xs">
-                          {user._count.sessions} active
+                          {user._count.sessions} aktif
                         </div>
                       </div>
                     </div>
@@ -640,7 +640,7 @@ export default function UsersPage() {
                     {/* Actions */}
                     <div className="flex items-center justify-between pt-2 border-t">
                       <ManageMenu actions={userActions(user)} />
-                      <div className="text-xs text-gray-400">
+                      <div className="text-xs text-muted">
                         #{user.id.slice(-8)}
                       </div>
                     </div>
@@ -652,8 +652,8 @@ export default function UsersPage() {
             {/* Mobile Pagination */}
             {totalPages > 1 && (
               <div className="flex items-center justify-between mt-6">
-                <div className="text-sm text-gray-500">
-                  Page {currentPage} of {totalPages}
+                <div className="text-sm text-muted">
+                  Halaman {currentPage} dari {totalPages}
                 </div>
                 <div className="flex items-center space-x-2">
                   <Button
@@ -683,20 +683,20 @@ export default function UsersPage() {
       <Dialog open={showAddModal} onOpenChange={setShowAddModal}>
         <DialogContent className="max-w-md">
           <DialogHeader>
-            <DialogTitle>Add New User</DialogTitle>
+            <DialogTitle>Tambah pengguna baru</DialogTitle>
             <DialogDescription>
-              Create a new user account with appropriate permissions.
+              Buat akun pengguna baru dengan peran yang sesuai.
             </DialogDescription>
           </DialogHeader>
           
           <div className="space-y-4">
             <div>
-              <Label htmlFor="name">Name *</Label>
+              <Label htmlFor="name">Nama *</Label>
               <Input
                 id="name"
                 value={newUser.name}
                 onChange={(e) => setNewUser({ ...newUser, name: e.target.value })}
-                placeholder="Enter user name"
+                placeholder="Masukkan nama pengguna"
               />
             </div>
             
@@ -707,31 +707,31 @@ export default function UsersPage() {
                 type="email"
                 value={newUser.email}
                 onChange={(e) => setNewUser({ ...newUser, email: e.target.value })}
-                placeholder="Enter email address"
+                placeholder="Masukkan alamat email"
               />
             </div>
             
             <div>
-              <Label htmlFor="password">Password *</Label>
+              <Label htmlFor="password">Kata sandi *</Label>
               <Input
                 id="password"
                 type="password"
                 value={newUser.password}
                 onChange={(e) => setNewUser({ ...newUser, password: e.target.value })}
-                placeholder="Enter password"
+                placeholder="Masukkan kata sandi"
               />
             </div>
             
             <div>
-              <Label htmlFor="role">Role</Label>
+              <Label htmlFor="role">Peran</Label>
               <Select value={newUser.role} onValueChange={(value) => setNewUser({ ...newUser, role: value })}>
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="ADMIN">Admin</SelectItem>
-                  <SelectItem value="STAFF">Staff</SelectItem>
-                  <SelectItem value="FINANCE">Finance</SelectItem>
+                  <SelectItem value="STAFF">Staf</SelectItem>
+                  <SelectItem value="FINANCE">Keuangan</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -743,9 +743,9 @@ export default function UsersPage() {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="ACTIVE">Active</SelectItem>
-                  <SelectItem value="INACTIVE">Inactive</SelectItem>
-                  <SelectItem value="SUSPENDED">Suspended</SelectItem>
+                  <SelectItem value="ACTIVE">Aktif</SelectItem>
+                  <SelectItem value="INACTIVE">Nonaktif</SelectItem>
+                  <SelectItem value="SUSPENDED">Ditangguhkan</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -754,18 +754,18 @@ export default function UsersPage() {
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowAddModal(false)}>
               <X className="w-4 h-4 mr-2" />
-              Cancel
+              Batal
             </Button>
             <Button onClick={handleAddUser} disabled={addingUser}>
               {addingUser ? (
                 <>
                   <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  Creating...
+                  Membuat…
                 </>
               ) : (
                 <>
                   <Plus className="w-4 h-4 mr-2" />
-                  Create User
+                  Buat pengguna
                 </>
               )}
             </Button>
@@ -777,20 +777,20 @@ export default function UsersPage() {
       <Dialog open={showEditModal} onOpenChange={setShowEditModal}>
         <DialogContent className="max-w-md">
           <DialogHeader>
-            <DialogTitle>Edit User</DialogTitle>
+            <DialogTitle>Ubah pengguna</DialogTitle>
             <DialogDescription>
-              Update user information and permissions.
+              Perbarui data dan peran pengguna.
             </DialogDescription>
           </DialogHeader>
           
           <div className="space-y-4">
             <div>
-              <Label htmlFor="edit-name">Name</Label>
+              <Label htmlFor="edit-name">Nama</Label>
               <Input
                 id="edit-name"
                 value={editUser.name}
                 onChange={(e) => setEditUser({ ...editUser, name: e.target.value })}
-                placeholder="Enter user name"
+                placeholder="Masukkan nama pengguna"
               />
             </div>
             
@@ -801,31 +801,31 @@ export default function UsersPage() {
                 type="email"
                 value={editUser.email}
                 onChange={(e) => setEditUser({ ...editUser, email: e.target.value })}
-                placeholder="Enter email address"
+                placeholder="Masukkan alamat email"
               />
             </div>
             
             <div>
-              <Label htmlFor="edit-password">New Password (optional)</Label>
+              <Label htmlFor="edit-password">Kata sandi baru (opsional)</Label>
               <Input
                 id="edit-password"
                 type="password"
                 value={editUser.password}
                 onChange={(e) => setEditUser({ ...editUser, password: e.target.value })}
-                placeholder="Leave empty to keep current password"
+                placeholder="Kosongkan kalau nggak mau ganti kata sandi"
               />
             </div>
             
             <div>
-              <Label htmlFor="edit-role">Role</Label>
+              <Label htmlFor="edit-role">Peran</Label>
               <Select value={editUser.role} onValueChange={(value) => setEditUser({ ...editUser, role: value })}>
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="ADMIN">Admin</SelectItem>
-                  <SelectItem value="STAFF">Staff</SelectItem>
-                  <SelectItem value="FINANCE">Finance</SelectItem>
+                  <SelectItem value="STAFF">Staf</SelectItem>
+                  <SelectItem value="FINANCE">Keuangan</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -837,9 +837,9 @@ export default function UsersPage() {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="ACTIVE">Active</SelectItem>
-                  <SelectItem value="INACTIVE">Inactive</SelectItem>
-                  <SelectItem value="SUSPENDED">Suspended</SelectItem>
+                  <SelectItem value="ACTIVE">Aktif</SelectItem>
+                  <SelectItem value="INACTIVE">Nonaktif</SelectItem>
+                  <SelectItem value="SUSPENDED">Ditangguhkan</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -848,18 +848,18 @@ export default function UsersPage() {
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowEditModal(false)}>
               <X className="w-4 h-4 mr-2" />
-              Cancel
+              Batal
             </Button>
             <Button onClick={handleUpdateUser} disabled={editingUser}>
               {editingUser ? (
                 <>
                   <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  Updating...
+                  Memperbarui…
                 </>
               ) : (
                 <>
                   <Save className="w-4 h-4 mr-2" />
-                  Update User
+                  Perbarui pengguna
                 </>
               )}
             </Button>
@@ -871,9 +871,9 @@ export default function UsersPage() {
       <Dialog open={showViewModal} onOpenChange={setShowViewModal}>
         <DialogContent className="max-w-md">
           <DialogHeader>
-            <DialogTitle>User Details</DialogTitle>
+            <DialogTitle>Detail pengguna</DialogTitle>
             <DialogDescription>
-              View user information and account details.
+              Lihat data pengguna dan detail akunnya.
             </DialogDescription>
           </DialogHeader>
           
@@ -881,35 +881,35 @@ export default function UsersPage() {
             <div className="space-y-4">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <Label className="text-sm font-medium text-gray-500">Name</Label>
-                  <p className="text-sm">{selectedUser.name || 'No Name'}</p>
+                  <Label className="text-sm font-medium text-muted">Nama</Label>
+                  <p className="text-sm">{selectedUser.name || 'Tanpa nama'}</p>
                 </div>
                 <div>
-                  <Label className="text-sm font-medium text-gray-500">Email</Label>
+                  <Label className="text-sm font-medium text-muted">Email</Label>
                   <p className="text-sm">{selectedUser.email}</p>
                 </div>
                 <div>
-                  <Label className="text-sm font-medium text-gray-500">Role</Label>
+                  <Label className="text-sm font-medium text-muted">Peran</Label>
                   <StatusPill tone={toneFromBgClass(getRoleBadge(selectedUser.role).color)}>{getRoleBadge(selectedUser.role).text}</StatusPill>
                 </div>
                 <div>
-                  <Label className="text-sm font-medium text-gray-500">Status</Label>
+                  <Label className="text-sm font-medium text-muted">Status</Label>
                   <StatusPill tone={toneFromBgClass(getStatusBadge(selectedUser.status).color)}>{getStatusBadge(selectedUser.status).text}</StatusPill>
                 </div>
                 <div>
-                  <Label className="text-sm font-medium text-gray-500">Email Verified</Label>
-                  <p className="text-sm">{selectedUser.emailVerified ? 'Yes' : 'No'}</p>
+                  <Label className="text-sm font-medium text-muted">Email terverifikasi</Label>
+                  <p className="text-sm">{selectedUser.emailVerified ? 'Sudah' : 'Belum'}</p>
                 </div>
                 <div>
-                  <Label className="text-sm font-medium text-gray-500">Active Sessions</Label>
+                  <Label className="text-sm font-medium text-muted">Sesi aktif</Label>
                   <p className="text-sm">{selectedUser._count.sessions}</p>
                 </div>
                 <div>
-                  <Label className="text-sm font-medium text-gray-500">Last Login</Label>
+                  <Label className="text-sm font-medium text-muted">Terakhir masuk</Label>
                   <p className="text-sm">{formatDate(selectedUser.lastLoginAt)}</p>
                 </div>
                 <div>
-                  <Label className="text-sm font-medium text-gray-500">Created</Label>
+                  <Label className="text-sm font-medium text-muted">Dibuat</Label>
                   <p className="text-sm">{formatDate(selectedUser.createdAt)}</p>
                 </div>
               </div>
@@ -918,7 +918,7 @@ export default function UsersPage() {
           
           <DialogFooter>
             <Button onClick={() => setShowViewModal(false)}>
-              Close
+              Tutup
             </Button>
           </DialogFooter>
         </DialogContent>

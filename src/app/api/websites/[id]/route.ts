@@ -14,7 +14,7 @@ export async function GET(
     const session = await getServerSession(authOptions)
     
     if (!session?.user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+      return NextResponse.json({ error: 'Kamu perlu masuk dulu' }, { status: 401 })
     }
 
     const { id } = await params
@@ -34,7 +34,7 @@ export async function GET(
     })
 
     if (!website) {
-      return NextResponse.json({ error: 'Website not found' }, { status: 404 })
+      return NextResponse.json({ error: 'Website tidak ditemukan' }, { status: 404 })
     }
 
     return NextResponse.json({
@@ -45,7 +45,7 @@ export async function GET(
   } catch (error) {
     console.error('❌ Error fetching website:', error)
     return NextResponse.json(
-      { error: 'Internal server error' },
+      { error: 'Gagal memproses permintaan. Coba lagi, ya.' },
       { status: 500 }
     )
   }
@@ -60,13 +60,13 @@ export async function PUT(
     const session = await getServerSession(authOptions)
     
     if (!session?.user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+      return NextResponse.json({ error: 'Kamu perlu masuk dulu' }, { status: 401 })
     }
 
     // Check permissions - only ADMIN and STAFF can update websites
     const userRole = (session.user as any)?.role
     if (userRole !== 'ADMIN' && userRole !== 'STAFF') {
-      return NextResponse.json({ error: 'Insufficient permissions' }, { status: 403 })
+      return NextResponse.json({ error: 'Kamu nggak punya akses untuk ini' }, { status: 403 })
     }
 
     const { id } = await params
@@ -78,13 +78,13 @@ export async function PUT(
     })
 
     if (!existingWebsite) {
-      return NextResponse.json({ error: 'Website not found' }, { status: 404 })
+      return NextResponse.json({ error: 'Website tidak ditemukan' }, { status: 404 })
     }
 
     // Validate website status if provided
     if (body.status && !Object.values(WebsiteStatus).includes(body.status)) {
       return NextResponse.json(
-        { error: 'Invalid website status' },
+        { error: 'Status website tidak valid' },
         { status: 400 }
       )
     }
@@ -97,7 +97,7 @@ export async function PUT(
 
       if (!domain) {
         return NextResponse.json(
-          { error: 'Domain not found' },
+          { error: 'Domain tidak ditemukan' },
           { status: 404 }
         )
       }
@@ -133,14 +133,14 @@ export async function PUT(
 
     return NextResponse.json({
       success: true,
-      message: 'Website updated successfully',
+      message: 'Website diperbarui',
       website: updatedWebsite
     })
 
   } catch (error) {
     console.error('❌ Error updating website:', error)
     return NextResponse.json(
-      { error: 'Failed to update website' },
+      { error: 'Gagal memperbarui website. Coba lagi, ya.' },
       { status: 500 }
     )
   }
@@ -155,13 +155,13 @@ export async function DELETE(
     const session = await getServerSession(authOptions)
     
     if (!session?.user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+      return NextResponse.json({ error: 'Kamu perlu masuk dulu' }, { status: 401 })
     }
 
     // Check permissions - only ADMIN can delete websites
     const userRole = (session.user as any)?.role
     if (userRole !== 'ADMIN') {
-      return NextResponse.json({ error: 'Insufficient permissions' }, { status: 403 })
+      return NextResponse.json({ error: 'Kamu nggak punya akses untuk ini' }, { status: 403 })
     }
 
     const { id } = await params
@@ -172,7 +172,7 @@ export async function DELETE(
     })
 
     if (!website) {
-      return NextResponse.json({ error: 'Website not found' }, { status: 404 })
+      return NextResponse.json({ error: 'Website tidak ditemukan' }, { status: 404 })
     }
 
     // Delete website
@@ -184,13 +184,13 @@ export async function DELETE(
 
     return NextResponse.json({
       success: true,
-      message: 'Website deleted successfully'
+      message: 'Website dihapus'
     })
 
   } catch (error) {
     console.error('❌ Error deleting website:', error)
     return NextResponse.json(
-      { error: 'Failed to delete website' },
+      { error: 'Gagal menghapus website. Coba lagi, ya.' },
       { status: 500 }
     )
   }

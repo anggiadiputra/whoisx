@@ -12,29 +12,23 @@ interface PageSkeletonProps {
 export function PageSkeleton({ showStats = true, showTable = true }: PageSkeletonProps) {
   return (
     <div>
-      <div className="container mx-auto px-4 py-8 space-y-8">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+      <div className="space-y-6 lg:space-y-8">
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
           <div className="space-y-2">
-            <Skeleton className="h-8 w-48" />
+            <Skeleton className="h-10 w-48 md:h-14 md:w-72" />
             <Skeleton className="h-4 w-72" />
           </div>
-          <Skeleton className="h-10 w-40" />
+          <Skeleton className="h-12 w-40 rounded-full" />
         </div>
 
         {showStats && (
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
+          <div className="grid grid-cols-2 gap-4 xl:grid-cols-4 lg:gap-5">
             {[1, 2, 3, 4].map((i) => (
-              <Card key={i}>
-                <CardContent className="p-6">
-                  <div className="flex items-center justify-between">
-                    <div className="space-y-3">
-                      <Skeleton className="h-4 w-24" />
-                      <Skeleton className="h-8 w-12" />
-                    </div>
-                    <Skeleton className="w-12 h-12 rounded-lg" />
-                  </div>
-                </CardContent>
-              </Card>
+              <div key={i} className="rounded-card bg-white p-4 md:p-5">
+                <Skeleton className="size-10 rounded-full" />
+                <Skeleton className="mt-4 h-12 w-16" />
+                <Skeleton className="mt-2 h-4 w-24" />
+              </div>
             ))}
           </div>
         )}

@@ -11,7 +11,7 @@ export async function GET(request: NextRequest) {
     const session = await getServerSession(authOptions)
     
     if (!session?.user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+      return NextResponse.json({ error: 'Kamu perlu masuk dulu' }, { status: 401 })
     }
 
     // Fetch all websites with domain information
@@ -53,7 +53,7 @@ export async function GET(request: NextRequest) {
   } catch (error) {
     console.error('❌ Error fetching websites:', error)
     return NextResponse.json(
-      { error: 'Internal server error' },
+      { error: 'Gagal memproses permintaan. Coba lagi, ya.' },
       { status: 500 }
     )
   }
@@ -65,13 +65,13 @@ export async function POST(request: NextRequest) {
     const session = await getServerSession(authOptions)
     
     if (!session?.user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+      return NextResponse.json({ error: 'Kamu perlu masuk dulu' }, { status: 401 })
     }
 
     // Check permissions - only ADMIN and STAFF can create websites
     const userRole = (session.user as any)?.role
     if (userRole !== 'ADMIN' && userRole !== 'STAFF') {
-      return NextResponse.json({ error: 'Insufficient permissions' }, { status: 403 })
+      return NextResponse.json({ error: 'Kamu nggak punya akses untuk ini' }, { status: 403 })
     }
 
     const body = await request.json()
@@ -79,7 +79,7 @@ export async function POST(request: NextRequest) {
     // Validate required fields
     if (!body.siteName || !body.domainId) {
       return NextResponse.json(
-        { error: 'Site name and domain are required' },
+        { error: 'Nama website dan domain wajib diisi' },
         { status: 400 }
       )
     }
@@ -87,7 +87,7 @@ export async function POST(request: NextRequest) {
     // Validate website status
     if (body.status && !Object.values(WebsiteStatus).includes(body.status)) {
       return NextResponse.json(
-        { error: 'Invalid website status' },
+        { error: 'Status website tidak valid' },
         { status: 400 }
       )
     }
@@ -99,7 +99,7 @@ export async function POST(request: NextRequest) {
 
     if (!domain) {
       return NextResponse.json(
-        { error: 'Domain not found' },
+        { error: 'Domain tidak ditemukan' },
         { status: 404 }
       )
     }
@@ -133,14 +133,14 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      message: 'Website created successfully',
+      message: 'Website ditambahkan',
       website
     })
 
   } catch (error) {
     console.error('❌ Error creating website:', error)
     return NextResponse.json(
-      { error: 'Failed to create website' },
+      { error: 'Gagal menambahkan website. Coba lagi, ya.' },
       { status: 500 }
     )
   }

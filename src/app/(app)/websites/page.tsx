@@ -224,8 +224,8 @@ export default function WebsitesPage() {
     } catch (error) {
       console.error('Error fetching available domains:', error)
       toast({
-        title: "Error",
-        description: "Failed to load available domains",
+        title: "Gagal",
+        description: "Daftar domain nggak bisa dimuat. Coba lagi, ya.",
       })
     } finally {
       setLoadingDomains(false)
@@ -243,49 +243,49 @@ export default function WebsitesPage() {
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'ACTIVE':
-        return { status: 'active', color: 'bg-green-500', text: 'Active' }
+        return { status: 'active', color: 'bg-green-500', text: 'Aktif' }
       case 'INACTIVE':
-        return { status: 'inactive', color: 'bg-gray-500', text: 'Inactive' }
+        return { status: 'inactive', color: 'bg-gray-500', text: 'Nonaktif' }
       case 'MAINTENANCE':
-        return { status: 'maintenance', color: 'bg-yellow-500', text: 'Maintenance' }
+        return { status: 'maintenance', color: 'bg-yellow-500', text: 'Pemeliharaan' }
       case 'DEVELOPMENT':
-        return { status: 'development', color: 'bg-blue-500', text: 'Development' }
+        return { status: 'development', color: 'bg-blue-500', text: 'Pengembangan' }
       case 'SUSPENDED':
-        return { status: 'suspended', color: 'bg-red-500', text: 'Suspended' }
+        return { status: 'suspended', color: 'bg-red-500', text: 'Ditangguhkan' }
       default:
-        return { status: 'unknown', color: 'bg-gray-400', text: 'Unknown' }
+        return { status: 'unknown', color: 'bg-gray-400', text: 'Tidak diketahui' }
     }
   }
 
   // Stats cards configuration
   const statsCards = [
     {
-      title: 'Total Websites',
+      title: 'Total website',
       value: stats.total,
       icon: AppWindow,
-      color: 'text-blue-600',
-      bgColor: 'bg-blue-50'
+      color: 'text-violet',
+      bgColor: 'bg-lilac'
     },
     {
-      title: 'Active Websites',
+      title: 'Website aktif',
       value: stats.active,
       icon: Activity,
-      color: 'text-green-600',
-      bgColor: 'bg-green-50'
+      color: 'text-on-mint',
+      bgColor: 'bg-mint'
     },
     {
-      title: 'Live Sites',
+      title: 'Situs online',
       value: stats.live,
       icon: Monitor,
-      color: 'text-emerald-600',
-      bgColor: 'bg-emerald-50'
+      color: 'text-on-sky',
+      bgColor: 'bg-sky'
     },
     {
-      title: 'Offline Sites',
+      title: 'Situs offline',
       value: stats.offline,
       icon: MonitorOff,
-      color: 'text-red-600',
-      bgColor: 'bg-red-50'
+      color: 'text-st-no',
+      bgColor: 'bg-rose'
     }
   ]
 
@@ -303,8 +303,8 @@ export default function WebsitesPage() {
       // Basic validation
       if (!newWebsite.siteName.trim()) {
         toast({
-          title: "Validation Error",
-          description: "Site name is required",
+          title: "Cek lagi, ya",
+          description: "Nama situs wajib diisi",
           variant: "destructive",
         })
         return
@@ -312,8 +312,8 @@ export default function WebsitesPage() {
 
       if (!newWebsite.domainId) {
         toast({
-          title: "Validation Error", 
-          description: "Domain selection is required",
+          title: "Cek lagi, ya", 
+          description: "Pilih domain dulu, ya",
           variant: "destructive",
         })
         return
@@ -335,8 +335,8 @@ export default function WebsitesPage() {
 
       if (response.ok && data.success) {
         toast({
-          title: "Success",
-          description: "Website created successfully",
+          title: "Beres!",
+          description: "Website sudah ditambahkan",
         })
 
         // Refresh websites list
@@ -358,16 +358,16 @@ export default function WebsitesPage() {
         setShowAddModal(false)
       } else {
         toast({
-          title: "Error",
-          description: data.error || "Failed to create website",
+          title: "Gagal",
+          description: data.error || "Website gagal ditambahkan",
           variant: "destructive",
         })
       }
     } catch (error) {
       console.error('Error adding website:', error)
       toast({
-        title: "Error",
-        description: "Failed to create website",
+        title: "Gagal",
+        description: "Website gagal ditambahkan",
         variant: "destructive",
       })
     } finally {
@@ -422,8 +422,8 @@ export default function WebsitesPage() {
     } catch (error) {
       console.error('Error fetching domains:', error)
       toast({
-        title: "Error",
-        description: "Failed to fetch available domains",
+        title: "Gagal",
+        description: "Daftar domain nggak bisa dimuat. Coba lagi, ya.",
         variant: "destructive",
       })
     } finally {
@@ -477,8 +477,8 @@ export default function WebsitesPage() {
 
       if (response.ok && data.success) {
         toast({
-          title: "Success",
-          description: "Website updated successfully",
+          title: "Beres!",
+          description: "Website sudah diperbarui",
         })
 
         // Refresh websites list
@@ -500,16 +500,16 @@ export default function WebsitesPage() {
         setShowEditModal(false)
       } else {
         toast({
-          title: "Error",
-          description: data.error || "Failed to update website",
+          title: "Gagal",
+          description: data.error || "Website gagal diperbarui",
           variant: "destructive",
         })
       }
     } catch (error) {
       console.error('Error updating website:', error)
       toast({
-        title: "Error",
-        description: "Failed to update website",
+        title: "Gagal",
+        description: "Website gagal diperbarui",
         variant: "destructive",
       })
     } finally {
@@ -541,13 +541,13 @@ export default function WebsitesPage() {
     try {
       await navigator.clipboard.writeText(password)
       toast({
-        title: "Success",
-        description: "Password copied to clipboard",
+        title: "Beres!",
+        description: "Kata sandi sudah disalin",
       })
     } catch (error) {
       toast({
-        title: "Error",
-        description: "Failed to copy password",
+        title: "Gagal",
+        description: "Kata sandi nggak bisa disalin. Coba lagi, ya.",
         variant: "destructive",
       })
     }
@@ -555,16 +555,16 @@ export default function WebsitesPage() {
 
   // Actions behind each row's "Manage" button
   const websiteActions = (website: Website): ManageAction[] => [
-    { label: 'View Details', icon: Eye, onSelect: () => handleViewWebsite(website) },
-    ...(canManageWebsites ? [{ label: 'Edit', icon: Edit, onSelect: () => handleEditWebsite(website) }] : []),
-    ...(userRole === 'ADMIN' ? [{ label: 'Delete', icon: Trash2, onSelect: () => handleDeleteWebsite(website), destructive: true }] : []),
+    { label: 'Lihat detail', icon: Eye, onSelect: () => handleViewWebsite(website) },
+    ...(canManageWebsites ? [{ label: 'Ubah', icon: Edit, onSelect: () => handleEditWebsite(website) }] : []),
+    ...(userRole === 'ADMIN' ? [{ label: 'Hapus', icon: Trash2, onSelect: () => handleDeleteWebsite(website), destructive: true }] : []),
   ]
 
   // Handle delete website
   const handleDeleteWebsite = async (website: Website) => {
     const confirmed = await confirm({
-      title: 'Delete website?',
-      description: `"${website.siteName}" will be permanently deleted. This action cannot be undone.`,
+      title: 'Hapus website?',
+      description: `"${website.siteName}" akan dihapus permanen. Tindakan ini nggak bisa dibatalkan.`,
     })
     if (!confirmed) {
       return
@@ -580,24 +580,24 @@ export default function WebsitesPage() {
 
       if (response.ok && data.success) {
         toast({
-          title: "Success",
-          description: "Website deleted successfully",
+          title: "Beres!",
+          description: "Website sudah dihapus",
         })
 
         // Refresh websites list
         await fetchWebsites()
       } else {
         toast({
-          title: "Error",
-          description: data.error || "Failed to delete website",
+          title: "Gagal",
+          description: data.error || "Website gagal dihapus",
           variant: "destructive",
         })
       }
     } catch (error) {
       console.error('Error deleting website:', error)
       toast({
-        title: "Error",
-        description: "Failed to delete website",
+        title: "Gagal",
+        description: "Website gagal dihapus",
         variant: "destructive",
       })
     }
@@ -635,21 +635,21 @@ export default function WebsitesPage() {
 
   return (
     <>
-      <div className="container mx-auto px-4 py-8">
+      <div className="w-full">
       {/* Header */}
       <PageHeader className="mb-8"
-        title="Websites"
-        description="Manage your websites and their configurations"
+        title="Website"
+        description="Kelola website kamu beserta detailnya"
         actions={
           <>
             <Button variant="outline" onClick={fetchWebsites} disabled={websitesQuery.isFetching}>
               <RefreshCw className={`w-4 h-4 mr-2 ${websitesQuery.isFetching ? 'animate-spin' : ''}`} />
-              Refresh
+              Muat ulang
             </Button>
             {canManageWebsites && (
               <Button onClick={handleShowAddModal}>
                 <Plus className="w-4 h-4 mr-2" />
-                Add Website
+                Tambah website
               </Button>
             )}
           </>
@@ -657,7 +657,7 @@ export default function WebsitesPage() {
       />
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 mb-8">
+      <div className="grid grid-cols-2 gap-4 lg:gap-5 xl:grid-cols-4 mb-8">
         {statsCards.map((card, index) => (
           <StatCard key={index} title={card.title} value={card.value} icon={card.icon} color={card.color} bgColor={card.bgColor} />
         ))}
@@ -666,27 +666,27 @@ export default function WebsitesPage() {
       {/* Filters */}
       <div className="flex flex-col sm:flex-row gap-4 mb-6">
         <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted w-4 h-4" />
           <Input
-            placeholder="Search websites, domains, or CMS..."
+            placeholder="Cari website, domain, atau CMS…"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-10"
+            className="bg-white pl-10 shadow-card"
           />
         </div>
         
         <Select value={filterStatus} onValueChange={setFilterStatus}>
-          <SelectTrigger className="w-full sm:w-48">
+          <SelectTrigger className="w-full bg-white shadow-card sm:w-52">
             <Filter className="w-4 h-4 mr-2" />
-            <SelectValue placeholder="Filter by status" />
+            <SelectValue placeholder="Filter status" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">All Status</SelectItem>
-            <SelectItem value="ACTIVE">Active</SelectItem>
-            <SelectItem value="INACTIVE">Inactive</SelectItem>
-            <SelectItem value="MAINTENANCE">Maintenance</SelectItem>
-            <SelectItem value="DEVELOPMENT">Development</SelectItem>
-            <SelectItem value="SUSPENDED">Suspended</SelectItem>
+            <SelectItem value="all">Semua status</SelectItem>
+            <SelectItem value="ACTIVE">Aktif</SelectItem>
+            <SelectItem value="INACTIVE">Nonaktif</SelectItem>
+            <SelectItem value="MAINTENANCE">Pemeliharaan</SelectItem>
+            <SelectItem value="DEVELOPMENT">Pengembangan</SelectItem>
+            <SelectItem value="SUSPENDED">Ditangguhkan</SelectItem>
           </SelectContent>
         </Select>
       </div>
@@ -698,25 +698,25 @@ export default function WebsitesPage() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Site Name</TableHead>
+                  <TableHead>Nama situs</TableHead>
                   <TableHead>Domain</TableHead>
                   <TableHead>CMS</TableHead>
                   <TableHead>Status</TableHead>
-                  <TableHead>Created</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
+                  <TableHead>Dibuat</TableHead>
+                  <TableHead className="text-right">Aksi</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {paginatedWebsites.length === 0 ? (
                   <TableRow>
                     <TableCell colSpan={6} className="text-center py-8">
-                      <div className="flex flex-col items-center justify-center text-gray-500">
+                      <div className="flex flex-col items-center justify-center text-muted">
                         <AppWindow className="w-12 h-12 mb-4 opacity-50" />
-                        <p className="text-lg font-medium mb-2">No websites found</p>
+                        <p className="text-lg font-medium mb-2">Nggak ada website yang ditemukan</p>
                         <p className="text-sm">
                           {searchTerm || filterStatus !== 'all' 
-                            ? 'Try adjusting your search or filter criteria'
-                            : 'Get started by adding your first website'
+                            ? 'Coba ubah kata kunci atau filternya'
+                            : 'Yuk, tambah website pertamamu'
                           }
                         </p>
                       </div>
@@ -730,14 +730,14 @@ export default function WebsitesPage() {
                         <TableCell>
                           <div className="font-medium">{website.siteName}</div>
                           {website.description && (
-                            <div className="text-sm text-gray-500 truncate max-w-48">
+                            <div className="text-sm text-muted truncate max-w-48">
                               {website.description}
                             </div>
                           )}
                         </TableCell>
                         <TableCell>
                           <div className="flex items-center gap-2">
-                            <Globe className="w-4 h-4 text-blue-500" />
+                            <Globe className="w-4 h-4 text-violet" />
                             <span className="font-mono text-sm">{website.domain.domain}</span>
                           </div>
                         </TableCell>
@@ -747,18 +747,18 @@ export default function WebsitesPage() {
                               {website.cms}
                             </Badge>
                           ) : (
-                            <span className="text-gray-400 text-sm">-</span>
+                            <span className="text-muted text-sm">-</span>
                           )}
                         </TableCell>
                         <TableCell>
                           <StatusPill tone={toneFromBgClass(statusBadge.color)}>{statusBadge.text}</StatusPill>
-                          <div className={`mt-1 flex items-center gap-1 text-sm ${website.isLive ? 'text-green-600' : 'text-red-600'}`}>
+                          <div className={`mt-1 flex items-center gap-1 text-sm ${website.isLive ? 'text-on-mint' : 'text-st-no'}`}>
                             {website.isLive ? <Monitor className="w-3.5 h-3.5" /> : <MonitorOff className="w-3.5 h-3.5" />}
-                            {website.isLive ? 'Live' : 'Offline'}
+                            {website.isLive ? 'Online' : 'Offline'}
                           </div>
                         </TableCell>
                         <TableCell>
-                          <div className="text-sm text-gray-600">
+                          <div className="text-sm text-muted">
                             {new Date(website.createdAt).toLocaleDateString('id-ID')}
                           </div>
                         </TableCell>
@@ -778,11 +778,11 @@ export default function WebsitesPage() {
       {/* Websites Cards - Mobile */}
       <div className="md:hidden space-y-4">
         <div className="flex items-center justify-between mb-4">
-          <h3 className="text-lg font-semibold">Websites ({filteredWebsites.length})</h3>
+          <h3 className="text-lg font-extrabold tracking-[-0.02em]">Website ({filteredWebsites.length})</h3>
           {(userRole === 'ADMIN' || userRole === 'STAFF') && (
             <Button onClick={handleShowAddModal} size="sm">
               <Plus className="w-4 h-4 mr-2" />
-              Add
+              Tambah
             </Button>
           )}
         </div>
@@ -790,13 +790,13 @@ export default function WebsitesPage() {
         {paginatedWebsites.length === 0 ? (
           <Card>
             <CardContent className="text-center py-8">
-              <div className="flex flex-col items-center justify-center text-gray-500">
+              <div className="flex flex-col items-center justify-center text-muted">
                 <AppWindow className="w-12 h-12 mb-4 opacity-50" />
-                <p className="text-lg font-medium mb-2">No websites found</p>
+                <p className="text-lg font-medium mb-2">Nggak ada website yang ditemukan</p>
                 <p className="text-sm">
                   {searchTerm || filterStatus !== 'all' 
-                    ? 'Try adjusting your search or filter criteria'
-                    : 'Get started by adding your first website'
+                    ? 'Coba ubah kata kunci atau filternya'
+                    : 'Yuk, tambah website pertamamu'
                   }
                 </p>
               </div>
@@ -813,20 +813,20 @@ export default function WebsitesPage() {
                     {/* Website Header */}
                     <div className="flex items-center justify-between">
                       <div className="flex items-center space-x-3">
-                        <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
-                          <AppWindow className="w-4 h-4 text-blue-600" />
+                        <div className="w-8 h-8 bg-lilac rounded-2xl flex items-center justify-center">
+                          <AppWindow className="w-4 h-4 text-violet" />
                         </div>
                         <div>
-                          <h4 className="font-medium text-gray-900">{website.siteName}</h4>
-                          <p className="text-sm text-gray-500">{website.domain?.domain || 'No domain'}</p>
+                          <h4 className="text-[15px] font-extrabold leading-snug">{website.siteName}</h4>
+                          <p className="text-sm text-muted">{website.domain?.domain || 'Belum ada domain'}</p>
                         </div>
                       </div>
                       <div className="flex flex-col items-end space-y-1">
                         <StatusPill tone={toneFromBgClass(statusBadge.color)}>{statusBadge.text}</StatusPill>
                         <div className="flex items-center space-x-1">
-                          <div className={`w-2 h-2 rounded-full ${website.isLive ? 'bg-green-500' : 'bg-gray-400'}`}></div>
-                          <span className="text-xs text-gray-500">
-                            {website.isLive ? 'Live' : 'Offline'}
+                          <div className={`w-2 h-2 rounded-full ${website.isLive ? 'bg-on-mint' : 'bg-muted'}`}></div>
+                          <span className="text-xs text-muted">
+                            {website.isLive ? 'Online' : 'Offline'}
                           </span>
                         </div>
                       </div>
@@ -835,14 +835,14 @@ export default function WebsitesPage() {
                     {/* Website Details */}
                     <div className="grid grid-cols-2 gap-3 text-sm">
                       <div>
-                        <span className="text-gray-500">CMS:</span>
+                        <span className="text-muted">CMS:</span>
                         <div className="mt-1 font-medium">
-                          {website.cms || 'Not specified'}
+                          {website.cms || 'Belum diisi'}
                         </div>
                       </div>
                       
                       <div>
-                        <span className="text-gray-500">Created:</span>
+                        <span className="text-muted">Dibuat:</span>
                         <div className="mt-1 font-medium">
                           {formatIndonesianDate(website.createdAt)}
                         </div>
@@ -852,15 +852,15 @@ export default function WebsitesPage() {
                     {/* Description */}
                     {website.description && (
                       <div className="text-sm">
-                        <span className="text-gray-500">Description:</span>
-                        <p className="mt-1 text-gray-700">{website.description}</p>
+                        <span className="text-muted">Deskripsi:</span>
+                        <p className="mt-1 text-ink">{website.description}</p>
                       </div>
                     )}
 
                     {/* Actions */}
                     <div className="flex items-center justify-between pt-2 border-t">
                       <ManageMenu actions={websiteActions(website)} />
-                      <div className="text-xs text-gray-400">
+                      <div className="text-xs text-muted">
                         #{website.id.slice(-8)}
                       </div>
                     </div>
@@ -872,8 +872,8 @@ export default function WebsitesPage() {
             {/* Mobile Pagination */}
             {totalPages > 1 && (
               <div className="flex items-center justify-between mt-6">
-                <div className="text-sm text-gray-500">
-                  Page {currentPage} of {totalPages}
+                <div className="text-sm text-muted">
+                  Halaman {currentPage} dari {totalPages}
                 </div>
                 <div className="flex items-center space-x-2">
                   <Button
@@ -907,7 +907,7 @@ export default function WebsitesPage() {
           totalItems={filteredWebsites.length}
           pageSize={itemsPerPage}
           onPageChange={setCurrentPage}
-          itemLabel="websites"
+          itemLabel="website"
         />
       </div>
 
@@ -915,19 +915,19 @@ export default function WebsitesPage() {
       <Dialog open={showAddModal} onOpenChange={setShowAddModal}>
         <DialogContent className="max-w-2xl">
           <DialogHeader>
-            <DialogTitle>Add New Website</DialogTitle>
+            <DialogTitle>Tambah website baru</DialogTitle>
             <DialogDescription>
-              Create a new website entry with domain and configuration details.
+              Tambah website baru lengkap dengan domain dan detailnya.
             </DialogDescription>
           </DialogHeader>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {/* Site Name */}
             <div className="space-y-2">
-              <Label htmlFor="siteName">Site Name *</Label>
+              <Label htmlFor="siteName">Nama situs *</Label>
               <Input
                 id="siteName"
-                placeholder="My Awesome Website"
+                placeholder="mis. Blog Perusahaan"
                 value={newWebsite.siteName}
                 onChange={(e) => setNewWebsite(prev => ({ ...prev, siteName: e.target.value }))}
               />
@@ -939,7 +939,7 @@ export default function WebsitesPage() {
               {loadingDomains ? (
                 <div className="flex items-center justify-center py-2">
                   <Loader2 className="w-4 h-4 animate-spin mr-2" />
-                  <span className="text-sm text-gray-500">Loading domains...</span>
+                  <span className="text-sm text-muted">Memuat domain…</span>
                 </div>
               ) : (
                 <Select 
@@ -947,7 +947,7 @@ export default function WebsitesPage() {
                   onValueChange={(value) => setNewWebsite(prev => ({ ...prev, domainId: value }))}
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder="Select a domain" />
+                    <SelectValue placeholder="Pilih domain" />
                   </SelectTrigger>
                   <SelectContent>
                     {availableDomains.map((domain) => (
@@ -976,7 +976,7 @@ export default function WebsitesPage() {
 
             {/* Password */}
             <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
+              <Label htmlFor="password">Kata sandi</Label>
               <Input
                 id="password"
                 type="password"
@@ -994,10 +994,10 @@ export default function WebsitesPage() {
                 onValueChange={(value) => setNewWebsite(prev => ({ ...prev, cms: value }))}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="Select CMS" />
+                  <SelectValue placeholder="Pilih CMS" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="none">None</SelectItem>
+                  <SelectItem value="none">Tidak ada</SelectItem>
                   <SelectItem value="WordPress">WordPress</SelectItem>
                   <SelectItem value="Laravel">Laravel</SelectItem>
                   <SelectItem value="CodeIgniter">CodeIgniter</SelectItem>
@@ -1007,7 +1007,7 @@ export default function WebsitesPage() {
                   <SelectItem value="Nuxt.js">Nuxt.js</SelectItem>
                   <SelectItem value="Drupal">Drupal</SelectItem>
                   <SelectItem value="Joomla">Joomla</SelectItem>
-                  <SelectItem value="Custom">Custom</SelectItem>
+                  <SelectItem value="Custom">Kustom</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -1023,21 +1023,21 @@ export default function WebsitesPage() {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="ACTIVE">Active</SelectItem>
-                  <SelectItem value="INACTIVE">Inactive</SelectItem>
-                  <SelectItem value="MAINTENANCE">Maintenance</SelectItem>
-                  <SelectItem value="DEVELOPMENT">Development</SelectItem>
-                  <SelectItem value="SUSPENDED">Suspended</SelectItem>
+                  <SelectItem value="ACTIVE">Aktif</SelectItem>
+                  <SelectItem value="INACTIVE">Nonaktif</SelectItem>
+                  <SelectItem value="MAINTENANCE">Pemeliharaan</SelectItem>
+                  <SelectItem value="DEVELOPMENT">Pengembangan</SelectItem>
+                  <SelectItem value="SUSPENDED">Ditangguhkan</SelectItem>
                 </SelectContent>
               </Select>
             </div>
 
             {/* Description */}
             <div className="space-y-2 md:col-span-2">
-              <Label htmlFor="description">Description</Label>
+              <Label htmlFor="description">Deskripsi</Label>
               <Input
                 id="description"
-                placeholder="Brief description of the website"
+                placeholder="Deskripsi singkat website"
                 value={newWebsite.description}
                 onChange={(e) => setNewWebsite(prev => ({ ...prev, description: e.target.value }))}
               />
@@ -1051,16 +1051,16 @@ export default function WebsitesPage() {
                   checked={newWebsite.isLive}
                   onCheckedChange={(checked) => setNewWebsite(prev => ({ ...prev, isLive: checked }))}
                 />
-                <Label htmlFor="isLive">Website is live</Label>
+                <Label htmlFor="isLive">Website sudah online</Label>
               </div>
             </div>
 
             {/* Notes */}
             <div className="space-y-2 md:col-span-2">
-              <Label htmlFor="notes">Notes</Label>
+              <Label htmlFor="notes">Catatan</Label>
               <Textarea
                 id="notes"
-                placeholder="Additional notes about this website..."
+                placeholder="Catatan tambahan soal website ini…"
                 value={newWebsite.notes}
                 onChange={(e) => setNewWebsite(prev => ({ ...prev, notes: e.target.value }))}
                 rows={3}
@@ -1071,18 +1071,18 @@ export default function WebsitesPage() {
           <div className="flex justify-end gap-4 mt-6">
             <Button variant="outline" onClick={() => setShowAddModal(false)}>
               <X className="w-4 h-4 mr-2" />
-              Cancel
+              Batal
             </Button>
             <Button onClick={handleAddWebsite} disabled={addingWebsite}>
               {addingWebsite ? (
                 <>
                   <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  Adding...
+                  Menambahkan…
                 </>
               ) : (
                 <>
                   <Plus className="w-4 h-4 mr-2" />
-                  Add Website
+                  Tambah website
                 </>
               )}
             </Button>
@@ -1094,19 +1094,19 @@ export default function WebsitesPage() {
       <Dialog open={showEditModal} onOpenChange={setShowEditModal}>
         <DialogContent className="max-w-2xl">
           <DialogHeader>
-            <DialogTitle>Edit Website</DialogTitle>
+            <DialogTitle>Ubah website</DialogTitle>
             <DialogDescription>
-              Update website information and configuration.
+              Perbarui informasi dan detail website.
             </DialogDescription>
           </DialogHeader>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {/* Site Name */}
             <div className="space-y-2">
-              <Label htmlFor="editSiteName">Site Name *</Label>
+              <Label htmlFor="editSiteName">Nama situs *</Label>
               <Input
                 id="editSiteName"
-                placeholder="My Awesome Website"
+                placeholder="mis. Blog Perusahaan"
                 value={editWebsite.siteName}
                 onChange={(e) => setEditWebsite(prev => ({ ...prev, siteName: e.target.value }))}
               />
@@ -1120,7 +1120,7 @@ export default function WebsitesPage() {
                 onValueChange={(value) => setEditWebsite(prev => ({ ...prev, domainId: value }))}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="Select a domain" />
+                  <SelectValue placeholder="Pilih domain" />
                 </SelectTrigger>
                 <SelectContent>
                   {availableDomains.map((domain) => (
@@ -1148,7 +1148,7 @@ export default function WebsitesPage() {
 
             {/* Password */}
             <div className="space-y-2">
-              <Label htmlFor="editPassword">Password</Label>
+              <Label htmlFor="editPassword">Kata sandi</Label>
               <Input
                 id="editPassword"
                 type="password"
@@ -1166,10 +1166,10 @@ export default function WebsitesPage() {
                 onValueChange={(value) => setEditWebsite(prev => ({ ...prev, cms: value }))}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="Select CMS" />
+                  <SelectValue placeholder="Pilih CMS" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="none">None</SelectItem>
+                  <SelectItem value="none">Tidak ada</SelectItem>
                   <SelectItem value="WordPress">WordPress</SelectItem>
                   <SelectItem value="Laravel">Laravel</SelectItem>
                   <SelectItem value="CodeIgniter">CodeIgniter</SelectItem>
@@ -1179,7 +1179,7 @@ export default function WebsitesPage() {
                   <SelectItem value="Nuxt.js">Nuxt.js</SelectItem>
                   <SelectItem value="Drupal">Drupal</SelectItem>
                   <SelectItem value="Joomla">Joomla</SelectItem>
-                  <SelectItem value="Custom">Custom</SelectItem>
+                  <SelectItem value="Custom">Kustom</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -1195,21 +1195,21 @@ export default function WebsitesPage() {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="ACTIVE">Active</SelectItem>
-                  <SelectItem value="INACTIVE">Inactive</SelectItem>
-                  <SelectItem value="MAINTENANCE">Maintenance</SelectItem>
-                  <SelectItem value="DEVELOPMENT">Development</SelectItem>
-                  <SelectItem value="SUSPENDED">Suspended</SelectItem>
+                  <SelectItem value="ACTIVE">Aktif</SelectItem>
+                  <SelectItem value="INACTIVE">Nonaktif</SelectItem>
+                  <SelectItem value="MAINTENANCE">Pemeliharaan</SelectItem>
+                  <SelectItem value="DEVELOPMENT">Pengembangan</SelectItem>
+                  <SelectItem value="SUSPENDED">Ditangguhkan</SelectItem>
                 </SelectContent>
               </Select>
             </div>
 
             {/* Description */}
             <div className="space-y-2 md:col-span-2">
-              <Label htmlFor="editDescription">Description</Label>
+              <Label htmlFor="editDescription">Deskripsi</Label>
               <Input
                 id="editDescription"
-                placeholder="Brief description of the website"
+                placeholder="Deskripsi singkat website"
                 value={editWebsite.description}
                 onChange={(e) => setEditWebsite(prev => ({ ...prev, description: e.target.value }))}
               />
@@ -1223,16 +1223,16 @@ export default function WebsitesPage() {
                   checked={editWebsite.isLive}
                   onCheckedChange={(checked) => setEditWebsite(prev => ({ ...prev, isLive: checked }))}
                 />
-                <Label htmlFor="editIsLive">Website is live</Label>
+                <Label htmlFor="editIsLive">Website sudah online</Label>
               </div>
             </div>
 
             {/* Notes */}
             <div className="space-y-2 md:col-span-2">
-              <Label htmlFor="editNotes">Notes</Label>
+              <Label htmlFor="editNotes">Catatan</Label>
               <Textarea
                 id="editNotes"
-                placeholder="Additional notes about this website..."
+                placeholder="Catatan tambahan soal website ini…"
                 value={editWebsite.notes}
                 onChange={(e) => setEditWebsite(prev => ({ ...prev, notes: e.target.value }))}
                 rows={3}
@@ -1243,18 +1243,18 @@ export default function WebsitesPage() {
           <div className="flex justify-end gap-4 mt-6">
             <Button variant="outline" onClick={() => setShowEditModal(false)}>
               <X className="w-4 h-4 mr-2" />
-              Cancel
+              Batal
             </Button>
             <Button onClick={handleUpdateWebsite} disabled={editingWebsite}>
               {editingWebsite ? (
                 <>
                   <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  Updating...
+                  Memperbarui…
                 </>
               ) : (
                 <>
                   <Save className="w-4 h-4 mr-2" />
-                  Update Website
+                  Perbarui website
                 </>
               )}
             </Button>
@@ -1266,9 +1266,9 @@ export default function WebsitesPage() {
       <Dialog open={showViewModal} onOpenChange={setShowViewModal}>
         <DialogContent className="max-w-2xl">
           <DialogHeader>
-            <DialogTitle>Website Details</DialogTitle>
+            <DialogTitle>Detail website</DialogTitle>
             <DialogDescription>
-              View detailed information about {selectedWebsite?.siteName}
+              Informasi lengkap {selectedWebsite?.siteName}
             </DialogDescription>
           </DialogHeader>
           
@@ -1276,20 +1276,20 @@ export default function WebsitesPage() {
             <div className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <Label className="text-sm font-medium text-gray-600">Site Name</Label>
+                  <Label className="text-sm font-medium text-muted">Nama situs</Label>
                   <p className="text-sm font-medium">{selectedWebsite.siteName}</p>
                 </div>
                 
                 <div>
-                  <Label className="text-sm font-medium text-gray-600">Domain</Label>
+                  <Label className="text-sm font-medium text-muted">Domain</Label>
                   <div className="flex items-center gap-2">
-                    <Globe className="w-4 h-4 text-blue-500" />
+                    <Globe className="w-4 h-4 text-violet" />
                     <p className="text-sm font-mono">{selectedWebsite.domain.domain}</p>
                   </div>
                 </div>
 
                 <div>
-                  <Label className="text-sm font-medium text-gray-600">Status</Label>
+                  <Label className="text-sm font-medium text-muted">Status</Label>
                   <div className="flex items-center gap-2">
                     {(() => {
                       const statusBadge = getStatusBadge(selectedWebsite.status)
@@ -1301,17 +1301,17 @@ export default function WebsitesPage() {
                 </div>
 
                 <div>
-                  <Label className="text-sm font-medium text-gray-600">Live Status</Label>
+                  <Label className="text-sm font-medium text-muted">Status online</Label>
                   <div className="flex items-center gap-2">
                     {selectedWebsite.isLive ? (
                       <>
-                        <Monitor className="w-4 h-4 text-green-500" />
-                        <span className="text-green-600 text-sm font-medium">Live</span>
+                        <Monitor className="w-4 h-4 text-on-mint" />
+                        <span className="text-on-mint text-sm font-medium">Online</span>
                       </>
                     ) : (
                       <>
-                        <MonitorOff className="w-4 h-4 text-red-500" />
-                        <span className="text-red-600 text-sm font-medium">Offline</span>
+                        <MonitorOff className="w-4 h-4 text-st-no" />
+                        <span className="text-st-no text-sm font-medium">Offline</span>
                       </>
                     )}
                   </div>
@@ -1319,14 +1319,14 @@ export default function WebsitesPage() {
 
                 {selectedWebsite.username && (
                   <div>
-                    <Label className="text-sm font-medium text-gray-600">Username</Label>
+                    <Label className="text-sm font-medium text-muted">Username</Label>
                     <p className="text-sm font-mono">{selectedWebsite.username}</p>
                   </div>
                 )}
 
                 {selectedWebsite.password && (
                   <div>
-                    <Label className="text-sm font-medium text-gray-600">Password</Label>
+                    <Label className="text-sm font-medium text-muted">Kata sandi</Label>
                     <div className="flex items-center gap-2">
                       <span className="text-sm font-mono">
                         {visiblePasswords.has(selectedWebsite.id) 
@@ -1360,7 +1360,7 @@ export default function WebsitesPage() {
 
                 {selectedWebsite.cms && (
                   <div>
-                    <Label className="text-sm font-medium text-gray-600">CMS</Label>
+                    <Label className="text-sm font-medium text-muted">CMS</Label>
                     <Badge variant="outline" className="text-xs">
                       {selectedWebsite.cms}
                     </Badge>
@@ -1368,26 +1368,26 @@ export default function WebsitesPage() {
                 )}
 
                 <div>
-                  <Label className="text-sm font-medium text-gray-600">Created</Label>
+                  <Label className="text-sm font-medium text-muted">Dibuat</Label>
                   <p className="text-sm">{new Date(selectedWebsite.createdAt).toLocaleDateString('id-ID')}</p>
                 </div>
 
                 <div>
-                  <Label className="text-sm font-medium text-gray-600">Last Updated</Label>
+                  <Label className="text-sm font-medium text-muted">Terakhir diperbarui</Label>
                   <p className="text-sm">{new Date(selectedWebsite.updatedAt).toLocaleDateString('id-ID')}</p>
                 </div>
               </div>
 
               {selectedWebsite.description && (
                 <div>
-                  <Label className="text-sm font-medium text-gray-600">Description</Label>
+                  <Label className="text-sm font-medium text-muted">Deskripsi</Label>
                   <p className="text-sm">{selectedWebsite.description}</p>
                 </div>
               )}
 
               {selectedWebsite.notes && (
                 <div>
-                  <Label className="text-sm font-medium text-gray-600">Notes</Label>
+                  <Label className="text-sm font-medium text-muted">Catatan</Label>
                   <p className="text-sm whitespace-pre-wrap">{selectedWebsite.notes}</p>
                 </div>
               )}
@@ -1396,7 +1396,7 @@ export default function WebsitesPage() {
 
           <div className="flex justify-end mt-6">
             <Button variant="outline" onClick={() => setShowViewModal(false)}>
-              Close
+              Tutup
             </Button>
           </div>
         </DialogContent>

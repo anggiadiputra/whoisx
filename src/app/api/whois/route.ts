@@ -18,7 +18,7 @@ export async function POST(request: NextRequest) {
     if (!domain) {
       return NextResponse.json({
         success: false,
-        error: 'Domain is required'
+        error: 'Domain wajib diisi'
       }, { status: 400 })
     }
     
@@ -80,7 +80,7 @@ export async function POST(request: NextRequest) {
     console.error('Error in WHOIS lookup:', error)
     return NextResponse.json({
       success: false,
-      error: 'Failed to perform WHOIS lookup'
+      error: 'Gagal mengecek WHOIS. Coba lagi, ya.'
     }, { status: 500 })
   }
 }

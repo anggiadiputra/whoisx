@@ -20,11 +20,11 @@ export async function requireManager(): Promise<
   const session = await getServerSession(authOptions)
 
   if (!session?.user) {
-    return { error: NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 }) }
+    return { error: NextResponse.json({ success: false, error: 'Kamu perlu masuk dulu' }, { status: 401 }) }
   }
 
   if (!canManage(session.user.role)) {
-    return { error: NextResponse.json({ success: false, error: 'Insufficient permissions' }, { status: 403 }) }
+    return { error: NextResponse.json({ success: false, error: 'Kamu nggak punya akses untuk ini' }, { status: 403 }) }
   }
 
   return { session }

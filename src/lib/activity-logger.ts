@@ -43,7 +43,7 @@ export const ActivityLogger = {
   userLogin: (userId: string, userEmail: string) => 
     logActivity({
       type: 'USER_LOGIN',
-      description: `User ${userEmail} logged in`,
+      description: `${userEmail} masuk`,
       userId,
       entityType: 'user',
       entityId: userId
@@ -52,7 +52,7 @@ export const ActivityLogger = {
   userLogout: (userId: string, userEmail: string) => 
     logActivity({
       type: 'USER_LOGOUT', 
-      description: `User ${userEmail} logged out`,
+      description: `${userEmail} keluar`,
       userId,
       entityType: 'user',
       entityId: userId
@@ -61,7 +61,7 @@ export const ActivityLogger = {
   domainAdded: (userId: string, domainName: string, domainId: string) =>
     logActivity({
       type: 'DOMAIN_ADDED',
-      description: `Domain ${domainName} was added`,
+      description: `Domain ${domainName} ditambahkan`,
       userId,
       entityType: 'domain',
       entityId: domainId
@@ -70,7 +70,7 @@ export const ActivityLogger = {
   domainUpdated: (userId: string, domainName: string, domainId: string) =>
     logActivity({
       type: 'DOMAIN_UPDATED',
-      description: `Domain ${domainName} was updated`,
+      description: `Domain ${domainName} diperbarui`,
       userId,
       entityType: 'domain', 
       entityId: domainId
@@ -79,7 +79,7 @@ export const ActivityLogger = {
   domainDeleted: (userId: string, domainName: string) =>
     logActivity({
       type: 'DOMAIN_DELETED',
-      description: `Domain ${domainName} was deleted`,
+      description: `Domain ${domainName} dihapus`,
       userId,
       entityType: 'domain'
     }),
@@ -87,7 +87,7 @@ export const ActivityLogger = {
   serverAdded: (userId: string, serverName: string, serverId: string) =>
     logActivity({
       type: 'SERVER_ADDED',
-      description: `Server ${serverName} was added`,
+      description: `Server ${serverName} ditambahkan`,
       userId,
       entityType: 'server',
       entityId: serverId
@@ -96,7 +96,7 @@ export const ActivityLogger = {
   serverUpdated: (userId: string, serverName: string, serverId: string) =>
     logActivity({
       type: 'SERVER_UPDATED',
-      description: `Server ${serverName} was updated`,
+      description: `Server ${serverName} diperbarui`,
       userId,
       entityType: 'server',
       entityId: serverId
@@ -105,7 +105,7 @@ export const ActivityLogger = {
   serverDeleted: (userId: string, serverName: string) =>
     logActivity({
       type: 'SERVER_DELETED',
-      description: `Server ${serverName} was deleted`,
+      description: `Server ${serverName} dihapus`,
       userId,
       entityType: 'server'
     }),
@@ -113,7 +113,7 @@ export const ActivityLogger = {
   websiteAdded: (userId: string, siteName: string, websiteId: string) =>
     logActivity({
       type: 'WEBSITE_ADDED',
-      description: `Website ${siteName} was added`,
+      description: `Website ${siteName} ditambahkan`,
       userId,
       entityType: 'website',
       entityId: websiteId
@@ -122,7 +122,7 @@ export const ActivityLogger = {
   websiteUpdated: (userId: string, siteName: string, websiteId: string) =>
     logActivity({
       type: 'WEBSITE_UPDATED',
-      description: `Website ${siteName} was updated`,
+      description: `Website ${siteName} diperbarui`,
       userId,
       entityType: 'website',
       entityId: websiteId
@@ -131,7 +131,7 @@ export const ActivityLogger = {
   websiteDeleted: (userId: string, siteName: string) =>
     logActivity({
       type: 'WEBSITE_DELETED',
-      description: `Website ${siteName} was deleted`,
+      description: `Website ${siteName} dihapus`,
       userId,
       entityType: 'website'
     }),
@@ -139,7 +139,7 @@ export const ActivityLogger = {
   userCreated: (adminId: string, newUserEmail: string, newUserId: string) =>
     logActivity({
       type: 'USER_CREATED',
-      description: `User ${newUserEmail} was created`,
+      description: `Pengguna ${newUserEmail} ditambahkan`,
       userId: adminId,
       entityType: 'user',
       entityId: newUserId
@@ -148,7 +148,7 @@ export const ActivityLogger = {
   userUpdated: (adminId: string, targetUserEmail: string, targetUserId: string) =>
     logActivity({
       type: 'USER_UPDATED',
-      description: `User ${targetUserEmail} was updated`,
+      description: `Pengguna ${targetUserEmail} diperbarui`,
       userId: adminId,
       entityType: 'user',
       entityId: targetUserId
@@ -157,7 +157,7 @@ export const ActivityLogger = {
   userDeleted: (adminId: string, deletedUserEmail: string) =>
     logActivity({
       type: 'USER_DELETED',
-      description: `User ${deletedUserEmail} was deleted`,
+      description: `Pengguna ${deletedUserEmail} dihapus`,
       userId: adminId,
       entityType: 'user'
     })

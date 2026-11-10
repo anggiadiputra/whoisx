@@ -20,11 +20,11 @@ async function requireAdmin() {
   const session = await getServerSession(authOptions)
 
   if (!session?.user) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    return NextResponse.json({ error: 'Kamu perlu masuk dulu' }, { status: 401 })
   }
 
   if (session.user.role !== 'ADMIN') {
-    return NextResponse.json({ error: 'Access denied' }, { status: 403 })
+    return NextResponse.json({ error: 'Kamu nggak punya akses untuk ini' }, { status: 403 })
   }
 
   return null
@@ -77,12 +77,12 @@ export async function PUT(request: NextRequest) {
       const appName = typeof body.appName === 'string' ? body.appName.trim() : ''
 
       if (!appName) {
-        return NextResponse.json({ error: 'Application name is required' }, { status: 400 })
+        return NextResponse.json({ error: 'Nama aplikasi wajib diisi' }, { status: 400 })
       }
 
       if (appName.length > APP_NAME_MAX_LENGTH) {
         return NextResponse.json(
-          { error: `Application name must be ${APP_NAME_MAX_LENGTH} characters or fewer` },
+          { error: `Nama aplikasi maksimal ${APP_NAME_MAX_LENGTH} karakter` },
           { status: 400 }
         )
       }
@@ -93,7 +93,7 @@ export async function PUT(request: NextRequest) {
 
     if (body?.registrationEnabled !== undefined) {
       if (typeof body.registrationEnabled !== 'boolean') {
-        return NextResponse.json({ error: 'registrationEnabled must be true or false' }, { status: 400 })
+        return NextResponse.json({ error: 'registrationEnabled harus true atau false' }, { status: 400 })
       }
 
       writes.push([REGISTRATION_ENABLED_KEY, String(body.registrationEnabled)])
@@ -104,7 +104,7 @@ export async function PUT(request: NextRequest) {
       const { enabled, siteKey, secretKey, testToken } = body.turnstile ?? {}
 
       if (typeof enabled !== 'boolean') {
-        return NextResponse.json({ error: 'turnstile.enabled must be true or false' }, { status: 400 })
+        return NextResponse.json({ error: 'turnstile.enabled harus true atau false' }, { status: 400 })
       }
 
       const newSiteKey = typeof siteKey === 'string' ? siteKey.trim() : ''
@@ -114,7 +114,7 @@ export async function PUT(request: NextRequest) {
 
       if (enabled) {
         if (!newSiteKey || !effectiveSecretKey) {
-          return NextResponse.json({ error: 'Enter both the Turnstile site key and secret key' }, { status: 400 })
+          return NextResponse.json({ error: 'Isi site key dan secret key Turnstile dulu, ya' }, { status: 400 })
         }
 
         // A token from the test widget proves the keys pair up and work on this hostname,
@@ -122,7 +122,7 @@ export async function PUT(request: NextRequest) {
         const remoteIp = request.headers.get('cf-connecting-ip') ?? undefined
         if (!(await verifyTurnstileToken(effectiveSecretKey, testToken, remoteIp))) {
           return NextResponse.json(
-            { error: 'Turnstile check failed. Make sure both keys come from the same widget and this hostname is added to it.' },
+            { error: 'Pengecekan Turnstile gagal. Pastikan kedua key berasal dari widget yang sama dan hostname ini sudah ditambahkan di widget itu.' },
             { status: 400 }
           )
         }
@@ -144,6 +144,6 @@ export async function PUT(request: NextRequest) {
     return NextResponse.json(result)
   } catch (error) {
     console.error('Error saving general settings:', error)
-    return NextResponse.json({ error: 'Failed to save settings' }, { status: 500 })
+    return NextResponse.json({ error: 'Gagal menyimpan pengaturan. Coba lagi, ya.' }, { status: 500 })
   }
 }

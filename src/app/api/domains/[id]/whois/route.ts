@@ -24,7 +24,7 @@ export async function GET(
     if (!domain) {
       return NextResponse.json({
         success: false,
-        error: 'Domain not found'
+        error: 'Domain tidak ditemukan'
       }, { status: 404 })
     }
 
@@ -94,7 +94,7 @@ export async function GET(
     console.error('Error fetching WHOIS details:', error)
     return NextResponse.json({
       success: false,
-      error: 'Failed to fetch WHOIS details'
+      error: 'Gagal memuat detail WHOIS. Coba lagi, ya.'
     }, { status: 500 })
   }
 }

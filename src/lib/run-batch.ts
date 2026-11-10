@@ -31,7 +31,7 @@ export async function fetchOrThrow(url: string, init?: RequestInit): Promise<Res
   const response = await fetch(url, { credentials: 'include', ...init })
   if (!response.ok) {
     const body = await response.json().catch(() => null)
-    throw new Error(body?.error || `Request failed (${response.status})`)
+    throw new Error(body?.error || `Permintaan gagal (${response.status})`)
   }
   return response
 }

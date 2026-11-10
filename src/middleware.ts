@@ -31,7 +31,7 @@ export default withAuth(
       
       // Admin-only API routes
       if (req.nextUrl.pathname.startsWith('/api/users') && userRole !== 'ADMIN') {
-        return NextResponse.json({ error: 'Unauthorized' }, { status: 403 })
+        return NextResponse.json({ error: 'Kamu nggak punya akses untuk ini' }, { status: 403 })
       }
 
       // Finance and above can view financial data

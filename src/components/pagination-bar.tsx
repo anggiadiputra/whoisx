@@ -9,7 +9,7 @@ interface PaginationBarProps {
   totalItems: number
   pageSize: number
   onPageChange: (page: number) => void
-  // Plural noun for the summary, e.g. "domains"
+  // Noun for the summary, e.g. "domain"
   itemLabel: string
   className?: string
 }
@@ -53,19 +53,19 @@ export function PaginationBar({
   return (
     // Wraps the page buttons under the summary when the card is too narrow for both on one line
     <div className={`flex flex-wrap items-center justify-between gap-3 ${className}`}>
-      <p className="text-sm text-gray-600 whitespace-nowrap">
-        Showing {first}–{last} of {totalItems} {itemLabel}
+      <p className="tabular whitespace-nowrap text-[13px] font-semibold text-muted">
+        {first}–{last} dari {totalItems} {itemLabel}
       </p>
       <div className="flex items-center gap-1">
         <Button
-          variant="outline"
+          variant="secondary"
           size="sm"
           onClick={() => onPageChange(currentPage - 1)}
           disabled={currentPage === 1}
-          aria-label="Previous page"
+          aria-label="Halaman sebelumnya"
         >
           <ChevronLeft className="w-4 h-4" />
-          <span className="hidden lg:inline">Previous</span>
+          <span className="hidden lg:inline">Sebelumnya</span>
         </Button>
 
         {/* Page numbers from sm up; phones get "3 / 18" instead */}
@@ -74,31 +74,31 @@ export function PaginationBar({
             typeof slot === 'number' ? (
               <Button
                 key={slot}
-                variant={slot === currentPage ? 'default' : 'outline'}
-                size="sm"
+                variant={slot === currentPage ? 'default' : 'secondary'}
+                size="icon"
                 onClick={() => onPageChange(slot)}
-                className="w-8 h-8 p-0"
+                className={`tabular ${slot === currentPage ? 'bg-ink shadow-none hover:bg-ink' : ''}`}
                 aria-current={slot === currentPage ? 'page' : undefined}
               >
                 {slot}
               </Button>
             ) : (
-              <span key={slot} className="w-6 text-center text-sm text-gray-400">…</span>
+              <span key={slot} className="w-6 text-center text-[13px] font-extrabold text-muted">…</span>
             )
           )}
         </div>
-        <span className="sm:hidden px-2 text-sm text-gray-600">
+        <span className="tabular px-2 text-[13px] font-extrabold sm:hidden">
           {currentPage} / {totalPages}
         </span>
 
         <Button
-          variant="outline"
+          variant="secondary"
           size="sm"
           onClick={() => onPageChange(currentPage + 1)}
           disabled={currentPage === totalPages}
-          aria-label="Next page"
+          aria-label="Halaman berikutnya"
         >
-          <span className="hidden lg:inline">Next</span>
+          <span className="hidden lg:inline">Berikutnya</span>
           <ChevronRight className="w-4 h-4" />
         </Button>
       </div>

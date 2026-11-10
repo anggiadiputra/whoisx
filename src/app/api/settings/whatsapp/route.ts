@@ -9,12 +9,12 @@ export async function GET(request: NextRequest) {
     const session = await getServerSession(authOptions)
     
     if (!session?.user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+      return NextResponse.json({ error: 'Kamu perlu masuk dulu' }, { status: 401 })
     }
 
     // Only allow Admin users to access settings
     if (session.user.role !== 'ADMIN') {
-      return NextResponse.json({ error: 'Access denied' }, { status: 403 })
+      return NextResponse.json({ error: 'Kamu nggak punya akses untuk ini' }, { status: 403 })
     }
 
     // For now, we'll use a simple approach - store settings in a JSON file or database
@@ -54,7 +54,7 @@ export async function GET(request: NextRequest) {
     console.error('Error fetching WhatsApp settings:', error)
     return NextResponse.json({
       success: false,
-      error: 'Failed to fetch settings'
+      error: 'Gagal memuat pengaturan. Coba lagi, ya.'
     }, { status: 500 })
   }
 }
@@ -65,12 +65,12 @@ export async function POST(request: NextRequest) {
     const session = await getServerSession(authOptions)
     
     if (!session?.user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+      return NextResponse.json({ error: 'Kamu perlu masuk dulu' }, { status: 401 })
     }
 
     // Only allow Admin users to modify settings
     if (session.user.role !== 'ADMIN') {
-      return NextResponse.json({ error: 'Access denied' }, { status: 403 })
+      return NextResponse.json({ error: 'Kamu nggak punya akses untuk ini' }, { status: 403 })
     }
 
     const body = await request.json()
@@ -78,7 +78,7 @@ export async function POST(request: NextRequest) {
 
     // Validate settings structure
     if (!settings || typeof settings !== 'object') {
-      return NextResponse.json({ error: 'Invalid settings data' }, { status: 400 })
+      return NextResponse.json({ error: 'Data pengaturan tidak valid' }, { status: 400 })
     }
 
     // For this implementation, we'll store in localStorage on client side
@@ -92,13 +92,13 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      message: 'Settings saved successfully'
+      message: 'Pengaturan disimpan'
     })
   } catch (error: any) {
     console.error('Error saving WhatsApp settings:', error)
     return NextResponse.json({
       success: false,
-      error: 'Failed to save settings'
+      error: 'Gagal menyimpan pengaturan. Coba lagi, ya.'
     }, { status: 500 })
   }
 }

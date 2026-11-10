@@ -154,7 +154,7 @@ export async function GET(request: NextRequest) {
     console.error('Error fetching domains:', error)
     return NextResponse.json({
       success: false,
-      error: 'Failed to fetch domains'
+      error: 'Gagal memuat domain. Coba lagi, ya.'
     }, { status: 500 })
   }
 }
@@ -174,7 +174,7 @@ export async function POST(request: NextRequest) {
     if (!domain) {
       return NextResponse.json({
         success: false,
-        error: 'Domain is required'
+        error: 'Domain wajib diisi'
       }, { status: 400 })
     }
     
@@ -186,7 +186,7 @@ export async function POST(request: NextRequest) {
     if (existingDomain) {
       return NextResponse.json({
         success: false,
-        error: 'Domain already exists'
+        error: 'Domain sudah ada'
       }, { status: 409 })
     }
     
@@ -258,7 +258,7 @@ export async function POST(request: NextRequest) {
     console.error('Error creating domain:', error)
     return NextResponse.json({
       success: false,
-      error: 'Failed to create domain'
+      error: 'Gagal menambahkan domain. Coba lagi, ya.'
     }, { status: 500 })
   }
 }

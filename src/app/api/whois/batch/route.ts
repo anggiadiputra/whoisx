@@ -19,14 +19,14 @@ export async function POST(request: NextRequest) {
     if (!domains || !Array.isArray(domains) || domains.length === 0) {
       return NextResponse.json({
         success: false,
-        error: 'Domains array is required'
+        error: 'Daftar domain wajib diisi'
       }, { status: 400 })
     }
     
     if (domains.length > 100) {
       return NextResponse.json({
         success: false,
-        error: 'Maximum 100 domains allowed per batch'
+        error: 'Maksimal 100 domain sekali proses'
       }, { status: 400 })
     }
     
@@ -81,7 +81,7 @@ export async function POST(request: NextRequest) {
                 domain: result.domain,
                 action: 'skipped',
                 success: true,
-                message: 'Domain exists, use updateExisting=true to update'
+                message: 'Domain sudah ada. Pakai updateExisting=true untuk memperbaruinya.'
               })
             }
           } else {
@@ -128,7 +128,7 @@ export async function POST(request: NextRequest) {
           domain: result.domain,
           action: 'failed',
           success: false,
-          error: 'Database error: ' + dbError.message
+          error: 'Gagal menyimpan ke database: ' + dbError.message
         })
       }
     }
@@ -152,7 +152,7 @@ export async function POST(request: NextRequest) {
     console.error('Error in batch WHOIS lookup:', error)
     return NextResponse.json({
       success: false,
-      error: 'Failed to perform batch WHOIS lookup'
+      error: 'Gagal mengecek WHOIS massal. Coba lagi, ya.'
     }, { status: 500 })
   }
 }

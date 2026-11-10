@@ -12,13 +12,13 @@ export async function POST(
     const session = await getServerSession(authOptions)
     
     if (!session?.user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+      return NextResponse.json({ error: 'Kamu perlu masuk dulu' }, { status: 401 })
     }
 
     // Check permissions - only ADMIN and STAFF can assign domains
     const userRole = (session.user as any)?.role
     if (userRole !== 'ADMIN' && userRole !== 'STAFF') {
-      return NextResponse.json({ error: 'Insufficient permissions' }, { status: 403 })
+      return NextResponse.json({ error: 'Kamu nggak punya akses untuk ini' }, { status: 403 })
     }
 
     const { id } = await params
@@ -27,7 +27,7 @@ export async function POST(
 
     // Validate serverId
     if (!serverId) {
-      return NextResponse.json({ error: 'Server ID is required' }, { status: 400 })
+      return NextResponse.json({ error: 'Server wajib dipilih' }, { status: 400 })
     }
 
     // Check if domain exists
@@ -36,7 +36,7 @@ export async function POST(
     })
 
     if (!domain) {
-      return NextResponse.json({ error: 'Domain not found' }, { status: 404 })
+      return NextResponse.json({ error: 'Domain tidak ditemukan' }, { status: 404 })
     }
 
     // Check if server exists
@@ -45,13 +45,13 @@ export async function POST(
     })
 
     if (!server) {
-      return NextResponse.json({ error: 'Server not found' }, { status: 404 })
+      return NextResponse.json({ error: 'Server tidak ditemukan' }, { status: 404 })
     }
 
     // Check if domain is already assigned to this server
     if (domain.serverId === serverId) {
       return NextResponse.json({ 
-        error: 'Domain is already assigned to this server' 
+        error: 'Domain sudah dipasang ke server ini' 
       }, { status: 400 })
     }
 
@@ -73,14 +73,14 @@ export async function POST(
 
     return NextResponse.json({
       success: true,
-      message: `Domain "${domain.domain}" assigned to server "${server.serverName}"`,
+      message: `Domain "${domain.domain}" dipasang ke server "${server.serverName}"`,
       domain: updatedDomain
     })
 
   } catch (error) {
     console.error('❌ Error assigning domain to server:', error)
     return NextResponse.json(
-      { error: 'Failed to assign domain to server' },
+      { error: 'Gagal memasang domain ke server. Coba lagi, ya.' },
       { status: 500 }
     )
   }
@@ -95,13 +95,13 @@ export async function DELETE(
     const session = await getServerSession(authOptions)
     
     if (!session?.user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+      return NextResponse.json({ error: 'Kamu perlu masuk dulu' }, { status: 401 })
     }
 
     // Check permissions - only ADMIN and STAFF can unassign domains
     const userRole = (session.user as any)?.role
     if (userRole !== 'ADMIN' && userRole !== 'STAFF') {
-      return NextResponse.json({ error: 'Insufficient permissions' }, { status: 403 })
+      return NextResponse.json({ error: 'Kamu nggak punya akses untuk ini' }, { status: 403 })
     }
 
     const { id } = await params
@@ -119,13 +119,13 @@ export async function DELETE(
     })
 
     if (!domain) {
-      return NextResponse.json({ error: 'Domain not found' }, { status: 404 })
+      return NextResponse.json({ error: 'Domain tidak ditemukan' }, { status: 404 })
     }
 
     // Check if domain is assigned to any server
     if (!domain.serverId) {
       return NextResponse.json({ 
-        error: 'Domain is not assigned to any server' 
+        error: 'Domain belum dipasang ke server mana pun' 
       }, { status: 400 })
     }
 
@@ -137,14 +137,14 @@ export async function DELETE(
 
     return NextResponse.json({
       success: true,
-      message: `Domain "${domain.domain}" unassigned from server "${domain.server?.serverName}"`,
+      message: `Domain "${domain.domain}" dilepas dari server "${domain.server?.serverName}"`,
       domain: updatedDomain
     })
 
   } catch (error) {
     console.error('❌ Error unassigning domain from server:', error)
     return NextResponse.json(
-      { error: 'Failed to unassign domain from server' },
+      { error: 'Gagal melepas domain dari server. Coba lagi, ya.' },
       { status: 500 }
     )
   }

@@ -14,7 +14,7 @@ export async function GET(request: NextRequest) {
     const session = await getServerSession(authOptions)
     
     if (!session?.user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+      return NextResponse.json({ error: 'Kamu perlu masuk dulu' }, { status: 401 })
     }
 
     // Fetch all servers
@@ -114,7 +114,7 @@ export async function GET(request: NextRequest) {
   } catch (error) {
     console.error('❌ Error fetching servers:', error)
     return NextResponse.json(
-      { error: 'Internal server error' },
+      { error: 'Gagal memproses permintaan. Coba lagi, ya.' },
       { status: 500 }
     )
   }
@@ -126,13 +126,13 @@ export async function POST(request: NextRequest) {
     const session = await getServerSession(authOptions)
     
     if (!session?.user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+      return NextResponse.json({ error: 'Kamu perlu masuk dulu' }, { status: 401 })
     }
 
     // Check permissions - only ADMIN and STAFF can create servers
     const userRole = (session.user as any)?.role
     if (userRole !== 'ADMIN' && userRole !== 'STAFF') {
-      return NextResponse.json({ error: 'Insufficient permissions' }, { status: 403 })
+      return NextResponse.json({ error: 'Kamu nggak punya akses untuk ini' }, { status: 403 })
     }
 
     const body = await request.json()
@@ -140,7 +140,7 @@ export async function POST(request: NextRequest) {
     // Validate required fields
     if (!body.serverName || !body.provider || !body.serverType) {
       return NextResponse.json(
-        { error: 'Server name, provider, and server type are required' },
+        { error: 'Nama server, provider, dan tipe server wajib diisi' },
         { status: 400 }
       )
     }
@@ -148,7 +148,7 @@ export async function POST(request: NextRequest) {
     // Validate server type
     if (!Object.values(ServerType).includes(body.serverType)) {
       return NextResponse.json(
-        { error: 'Invalid server type' },
+        { error: 'Tipe server tidak valid' },
         { status: 400 }
       )
     }
@@ -197,14 +197,14 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      message: 'Server created successfully',
+      message: 'Server ditambahkan',
       server
     })
 
   } catch (error) {
     console.error('❌ Error creating server:', error)
     return NextResponse.json(
-      { error: 'Failed to create server' },
+      { error: 'Gagal menambahkan server. Coba lagi, ya.' },
       { status: 500 }
     )
   }

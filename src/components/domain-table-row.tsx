@@ -44,36 +44,36 @@ const DomainTableRow = memo(({
   const expiryStatus = getExpiryStatus(domain.daysToExpiry)
   
   return (
-    <TableRow key={domain.id} className="hover:bg-gray-50">
+    <TableRow key={domain.id} className="hover:bg-cream">
       <TableCell className="font-medium">{domain.domain}</TableCell>
       <TableCell>
         <Badge variant="outline" className={`${expiryStatus.color} text-white`}>
           {expiryStatus.text}
         </Badge>
       </TableCell>
-      <TableCell>{domain.registrar || 'Unknown'}</TableCell>
+      <TableCell>{domain.registrar || 'Tidak diketahui'}</TableCell>
       <TableCell>
         {domain.server ? (
           <div className="flex items-center space-x-2">
-            <Link className="w-4 h-4 text-blue-600" />
+            <Link className="w-4 h-4 text-violet" />
             <span className="text-sm">
               {domain.server.serverName} ({domain.server.provider})
             </span>
           </div>
         ) : (
-          <span className="text-gray-400 text-sm">Not assigned</span>
+          <span className="text-muted text-sm">Belum dipasang</span>
         )}
       </TableCell>
       <TableCell>
-        {domain.expiryDate ? formatIndonesianDate(domain.expiryDate) : 'N/A'}
+        {domain.expiryDate ? formatIndonesianDate(domain.expiryDate) : '–'}
       </TableCell>
       <TableCell>
-        {domain.daysToExpiry !== null ? `${domain.daysToExpiry} days` : 'N/A'}
+        {domain.daysToExpiry !== null ? `${domain.daysToExpiry} hari` : '–'}
       </TableCell>
       <TableCell>
         <div className="flex space-x-2">
           <WhoisDetailModal domainId={domain.id} domainName={domain.domain}>
-            <Button variant="ghost" size="sm" className="text-blue-600 hover:text-blue-700 hover:bg-blue-50">
+            <Button variant="ghost" size="sm" className="text-violet hover:text-violet-dark hover:bg-lilac">
               <Eye className="w-4 h-4" />
             </Button>
           </WhoisDetailModal>
@@ -81,7 +81,7 @@ const DomainTableRow = memo(({
             <Button 
               variant="ghost" 
               size="sm" 
-              className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+              className="text-violet hover:text-violet-dark hover:bg-lilac"
               onClick={() => onEditDomain(domain)}
             >
               <Edit className="w-4 h-4" />

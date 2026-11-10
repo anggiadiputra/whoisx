@@ -86,17 +86,17 @@ const EMPTY_STATS: DashboardStats = {
 // Second line under the expiry date
 function describeDaysLeft(days?: number | null) {
   if (days === undefined || days === null) return null
-  if (days < 0) return `Expired ${Math.abs(days)} days ago`
-  if (days === 0) return 'Expires today'
-  return `${days} days remaining`
+  if (days < 0) return `Kedaluwarsa ${Math.abs(days)} hari lalu`
+  if (days === 0) return 'Kedaluwarsa hari ini'
+  return `${days} hari lagi`
 }
 
 function daysLeftColor(days?: number | null) {
-  if (days === undefined || days === null) return 'text-gray-500'
-  if (days <= 1) return 'text-red-600'
-  if (days <= 7) return 'text-orange-600'
-  if (days <= 30) return 'text-yellow-600'
-  return 'text-gray-500'
+  if (days === undefined || days === null) return 'text-muted'
+  if (days <= 1) return 'text-st-no'
+  if (days <= 7) return 'text-on-peach'
+  if (days <= 30) return 'text-st-wait'
+  return 'text-muted'
 }
 
 // Bulk add: one domain per line (commas and spaces work too). Pasted URLs are reduced to their
@@ -239,12 +239,12 @@ export default function DomainsPage() {
   if (status === 'unauthenticated') {
     return (
       <div>
-        <div className="container mx-auto px-4 py-8">
+        <div className="w-full">
           <Card className="max-w-md mx-auto mt-20">
             <CardHeader>
-              <CardTitle className="text-center">Authentication Required</CardTitle>
+              <CardTitle className="text-center">Perlu masuk dulu</CardTitle>
               <CardDescription className="text-center">
-                Please sign in to access the domains page
+                Masuk dulu untuk membuka halaman domain
               </CardDescription>
             </CardHeader>
           </Card>
@@ -255,18 +255,18 @@ export default function DomainsPage() {
 
   // Domain is active while its registration has not expired
   const getExpiryStatus = (daysToExpiry?: number) => {
-    if (daysToExpiry === undefined || daysToExpiry === null || daysToExpiry < 0) return { status: 'inactive', color: 'bg-red-600', text: 'Tidak Aktif' }
+    if (daysToExpiry === undefined || daysToExpiry === null || daysToExpiry < 0) return { status: 'inactive', color: 'bg-red-600', text: 'Nonaktif' }
     return { status: 'active', color: 'bg-green-600', text: 'Aktif' }
   }
 
   // Domain validation function
   const validateDomain = (domain: string): string | null => {
-    if (!domain) return 'Domain is required'
-    if (domain.length < 3) return 'Domain must be at least 3 characters'
+    if (!domain) return 'Nama domain wajib diisi'
+    if (domain.length < 3) return 'Nama domain minimal 3 karakter'
     
     // Basic domain validation regex
     const domainRegex = /^[a-zA-Z0-9]([a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(\.[a-zA-Z0-9]([a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/
-    if (!domainRegex.test(domain)) return 'Please enter a valid domain name'
+    if (!domainRegex.test(domain)) return 'Masukkan nama domain yang valid'
     
     return null
   }
@@ -278,7 +278,7 @@ export default function DomainsPage() {
     const domainError = validateDomain(newDomain.domain.trim())
     if (domainError) {
       toast({
-        title: "Validation Error",
+        title: "Cek lagi, ya",
         description: domainError,
         variant: "destructive",
       })
@@ -304,8 +304,8 @@ export default function DomainsPage() {
 
       if (response.ok) {
         toast({
-          title: "Success!",
-          description: `Domain ${newDomain.domain} has been added successfully.`,
+          title: "Beres!",
+          description: `Domain ${newDomain.domain} berhasil ditambahkan.`,
         })
         setNewDomain({ domain: '', renewalPrice: '', notes: '' })
         setShowAddDomain(false)
@@ -313,16 +313,16 @@ export default function DomainsPage() {
       } else {
         // Handle API errors
         toast({
-          title: "Error Adding Domain",
-          description: data.error || 'Failed to add domain. Please try again.',
+          title: "Gagal menambah domain",
+          description: data.error || 'Domain gagal ditambahkan. Coba lagi, ya.',
           variant: "destructive",
         })
       }
     } catch (error) {
       console.error('Error adding domain:', error)
       toast({
-        title: "Network Error",
-        description: 'Unable to connect to server. Please check your connection.',
+        title: "Koneksi bermasalah",
+        description: 'Nggak bisa terhubung ke server. Cek koneksi kamu dulu.',
         variant: "destructive",
       })
     } finally {
@@ -341,10 +341,10 @@ export default function DomainsPage() {
 
     if (toAdd.length === 0) {
       toast({
-        title: "Nothing to Add",
+        title: "Nggak ada yang bisa ditambah",
         description: invalid.length
-          ? `Not valid domain names: ${invalid.slice(0, 5).join(', ')}`
-          : 'Every domain in the list is already added.',
+          ? `Nama domain nggak valid: ${invalid.slice(0, 5).join(', ')}`
+          : 'Semua domain di daftar ini sudah ditambahkan.',
         variant: "destructive",
       })
       return
@@ -375,13 +375,13 @@ export default function DomainsPage() {
     const leftOver = [...invalid, ...failed]
 
     const notes = [
-      skipped ? `${skipped} already added` : '',
-      invalid.length ? `${invalid.length} not valid` : '',
-      failed.length ? `${failed.length} failed` : '',
+      skipped ? `${skipped} sudah ada` : '',
+      invalid.length ? `${invalid.length} nggak valid` : '',
+      failed.length ? `${failed.length} gagal` : '',
     ].filter(Boolean)
     toast({
-      title: `Added ${added} domain${added === 1 ? '' : 's'}`,
-      description: notes.length ? `${notes.join(', ')}.${leftOver.length ? ' Those still in the list need another look.' : ''}` : undefined,
+      title: `${added} domain ditambahkan`,
+      description: notes.length ? `${notes.join(', ')}.${leftOver.length ? ' Yang masih ada di daftar perlu dicek lagi.' : ''}` : undefined,
       variant: leftOver.length ? "destructive" : "default",
     })
 
@@ -424,8 +424,8 @@ export default function DomainsPage() {
 
       if (response.ok) {
         toast({
-          title: "Success!",
-          description: `Domain ${selectedDomainForEdit.domain} has been updated successfully.`,
+          title: "Beres!",
+          description: `Domain ${selectedDomainForEdit.domain} berhasil diperbarui.`,
         })
         setEditDomain({ domain: '', renewalPrice: '', notes: '' })
         setShowEditDomain(false)
@@ -433,16 +433,16 @@ export default function DomainsPage() {
         fetchDomains()
       } else {
         toast({
-          title: "Error Updating Domain",
-          description: data.error || 'Failed to update domain. Please try again.',
+          title: "Gagal memperbarui domain",
+          description: data.error || 'Domain gagal diperbarui. Coba lagi, ya.',
           variant: "destructive",
         })
       }
     } catch (error) {
       console.error('Error updating domain:', error)
       toast({
-        title: "Network Error",
-        description: 'Unable to connect to server. Please check your connection.',
+        title: "Koneksi bermasalah",
+        description: 'Nggak bisa terhubung ke server. Cek koneksi kamu dulu.',
         variant: "destructive",
       })
     } finally {
@@ -452,19 +452,19 @@ export default function DomainsPage() {
 
   // Actions behind each row's "Manage" button
   const domainActions = (domain: Domain): ManageAction[] => [
-    { label: 'View WHOIS', icon: Eye, onSelect: () => setWhoisDomain(domain) },
+    { label: 'Lihat WHOIS', icon: Eye, onSelect: () => setWhoisDomain(domain) },
     ...(canManageDomains ? [
-      { label: 'Edit', icon: Edit, onSelect: () => handleEditDomain(domain) },
-      { label: 'Assign to Server', icon: Link, onSelect: () => handleAssignDomain(domain) },
-      { label: 'Delete', icon: Trash2, onSelect: () => handleDeleteDomain(domain), destructive: true },
+      { label: 'Ubah', icon: Edit, onSelect: () => handleEditDomain(domain) },
+      { label: 'Pasang ke server', icon: Link, onSelect: () => handleAssignDomain(domain) },
+      { label: 'Hapus', icon: Trash2, onSelect: () => handleDeleteDomain(domain), destructive: true },
     ] : []),
   ]
 
   // Handle delete domain
   const handleDeleteDomain = async (domain: Domain) => {
     const confirmed = await confirm({
-      title: 'Delete domain?',
-      description: `"${domain.domain}" and any websites linked to it will be permanently deleted. This action cannot be undone.`,
+      title: 'Hapus domain?',
+      description: `"${domain.domain}" dan semua website yang terhubung akan dihapus permanen. Tindakan ini nggak bisa dibatalkan.`,
     })
     if (!confirmed) {
       return
@@ -480,22 +480,22 @@ export default function DomainsPage() {
 
       if (response.ok && result.success) {
         toast({
-          title: "Success",
-          description: `Domain "${domain.domain}" deleted successfully`,
+          title: "Beres!",
+          description: `Domain "${domain.domain}" berhasil dihapus`,
         })
         fetchDomains()
       } else {
         toast({
-          title: "Error",
-          description: result.error || 'Failed to delete domain',
+          title: "Gagal",
+          description: result.error || 'Domain gagal dihapus',
           variant: "destructive",
         })
       }
     } catch (error) {
       console.error('❌ Error deleting domain:', error)
       toast({
-        title: "Error",
-        description: "Failed to delete domain",
+        title: "Gagal",
+        description: "Domain gagal dihapus",
         variant: "destructive",
       })
     }
@@ -505,52 +505,52 @@ export default function DomainsPage() {
 
   const statsCards = [
     {
-      title: 'Total Domains',
+      title: 'Total domain',
       value: stats.total,
       icon: Globe,
-      color: 'text-blue-600',
-      bgColor: 'bg-blue-50'
+      color: 'text-violet',
+      bgColor: 'bg-lilac'
     },
     {
-      title: 'Available to Order',
+      title: 'Bisa dipesan',
       value: domains.filter(d => d.daysToExpiry === null || d.daysToExpiry === undefined).length,
       icon: ShoppingCart,
-      color: 'text-blue-600',
-      bgColor: 'bg-blue-50'
+      color: 'text-on-sky',
+      bgColor: 'bg-sky'
     },
     {
-      title: 'Akan Expired (30 Hari)',
+      title: 'Kedaluwarsa ≤30 hari',
       value: stats.expiring30,
       icon: CalendarClock,
-      color: 'text-orange-600',
-      bgColor: 'bg-orange-50'
+      color: 'text-on-peach',
+      bgColor: 'bg-peach'
     },
     {
-      title: 'Segera Expired (1 Hari)',
+      title: 'Kedaluwarsa ≤1 hari',
       value: stats.expiring1,
       icon: AlertTriangle,
-      color: 'text-red-700',
-      bgColor: 'bg-red-50'
+      color: 'text-st-no',
+      bgColor: 'bg-rose'
     }
   ]
 
   return (
     <div>
-      <div className="container mx-auto px-4 py-8">
+      <div className="w-full">
         {/* Page Header */}
         <PageHeader className="mb-8"
-          title="Domains"
-          description="Monitor and manage your domain portfolio"
+          title="Domain"
+          description="Pantau dan kelola semua domain kamu"
           actions={
             <>
               <Button variant="outline" onClick={fetchDomains} disabled={domainsQuery.isFetching}>
                 <RefreshCw className={`w-4 h-4 mr-2 ${domainsQuery.isFetching ? 'animate-spin' : ''}`} />
-                Refresh
+                Muat ulang
               </Button>
               {canManageDomains && (
                 <Button onClick={() => setShowAddDomain(true)}>
                   <Plus className="w-4 h-4 mr-2" />
-                  Add Domain
+                  Tambah domain
                 </Button>
               )}
             </>
@@ -561,22 +561,22 @@ export default function DomainsPage() {
           <Dialog open={showAddDomain} onOpenChange={setShowAddDomain}>
                 <DialogContent className="sm:max-w-[425px]">
                   <DialogHeader>
-                    <DialogTitle>Add New Domain</DialogTitle>
+                    <DialogTitle>Tambah domain baru</DialogTitle>
                     <DialogDescription>
-                      Enter domain details to start monitoring. WHOIS data will be automatically fetched.
+                      Isi detail domain untuk mulai dipantau. Data WHOIS diambil otomatis.
                     </DialogDescription>
                   </DialogHeader>
                   <Tabs value={addMode} onValueChange={(value) => setAddMode(value as 'single' | 'bulk')}>
                     <TabsList className="grid w-full grid-cols-2">
-                      <TabsTrigger value="single" disabled={addingDomain}>Single</TabsTrigger>
-                      <TabsTrigger value="bulk" disabled={addingDomain}>Bulk</TabsTrigger>
+                      <TabsTrigger value="single" disabled={addingDomain}>Satu</TabsTrigger>
+                      <TabsTrigger value="bulk" disabled={addingDomain}>Banyak</TabsTrigger>
                     </TabsList>
                   </Tabs>
                   {addMode === 'bulk' ? (
                   <form onSubmit={handleBulkAdd} className="space-y-4">
                     <div className="space-y-2">
-                      <label htmlFor="bulkDomains" className="text-sm font-medium text-gray-700">
-                        Domain Names
+                      <label htmlFor="bulkDomains" className="text-sm font-medium text-ink">
+                        Nama domain
                       </label>
                       <Textarea
                         id="bulkDomains"
@@ -587,8 +587,8 @@ export default function DomainsPage() {
                         disabled={addingDomain}
                         className="font-mono text-sm"
                       />
-                      <p className="text-xs text-gray-500">
-                        One domain per line. {parseDomainList(bulkDomainsText).length} detected; ones already added are skipped. Set prices and notes afterwards with Edit.
+                      <p className="text-xs text-muted">
+                        Satu domain per baris. {parseDomainList(bulkDomainsText).length} terdeteksi; yang sudah ada dilewati. Harga dan catatan bisa diatur nanti lewat Ubah.
                       </p>
                     </div>
 
@@ -601,7 +601,7 @@ export default function DomainsPage() {
                         disabled={addingDomain}
                       >
                         <X className="w-4 h-4 mr-2" />
-                        Cancel
+                        Batal
                       </Button>
                       <Button
                         type="submit"
@@ -611,12 +611,12 @@ export default function DomainsPage() {
                         {bulkProgress ? (
                           <>
                             <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                            Adding {bulkProgress.done}/{bulkProgress.total}...
+                            Menambahkan {bulkProgress.done}/{bulkProgress.total}…
                           </>
                         ) : (
                           <>
                             <Plus className="w-4 h-4 mr-2" />
-                            Add Domains
+                            Tambah domain
                           </>
                         )}
                       </Button>
@@ -625,8 +625,8 @@ export default function DomainsPage() {
                   ) : (
                   <form onSubmit={handleAddDomain} className="space-y-4">
                     <div className="space-y-2">
-                      <label htmlFor="domain" className="text-sm font-medium text-gray-700">
-                        Domain Name
+                      <label htmlFor="domain" className="text-sm font-medium text-ink">
+                        Nama domain
                       </label>
                       <Input
                         id="domain"
@@ -639,8 +639,8 @@ export default function DomainsPage() {
                     </div>
                     
                     <div className="space-y-2">
-                      <label htmlFor="renewalPrice" className="text-sm font-medium text-gray-700">
-                        Renewal Price (Optional)
+                      <label htmlFor="renewalPrice" className="text-sm font-medium text-ink">
+                        Harga perpanjangan (opsional)
                       </label>
                       <Input
                         id="renewalPrice"
@@ -654,12 +654,12 @@ export default function DomainsPage() {
                     </div>
                     
                     <div className="space-y-2">
-                      <label htmlFor="notes" className="text-sm font-medium text-gray-700">
-                        Notes (Optional)
+                      <label htmlFor="notes" className="text-sm font-medium text-ink">
+                        Catatan (opsional)
                       </label>
                       <Input
                         id="notes"
-                        placeholder="Additional information..."
+                        placeholder="Info tambahan…"
                         value={newDomain.notes}
                         onChange={(e) => setNewDomain(prev => ({ ...prev, notes: e.target.value }))}
                         disabled={addingDomain}
@@ -675,7 +675,7 @@ export default function DomainsPage() {
                         disabled={addingDomain}
                       >
                         <X className="w-4 h-4 mr-2" />
-                        Cancel
+                        Batal
                       </Button>
                       <Button
                         type="submit"
@@ -685,12 +685,12 @@ export default function DomainsPage() {
                         {addingDomain ? (
                           <>
                             <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                            Adding...
+                            Menambahkan…
                           </>
                         ) : (
                           <>
                             <Plus className="w-4 h-4 mr-2" />
-                            Add Domain
+                            Tambah domain
                           </>
                         )}
                       </Button>
@@ -706,27 +706,27 @@ export default function DomainsPage() {
               <Dialog open={showEditDomain} onOpenChange={setShowEditDomain}>
                 <DialogContent className="sm:max-w-[425px]">
                   <DialogHeader>
-                    <DialogTitle>Edit Domain</DialogTitle>
+                    <DialogTitle>Ubah domain</DialogTitle>
                     <DialogDescription>
-                      Update domain information. Domain name cannot be changed.
+                      Perbarui info domain. Nama domain nggak bisa diubah.
                     </DialogDescription>
                   </DialogHeader>
                   <form onSubmit={handleUpdateDomain} className="space-y-4 mt-4">
                     <div className="space-y-2">
-                      <label htmlFor="editDomain" className="text-sm font-medium text-gray-700">
-                        Domain Name
+                      <label htmlFor="editDomain" className="text-sm font-medium text-ink">
+                        Nama domain
                       </label>
                       <Input
                         id="editDomain"
                         value={editDomain.domain}
                         disabled
-                        className="bg-gray-50"
+                        className="bg-cream"
                       />
                     </div>
                     
                     <div className="space-y-2">
-                      <label htmlFor="editRenewalPrice" className="text-sm font-medium text-gray-700">
-                        Renewal Price (Optional)
+                      <label htmlFor="editRenewalPrice" className="text-sm font-medium text-ink">
+                        Harga perpanjangan (opsional)
                       </label>
                       <Input
                         id="editRenewalPrice"
@@ -740,12 +740,12 @@ export default function DomainsPage() {
                     </div>
                     
                     <div className="space-y-2">
-                      <label htmlFor="editNotes" className="text-sm font-medium text-gray-700">
-                        Notes (Optional)
+                      <label htmlFor="editNotes" className="text-sm font-medium text-ink">
+                        Catatan (opsional)
                       </label>
                       <Input
                         id="editNotes"
-                        placeholder="Additional information..."
+                        placeholder="Info tambahan…"
                         value={editDomain.notes}
                         onChange={(e) => setEditDomain(prev => ({ ...prev, notes: e.target.value }))}
                         disabled={editingDomain}
@@ -765,7 +765,7 @@ export default function DomainsPage() {
                         disabled={editingDomain}
                       >
                         <X className="w-4 h-4 mr-2" />
-                        Cancel
+                        Batal
                       </Button>
                       <Button
                         type="submit"
@@ -775,12 +775,12 @@ export default function DomainsPage() {
                         {editingDomain ? (
                           <>
                             <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                            Updating...
+                            Menyimpan…
                           </>
                         ) : (
                           <>
                             <Save className="w-4 h-4 mr-2" />
-                            Update Domain
+                            Simpan perubahan
                           </>
                         )}
                       </Button>
@@ -791,7 +791,7 @@ export default function DomainsPage() {
             )}
 
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 mb-8">
+        <div className="grid grid-cols-2 gap-4 lg:gap-5 xl:grid-cols-4 mb-8">
           {statsCards.map((card, index) => (
             <StatCard key={index} title={card.title} value={card.value} icon={card.icon} color={card.color} bgColor={card.bgColor} />
           ))}
@@ -802,9 +802,9 @@ export default function DomainsPage() {
           <CardContent className="p-6">
             <div className="flex flex-col sm:flex-row gap-4">
               <div className="relative flex-1">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted w-4 h-4" />
                 <Input
-                  placeholder="Search domains, registrars, or notes..."
+                  placeholder="Cari domain, registrar, atau catatan…"
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="pl-10"
@@ -813,32 +813,36 @@ export default function DomainsPage() {
               
               <div className="flex flex-wrap gap-2">
                 <Button
-                  variant={filterExpiring === null ? "default" : "outline"}
+                  variant={filterExpiring === null ? "chipOn" : "chipOff"}
+                  aria-pressed={filterExpiring === null}
                   onClick={() => setFilterExpiring(null)}
                   size="sm"
                 >
-                  All
+                  Semua
                 </Button>
                 <Button
-                  variant={filterExpiring === 'critical' ? "default" : "outline"}
+                  variant={filterExpiring === 'critical' ? "chipOn" : "chipOff"}
+                  aria-pressed={filterExpiring === 'critical'}
                   onClick={() => setFilterExpiring(filterExpiring === 'critical' ? null : 'critical')}
                   size="sm"
                 >
-                  Critical
+                  Kritis
                 </Button>
                 <Button
-                  variant={filterExpiring === 'warning' ? "default" : "outline"}
+                  variant={filterExpiring === 'warning' ? "chipOn" : "chipOff"}
+                  aria-pressed={filterExpiring === 'warning'}
                   onClick={() => setFilterExpiring(filterExpiring === 'warning' ? null : 'warning')}
                   size="sm"
                 >
-                  Warning
+                  Peringatan
                 </Button>
                 <Button
-                  variant={filterExpiring === 'attention' ? "default" : "outline"}
+                  variant={filterExpiring === 'attention' ? "chipOn" : "chipOff"}
+                  aria-pressed={filterExpiring === 'attention'}
                   onClick={() => setFilterExpiring(filterExpiring === 'attention' ? null : 'attention')}
                   size="sm"
                 >
-                  Attention
+                  Perhatian
                 </Button>
               </div>
             </div>
@@ -869,15 +873,15 @@ export default function DomainsPage() {
                           checked={selection.pageAllSelected}
                           indeterminate={selection.pageSomeSelected}
                           onChange={selection.togglePage}
-                          label="Select all domains on this page"
+                          label="Pilih semua domain di halaman ini"
                         />
                       </TableHead>
                     )}
                     <TableHead>Domain</TableHead>
                     <TableHead>Status</TableHead>
                     <TableHead>Server</TableHead>
-                    <TableHead>Expiry</TableHead>
-                    <TableHead className="text-right">Actions</TableHead>
+                    <TableHead>Kedaluwarsa</TableHead>
+                    <TableHead className="text-right">Aksi</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -885,11 +889,11 @@ export default function DomainsPage() {
                     <TableRow>
                       <TableCell colSpan={canManageDomains ? 6 : 5} className="text-center py-8">
                         <div className="flex flex-col items-center space-y-2">
-                          <Globe className="w-8 h-8 text-gray-400" />
-                          <p className="text-gray-500">No domains found</p>
+                          <Globe className="w-8 h-8 text-muted" />
+                          <p className="text-muted">Tidak ada domain</p>
                           {canManageDomains && (
                             <Button onClick={() => setShowAddDomain(true)} size="sm">
-                              Add your first domain
+                              Tambah domain pertama
                             </Button>
                           )}
                         </div>
@@ -899,20 +903,20 @@ export default function DomainsPage() {
                     paginatedDomains.map((domain) => {
                       const expiryStatus = getExpiryStatus(domain.daysToExpiry)
                       return (
-                        <TableRow key={domain.id} className={selection.isSelected(domain.id) ? 'bg-blue-50/60' : 'hover:bg-gray-50'}>
+                        <TableRow key={domain.id} className={selection.isSelected(domain.id) ? 'bg-lilac/60' : 'hover:bg-cream'}>
                           {canManageDomains && (
                             <TableCell className="w-10 pr-0">
                               <SelectCheckbox
                                 checked={selection.isSelected(domain.id)}
                                 onChange={(checked) => selection.toggle(domain.id, checked)}
-                                label={`Select ${domain.domain}`}
+                                label={`Pilih ${domain.domain}`}
                               />
                             </TableCell>
                           )}
                           <TableCell>
-                            <div className="font-medium text-gray-900">{domain.domain}</div>
-                            <div className="text-sm text-gray-500">
-                              {domain.realRegistrarName || domain.registrar || 'Unknown registrar'}
+                            <div className="font-medium text-ink">{domain.domain}</div>
+                            <div className="text-sm text-muted">
+                              {domain.realRegistrarName || domain.registrar || 'Registrar tidak diketahui'}
                             </div>
                           </TableCell>
                           <TableCell>
@@ -921,25 +925,25 @@ export default function DomainsPage() {
                           <TableCell>
                             {domain.server ? (
                               <div className="flex items-center space-x-2">
-                                <div className="w-6 h-6 bg-green-100 rounded flex items-center justify-center">
+                                <div className="w-6 h-6 bg-mint rounded-lg flex items-center justify-center">
                                   {domain.server.serverType === 'VPS' ? (
-                                    <Server className="w-3 h-3 text-green-600" />
+                                    <Server className="w-3 h-3 text-on-mint" />
                                   ) : (
-                                    <Cloud className="w-3 h-3 text-green-600" />
+                                    <Cloud className="w-3 h-3 text-on-mint" />
                                   )}
                                 </div>
                                 <div>
                                   <div className="text-sm font-medium">{domain.server.serverName}</div>
-                                  <div className="text-xs text-gray-500">{domain.server.provider}</div>
+                                  <div className="text-xs text-muted">{domain.server.provider}</div>
                                 </div>
                               </div>
                             ) : (
-                              <span className="text-gray-400 text-sm">Not assigned</span>
+                              <span className="text-muted text-sm">Belum dipasang</span>
                             )}
                           </TableCell>
                           <TableCell>
-                            <div className="text-sm text-gray-900">
-                              {domain.expiryDate ? formatIndonesianDate(domain.expiryDate) : 'Unknown'}
+                            <div className="text-sm text-ink">
+                              {domain.expiryDate ? formatIndonesianDate(domain.expiryDate) : 'Tidak diketahui'}
                             </div>
                             {describeDaysLeft(domain.daysToExpiry) && (
                               <div className={`text-sm ${daysLeftColor(domain.daysToExpiry)}`}>
@@ -964,7 +968,7 @@ export default function DomainsPage() {
               totalItems={filteredDomains.length}
               pageSize={itemsPerPage}
               onPageChange={setCurrentPage}
-              itemLabel="domains"
+              itemLabel="domain"
               className="px-6 py-4 border-t"
             />
           </CardContent>
@@ -973,18 +977,18 @@ export default function DomainsPage() {
         {/* Domains Cards - Mobile */}
         <div className="md:hidden space-y-4">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold">Domains ({filteredDomains.length})</h3>
+            <h3 className="text-lg font-extrabold tracking-[-0.02em]">Domain ({filteredDomains.length})</h3>
           </div>
           
           {filteredDomains.length === 0 ? (
             <Card>
               <CardContent className="text-center py-8">
                 <div className="flex flex-col items-center space-y-2">
-                  <Globe className="w-8 h-8 text-gray-400" />
-                  <p className="text-gray-500">No domains found</p>
+                  <Globe className="w-8 h-8 text-muted" />
+                  <p className="text-muted">Tidak ada domain</p>
                   {canManageDomains && (
                     <Button onClick={() => setShowAddDomain(true)} size="sm">
-                      Add your first domain
+                      Tambah domain pertama
                     </Button>
                   )}
                 </div>
@@ -1004,15 +1008,15 @@ export default function DomainsPage() {
                             <SelectCheckbox
                               checked={selection.isSelected(domain.id)}
                               onChange={(checked) => selection.toggle(domain.id, checked)}
-                              label={`Select ${domain.domain}`}
+                              label={`Pilih ${domain.domain}`}
                             />
                           )}
-                          <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
-                            <Globe className="w-4 h-4 text-blue-600" />
+                          <div className="w-8 h-8 bg-lilac rounded-2xl flex items-center justify-center">
+                            <Globe className="w-4 h-4 text-violet" />
                           </div>
                           <div>
-                            <h4 className="font-medium text-gray-900">{domain.domain}</h4>
-                            <p className="text-sm text-gray-500">{domain.realRegistrarName || domain.registrar || 'Unknown'}</p>
+                            <h4 className="text-[15px] font-extrabold leading-snug">{domain.domain}</h4>
+                            <p className="text-sm text-muted">{domain.realRegistrarName || domain.registrar || 'Tidak diketahui'}</p>
                           </div>
                         </div>
                         <StatusPill tone={toneFromBgClass(expiryStatus.color)}>{expiryStatus.text}</StatusPill>
@@ -1021,37 +1025,37 @@ export default function DomainsPage() {
                       {/* Domain Details */}
                       <div className="grid grid-cols-2 gap-3 text-sm">
                         <div>
-                          <span className="text-gray-500">Server:</span>
+                          <span className="text-muted">Server:</span>
                           <div className="mt-1">
                             {domain.server ? (
                               <div className="flex items-center space-x-2">
-                                <div className="w-4 h-4 bg-green-100 rounded flex items-center justify-center">
+                                <div className="w-4 h-4 bg-mint rounded-lg flex items-center justify-center">
                                   {domain.server.serverType === 'VPS' ? (
-                                    <Server className="w-2 h-2 text-green-600" />
+                                    <Server className="w-2 h-2 text-on-mint" />
                                   ) : (
-                                    <Cloud className="w-2 h-2 text-green-600" />
+                                    <Cloud className="w-2 h-2 text-on-mint" />
                                   )}
                                 </div>
                                 <div>
                                   <div className="text-xs font-medium">{domain.server.serverName}</div>
-                                  <div className="text-xs text-gray-500">{domain.server.provider}</div>
+                                  <div className="text-xs text-muted">{domain.server.provider}</div>
                                 </div>
                               </div>
                             ) : (
-                              <span className="text-gray-400 text-xs">Not assigned</span>
+                              <span className="text-muted text-xs">Belum dipasang</span>
                             )}
                           </div>
                         </div>
                         
                         <div>
-                          <span className="text-gray-500">Days Left:</span>
+                          <span className="text-muted">Sisa waktu:</span>
                           <div className="mt-1 font-medium">
-                            {domain.daysToExpiry !== null ? `${domain.daysToExpiry} days` : 'N/A'}
+                            {domain.daysToExpiry !== null ? `${domain.daysToExpiry} hari` : '–'}
                           </div>
                         </div>
                         
                         <div>
-                          <span className="text-gray-500">Expiry Date:</span>
+                          <span className="text-muted">Tanggal kedaluwarsa:</span>
                           <div className="mt-1 font-medium">
                             {formatIndonesianDate(domain.expiryDate)}
                           </div>
@@ -1062,7 +1066,7 @@ export default function DomainsPage() {
                       {/* Actions */}
                       <div className="flex items-center justify-between pt-2 border-t">
                         <ManageMenu actions={domainActions(domain)} />
-                        <div className="text-xs text-gray-400">
+                        <div className="text-xs text-muted">
                           #{domain.id.slice(-8)}
                         </div>
                       </div>
@@ -1077,7 +1081,7 @@ export default function DomainsPage() {
                 totalItems={filteredDomains.length}
                 pageSize={itemsPerPage}
                 onPageChange={setCurrentPage}
-                itemLabel="domains"
+                itemLabel="domain"
                 className="mt-6"
               />
             </>

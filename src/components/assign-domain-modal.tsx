@@ -78,8 +78,8 @@ export function AssignDomainModal({ domain, isOpen, onClose, onSuccess }: Assign
     } catch (error) {
       console.error('Error fetching servers:', error)
       toast({
-        title: "Error",
-        description: "Failed to load servers",
+        title: "Gagal",
+        description: "Server gagal dimuat",
         variant: "destructive",
       })
     } finally {
@@ -105,20 +105,20 @@ export function AssignDomainModal({ domain, isOpen, onClose, onSuccess }: Assign
 
       if (response.ok && data.success) {
         toast({
-          title: "Success",
+          title: "Beres!",
           description: data.message,
           variant: "default",
         })
         onSuccess()
         onClose()
       } else {
-        throw new Error(data.error || 'Failed to assign domain')
+        throw new Error(data.error || 'Domain gagal dipasang ke server')
       }
     } catch (error) {
       console.error('Error assigning domain:', error)
       toast({
-        title: "Assignment Failed",
-        description: error instanceof Error ? error.message : "Failed to assign domain to server",
+        title: "Gagal memasang",
+        description: error instanceof Error ? error.message : "Domain gagal dipasang ke server",
         variant: "destructive",
       })
     } finally {
@@ -140,20 +140,20 @@ export function AssignDomainModal({ domain, isOpen, onClose, onSuccess }: Assign
 
       if (response.ok && data.success) {
         toast({
-          title: "Success",
+          title: "Beres!",
           description: data.message,
           variant: "default",
         })
         onSuccess()
         onClose()
       } else {
-        throw new Error(data.error || 'Failed to unassign domain')
+        throw new Error(data.error || 'Domain gagal dilepas dari server')
       }
     } catch (error) {
       console.error('Error unassigning domain:', error)
       toast({
-        title: "Unassignment Failed",
-        description: error instanceof Error ? error.message : "Failed to unassign domain from server",
+        title: "Gagal melepas",
+        description: error instanceof Error ? error.message : "Domain gagal dilepas dari server",
         variant: "destructive",
       })
     } finally {
@@ -167,28 +167,28 @@ export function AssignDomainModal({ domain, isOpen, onClose, onSuccess }: Assign
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Assign Domain to Server</DialogTitle>
+          <DialogTitle>Pasang domain ke server</DialogTitle>
           <DialogDescription>
-            Assign "{domain?.domain}" to a server. Each domain can only be assigned to one server.
+            Pasang "{domain?.domain}" ke server. Satu domain cuma bisa dipasang ke satu server.
           </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4">
           {/* Current Assignment */}
           {domain?.server && (
-            <div className="p-3 bg-blue-50 rounded-lg">
-              <div className="text-sm font-medium text-blue-900 mb-1">Currently assigned to:</div>
+            <div className="p-3 bg-lilac rounded-2xl">
+              <div className="text-sm font-medium text-violet-dark mb-1">Sekarang terpasang di:</div>
               <div className="flex items-center space-x-2">
-                <div className="w-6 h-6 bg-blue-100 rounded flex items-center justify-center">
+                <div className="w-6 h-6 bg-lilac rounded-lg flex items-center justify-center">
                   {domain.server.serverType === 'VPS' ? (
-                    <Server className="w-3 h-3 text-blue-600" />
+                    <Server className="w-3 h-3 text-violet" />
                   ) : (
-                    <Cloud className="w-3 h-3 text-blue-600" />
+                    <Cloud className="w-3 h-3 text-violet" />
                   )}
                 </div>
                 <div>
-                  <div className="text-sm font-medium text-blue-900">{domain.server.serverName}</div>
-                  <div className="text-xs text-blue-700">{domain.server.provider}</div>
+                  <div className="text-sm font-medium text-violet-dark">{domain.server.serverName}</div>
+                  <div className="text-xs text-violet-dark">{domain.server.provider}</div>
                 </div>
               </div>
             </div>
@@ -196,31 +196,31 @@ export function AssignDomainModal({ domain, isOpen, onClose, onSuccess }: Assign
 
           {/* Server Selection */}
           <div className="space-y-2">
-            <label className="text-sm font-medium">Select Server:</label>
+            <label className="text-sm font-medium">Pilih server:</label>
             {fetchingServers ? (
               <div className="flex items-center justify-center py-4">
                 <Loader2 className="w-4 h-4 animate-spin" />
-                <span className="ml-2 text-sm text-gray-500">Loading servers...</span>
+                <span className="ml-2 text-sm text-muted">Memuat server…</span>
               </div>
             ) : (
               <Select value={selectedServerId} onValueChange={setSelectedServerId}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Choose a server" />
+                  <SelectValue placeholder="Pilih server" />
                 </SelectTrigger>
                 <SelectContent>
                   {servers.map((server) => (
                     <SelectItem key={server.id} value={server.id}>
                       <div className="flex items-center space-x-2">
-                        <div className="w-4 h-4 bg-gray-100 rounded flex items-center justify-center">
+                        <div className="w-4 h-4 bg-cream rounded-lg flex items-center justify-center">
                           {server.serverType === 'VPS' ? (
-                            <Server className="w-2 h-2 text-gray-600" />
+                            <Server className="w-2 h-2 text-muted" />
                           ) : (
-                            <Cloud className="w-2 h-2 text-gray-600" />
+                            <Cloud className="w-2 h-2 text-muted" />
                           )}
                         </div>
                         <span>{server.serverName}</span>
                         <Badge variant="outline" className="text-xs">
-                          {server.domainCount || 0} domains
+                          {server.domainCount || 0} domain
                         </Badge>
                       </div>
                     </SelectItem>
@@ -232,20 +232,20 @@ export function AssignDomainModal({ domain, isOpen, onClose, onSuccess }: Assign
 
           {/* Selected Server Info */}
           {selectedServer && (
-            <div className="p-3 bg-green-50 rounded-lg">
-              <div className="text-sm font-medium text-green-900 mb-1">Selected server:</div>
+            <div className="p-3 bg-mint rounded-2xl">
+              <div className="text-sm font-medium text-on-mint mb-1">Server dipilih:</div>
               <div className="flex items-center space-x-2">
-                <div className="w-6 h-6 bg-green-100 rounded flex items-center justify-center">
+                <div className="w-6 h-6 bg-mint rounded-lg flex items-center justify-center">
                   {selectedServer.serverType === 'VPS' ? (
-                    <Server className="w-3 h-3 text-green-600" />
+                    <Server className="w-3 h-3 text-on-mint" />
                   ) : (
-                    <Cloud className="w-3 h-3 text-green-600" />
+                    <Cloud className="w-3 h-3 text-on-mint" />
                   )}
                 </div>
                 <div>
-                  <div className="text-sm font-medium text-green-900">{selectedServer.serverName}</div>
-                  <div className="text-xs text-green-700">
-                    {selectedServer.provider} • {selectedServer.domainCount || 0} domains
+                  <div className="text-sm font-medium text-on-mint">{selectedServer.serverName}</div>
+                  <div className="text-xs text-on-mint">
+                    {selectedServer.provider} • {selectedServer.domainCount || 0} domain
                   </div>
                 </div>
               </div>
@@ -267,7 +267,7 @@ export function AssignDomainModal({ domain, isOpen, onClose, onSuccess }: Assign
                 ) : (
                   <Unlink className="w-4 h-4 mr-2" />
                 )}
-                Unassign
+                Lepas dari server
               </Button>
             )}
           </div>
@@ -275,7 +275,7 @@ export function AssignDomainModal({ domain, isOpen, onClose, onSuccess }: Assign
           <div className="flex space-x-2">
             <Button variant="outline" onClick={onClose} disabled={loading}>
               <X className="w-4 h-4 mr-2" />
-              Cancel
+              Batal
             </Button>
             <Button
               onClick={handleAssign}
@@ -286,7 +286,7 @@ export function AssignDomainModal({ domain, isOpen, onClose, onSuccess }: Assign
               ) : (
                 <Link className="w-4 h-4 mr-2" />
               )}
-              Assign
+              Pasang
             </Button>
           </div>
         </div>

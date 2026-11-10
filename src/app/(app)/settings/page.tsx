@@ -128,12 +128,12 @@ export default function SettingsPage() {
   if (status === 'unauthenticated') {
     return (
       <div>
-        <div className="container mx-auto px-4 py-8">
+        <div className="w-full">
           <Card className="max-w-md mx-auto">
             <CardHeader className="text-center">
-              <CardTitle className="text-center">Authentication Required</CardTitle>
+              <CardTitle className="text-center">Perlu masuk dulu</CardTitle>
               <CardDescription className="text-center">
-                Please sign in to access settings
+                Masuk dulu buat buka pengaturan
               </CardDescription>
             </CardHeader>
           </Card>
@@ -147,15 +147,15 @@ export default function SettingsPage() {
   if (userRole !== 'ADMIN') {
     return (
       <div>
-        <div className="container mx-auto px-4 py-8">
+        <div className="w-full">
           <Card className="max-w-md mx-auto">
             <CardHeader className="text-center">
               <CardTitle className="text-center flex items-center justify-center">
                 <Shield className="w-5 h-5 mr-2" />
-                Access Denied
+                Akses ditolak
               </CardTitle>
               <CardDescription className="text-center">
-                Only administrators can access settings
+                Cuma admin yang bisa buka pengaturan
               </CardDescription>
             </CardHeader>
           </Card>
@@ -176,8 +176,8 @@ export default function SettingsPage() {
   const handleSaveSettings = async () => {
     if (!trimmedAppName) {
       toast({
-        title: "Application Name Required",
-        description: "Please enter a name for the application",
+        title: "Nama aplikasi belum diisi",
+        description: "Isi dulu nama aplikasinya",
         variant: "destructive",
       })
       return
@@ -185,8 +185,8 @@ export default function SettingsPage() {
 
     if (turnstileNeedsCheck && !turnstileTestToken) {
       toast({
-        title: "Turnstile Check Required",
-        description: "Enter both keys and complete the Turnstile check in the Security tab before saving",
+        title: "Perlu cek Turnstile dulu",
+        description: "Isi kedua key dan selesaikan pemeriksaan Turnstile di tab Keamanan sebelum menyimpan",
         variant: "destructive",
       })
       return
@@ -223,7 +223,7 @@ export default function SettingsPage() {
         if (!response.ok) {
           // A test token works once; get a fresh one for the next try
           if (changes.turnstile?.testToken) setTurnstileResetKey(key => key + 1)
-          throw new Error(result.error || 'Failed to save settings')
+          throw new Error(result.error || 'Gagal menyimpan pengaturan')
         }
         if (result.appName !== undefined) {
           setAppNameInput(result.appName)
@@ -245,14 +245,14 @@ export default function SettingsPage() {
       localStorage.setItem('whatsappSettings', JSON.stringify(whatsappSettings))
       
       toast({
-        title: "Settings Saved",
-        description: "Your settings have been saved successfully",
+        title: "Pengaturan tersimpan",
+        description: "Pengaturan kamu sudah disimpan",
         variant: "default",
       })
     } catch (error: any) {
       toast({
-        title: "Save Failed",
-        description: error.message || "Failed to save settings. Please try again.",
+        title: "Gagal menyimpan",
+        description: error.message || "Gagal menyimpan pengaturan. Coba lagi, ya.",
         variant: "destructive",
       })
     } finally {
@@ -263,8 +263,8 @@ export default function SettingsPage() {
   const handleTestMessage = async () => {
     if (!whatsappSettings.token || !whatsappSettings.phoneNumber) {
       toast({
-        title: "Missing Configuration",
-        description: "Please enter both API token and phone number before testing",
+        title: "Konfigurasi belum lengkap",
+        description: "Isi dulu token API dan nomor WhatsApp sebelum tes",
         variant: "destructive",
       })
       return
@@ -274,7 +274,7 @@ export default function SettingsPage() {
     try {
       const data = new FormData()
       data.append("target", whatsappSettings.phoneNumber)
-      data.append("message", `🔔 Test notification from ${appName}\n\nThis is a test message to verify your WhatsApp integration is working correctly.\n\n✅ Configuration successful!`)
+      data.append("message", `🔔 Notifikasi tes dari ${appName}\n\nIni pesan tes untuk memastikan integrasi WhatsApp kamu sudah berjalan.\n\n✅ Konfigurasi berhasil!`)
       data.append("countryCode", "62")
 
       const response = await fetch("https://api.fonnte.com/send", {
@@ -290,17 +290,17 @@ export default function SettingsPage() {
       
       if (response.ok && result.status) {
         toast({
-          title: "Test Message Sent",
-          description: "WhatsApp test message sent successfully! Check your phone.",
+          title: "Pesan tes terkirim",
+          description: "Pesan tes WhatsApp berhasil dikirim. Cek ponsel kamu.",
           variant: "default",
         })
       } else {
-        throw new Error(result.reason || 'Failed to send test message')
+        throw new Error(result.reason || 'Gagal mengirim pesan tes')
       }
     } catch (error: any) {
       toast({
-        title: "Test Failed",
-        description: error.message || 'Failed to send test message',
+        title: "Tes gagal",
+        description: error.message || 'Gagal mengirim pesan tes',
         variant: "destructive",
       })
     } finally {
@@ -320,25 +320,25 @@ export default function SettingsPage() {
       
       if (daysLeft <= 1) {
         urgencyIcon = "🚨"
-        message = `${urgencyIcon} CRITICAL DOMAIN ALERT\\n\\n` +
-                 `Domain: ${domain}\\n` +
-                 `Status: EXPIRES ${daysLeft === 0 ? 'TODAY' : 'TOMORROW'}\\n` +
-                 `Action Required: RENEW IMMEDIATELY\\n\\n` +
-                 `⚠️ Domain will become inactive if not renewed!`
+        message = `${urgencyIcon} PERINGATAN KRITIS DOMAIN\n\n` +
+                 `Domain: ${domain}\n` +
+                 `Status: KEDALUWARSA ${daysLeft === 0 ? 'HARI INI' : 'BESOK'}\n` +
+                 `Tindakan: SEGERA PERPANJANG\n\n` +
+                 `⚠️ Domain akan nonaktif kalau tidak diperpanjang!`
       } else if (daysLeft <= 7) {
         urgencyIcon = "⚠️"
-        message = `${urgencyIcon} Domain Expiry Warning\\n\\n` +
-                 `Domain: ${domain}\\n` +
-                 `Expires in: ${daysLeft} days\\n` +
-                 `Action: Please renew soon\\n\\n` +
-                 `📅 Renewal recommended within next few days`
+        message = `${urgencyIcon} Peringatan domain kedaluwarsa\n\n` +
+                 `Domain: ${domain}\n` +
+                 `Kedaluwarsa dalam: ${daysLeft} hari\n` +
+                 `Tindakan: Segera perpanjang, ya\n\n` +
+                 `📅 Sebaiknya diperpanjang dalam beberapa hari ini`
       } else if (daysLeft <= 30) {
         urgencyIcon = "📋"
-        message = `${urgencyIcon} Domain Renewal Reminder\\n\\n` +
-                 `Domain: ${domain}\\n` +
-                 `Expires in: ${daysLeft} days\\n` +
-                 `Status: Renewal planning recommended\\n\\n` +
-                 `💡 Consider renewing to avoid last-minute issues`
+        message = `${urgencyIcon} Pengingat perpanjangan domain\n\n` +
+                 `Domain: ${domain}\n` +
+                 `Kedaluwarsa dalam: ${daysLeft} hari\n` +
+                 `Status: Mulai rencanakan perpanjangan\n\n` +
+                 `💡 Perpanjang lebih awal supaya nggak mepet`
       }
 
       data.append("message", message)
@@ -364,19 +364,19 @@ export default function SettingsPage() {
 
   return (
     <div>
-      <div className="container mx-auto px-4 py-8">
+      <div className="w-full">
         {/* Page Header */}
         <PageHeader className="mb-8"
-          title="Settings"
-          description="Configure your domain management preferences and notifications"
+          title="Pengaturan"
+          description="Atur preferensi pengelolaan domain dan notifikasi kamu"
         />
 
         <Tabs defaultValue="general" className="space-y-6">
           {/* Two rows on phones, where four labels do not fit side by side */}
-          <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4 h-auto sm:h-9">
+          <TabsList className="grid w-full grid-cols-2 bg-white shadow-card sm:grid-cols-4">
             <TabsTrigger value="general" className="flex items-center space-x-2 h-8">
               <SlidersHorizontal className="w-4 h-4" />
-              <span>General</span>
+              <span>Umum</span>
             </TabsTrigger>
             <TabsTrigger value="whatsapp" className="flex items-center space-x-2 h-8">
               <MessageSquare className="w-4 h-4" />
@@ -384,11 +384,11 @@ export default function SettingsPage() {
             </TabsTrigger>
             <TabsTrigger value="notifications" className="flex items-center space-x-2 h-8">
               <Bell className="w-4 h-4" />
-              <span>Notifications</span>
+              <span>Notifikasi</span>
             </TabsTrigger>
             <TabsTrigger value="security" className="flex items-center space-x-2 h-8">
               <Shield className="w-4 h-4" />
-              <span>Security</span>
+              <span>Keamanan</span>
             </TabsTrigger>
           </TabsList>
 
@@ -397,24 +397,24 @@ export default function SettingsPage() {
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center space-x-2">
-                  <Globe className="w-5 h-5 text-blue-600" />
-                  <span>Application</span>
+                  <Globe className="w-5 h-5 text-violet" />
+                  <span>Aplikasi</span>
                 </CardTitle>
                 <CardDescription>
-                  Name shown in the sidebar, sign-up page and browser tab
+                  Nama yang tampil di sidebar, halaman daftar, dan tab browser
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-2">
-                <Label htmlFor="appName">Application Name</Label>
+                <Label htmlFor="appName">Nama aplikasi</Label>
                 <Input
                   id="appName"
-                  placeholder="e.g., Domain Manager"
+                  placeholder="mis. Domain Manager"
                   maxLength={APP_NAME_MAX_LENGTH}
                   value={appNameInput}
                   onChange={(e) => setAppNameInput(e.target.value)}
                 />
-                <p className="text-xs text-gray-500">
-                  Browser tabs read as &ldquo;Page | {trimmedAppName || appName}&rdquo;, e.g. &ldquo;Domains | {trimmedAppName || appName}&rdquo;
+                <p className="text-xs text-muted">
+                  Judul tab browser jadi &ldquo;Halaman | {trimmedAppName || appName}&rdquo;, misalnya &ldquo;Domain | {trimmedAppName || appName}&rdquo;
                 </p>
               </CardContent>
             </Card>
@@ -425,19 +425,19 @@ export default function SettingsPage() {
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center space-x-2">
-                  <Smartphone className="w-5 h-5 text-green-600" />
-                  <span>WhatsApp Integration</span>
+                  <Smartphone className="w-5 h-5 text-on-mint" />
+                  <span>Integrasi WhatsApp</span>
                 </CardTitle>
                 <CardDescription>
-                  Configure WhatsApp notifications for domain alerts using Fonnte API
+                  Atur notifikasi WhatsApp untuk peringatan domain lewat API Fonnte
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
                 {/* Enable WhatsApp */}
                 <div className="flex items-center justify-between">
                   <div>
-                    <Label className="text-base font-medium">Enable WhatsApp Notifications</Label>
-                    <p className="text-sm text-gray-500">Receive domain alerts via WhatsApp</p>
+                    <Label className="text-base font-medium">Aktifkan notifikasi WhatsApp</Label>
+                    <p className="text-sm text-muted">Terima peringatan domain lewat WhatsApp</p>
                   </div>
                   <Switch
                     checked={whatsappSettings.enabled}
@@ -451,34 +451,34 @@ export default function SettingsPage() {
                   <>
                     {/* API Token */}
                     <div className="space-y-2">
-                      <Label htmlFor="token">Fonnte API Token</Label>
+                      <Label htmlFor="token">Token API Fonnte</Label>
                       <Input
                         id="token"
                         type="password"
-                        placeholder="Enter your Fonnte API token"
+                        placeholder="Masukkan token API Fonnte kamu"
                         value={whatsappSettings.token}
                         onChange={(e) => 
                           setWhatsappSettings(prev => ({ ...prev, token: e.target.value }))
                         }
                       />
-                      <p className="text-xs text-gray-500">
-                        Get your token from <a href="https://fonnte.com" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">fonnte.com</a>
+                      <p className="text-xs text-muted">
+                        Ambil token kamu di <a href="https://fonnte.com" target="_blank" rel="noopener noreferrer" className="text-violet hover:underline">fonnte.com</a>
                       </p>
                     </div>
 
                     {/* Phone Number */}
                     <div className="space-y-2">
-                      <Label htmlFor="phone">WhatsApp Phone Number</Label>
+                      <Label htmlFor="phone">Nomor WhatsApp</Label>
                       <Input
                         id="phone"
-                        placeholder="e.g., 082227097005"
+                        placeholder="mis. 082227097005"
                         value={whatsappSettings.phoneNumber}
                         onChange={(e) => 
                           setWhatsappSettings(prev => ({ ...prev, phoneNumber: e.target.value }))
                         }
                       />
-                      <p className="text-xs text-gray-500">
-                        Enter phone number without country code (Indonesia +62 is default)
+                      <p className="text-xs text-muted">
+                        Masukkan nomor tanpa kode negara (bawaannya Indonesia +62)
                       </p>
                     </div>
 
@@ -492,12 +492,12 @@ export default function SettingsPage() {
                         {testLoading ? (
                           <>
                             <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                            Sending Test Message...
+                            Mengirim pesan tes…
                           </>
                         ) : (
                           <>
                             <Send className="w-4 h-4 mr-2" />
-                            Send Test Message
+                            Kirim pesan tes
                           </>
                         )}
                       </Button>
@@ -513,11 +513,11 @@ export default function SettingsPage() {
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center space-x-2">
-                  <Bell className="w-5 h-5 text-blue-600" />
-                  <span>Notification Preferences</span>
+                  <Bell className="w-5 h-5 text-violet" />
+                  <span>Preferensi notifikasi</span>
                 </CardTitle>
                 <CardDescription>
-                  Choose which events should trigger WhatsApp notifications
+                  Pilih kejadian apa saja yang dikabari lewat WhatsApp
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
@@ -525,10 +525,10 @@ export default function SettingsPage() {
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-3">
-                      <AlertTriangle className="w-5 h-5 text-red-500" />
+                      <AlertTriangle className="w-5 h-5 text-st-no" />
                       <div>
-                        <Label className="text-base font-medium">Domain Expiry Alerts</Label>
-                        <p className="text-sm text-gray-500">Critical domain expiration warnings</p>
+                        <Label className="text-base font-medium">Peringatan domain kedaluwarsa</Label>
+                        <p className="text-sm text-muted">Peringatan penting saat domain hampir kedaluwarsa</p>
                       </div>
                     </div>
                     <Switch
@@ -544,10 +544,10 @@ export default function SettingsPage() {
 
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-3">
-                      <FileSearch className="w-5 h-5 text-green-500" />
+                      <FileSearch className="w-5 h-5 text-on-mint" />
                       <div>
-                        <Label className="text-base font-medium">WHOIS Updates</Label>
-                        <p className="text-sm text-gray-500">Notifications when WHOIS data changes</p>
+                        <Label className="text-base font-medium">Pembaruan WHOIS</Label>
+                        <p className="text-sm text-muted">Notifikasi saat data WHOIS berubah</p>
                       </div>
                     </div>
                     <Switch
@@ -563,10 +563,10 @@ export default function SettingsPage() {
 
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-3">
-                      <AlertTriangle className="w-5 h-5 text-orange-500" />
+                      <AlertTriangle className="w-5 h-5 text-on-peach" />
                       <div>
-                        <Label className="text-base font-medium">Critical Alerts</Label>
-                        <p className="text-sm text-gray-500">Immediate alerts for urgent issues</p>
+                        <Label className="text-base font-medium">Peringatan kritis</Label>
+                        <p className="text-sm text-muted">Peringatan langsung untuk masalah mendesak</p>
                       </div>
                     </div>
                     <Switch
@@ -582,10 +582,10 @@ export default function SettingsPage() {
 
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-3">
-                      <Clock className="w-5 h-5 text-blue-500" />
+                      <Clock className="w-5 h-5 text-violet" />
                       <div>
-                        <Label className="text-base font-medium">Daily Reports</Label>
-                        <p className="text-sm text-gray-500">Daily summary of domain status</p>
+                        <Label className="text-base font-medium">Laporan harian</Label>
+                        <p className="text-sm text-muted">Ringkasan harian status domain</p>
                       </div>
                     </div>
                     <Switch
@@ -602,10 +602,10 @@ export default function SettingsPage() {
 
                 {/* Expiry Thresholds */}
                 <div className="pt-6 border-t">
-                  <h3 className="text-lg font-medium mb-4">Expiry Alert Thresholds</h3>
+                  <h3 className="text-lg font-extrabold tracking-[-0.02em] mb-4">Batas peringatan kedaluwarsa</h3>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div className="space-y-2">
-                      <Label htmlFor="critical">Critical (Days)</Label>
+                      <Label htmlFor="critical">Kritis (hari)</Label>
                       <Input
                         id="critical"
                         type="number"
@@ -619,11 +619,11 @@ export default function SettingsPage() {
                           }))
                         }
                       />
-                      <Badge variant="destructive" className="text-xs">Urgent</Badge>
+                      <Badge variant="destructive" className="text-xs">Mendesak</Badge>
                     </div>
                     
                     <div className="space-y-2">
-                      <Label htmlFor="warning">Warning (Days)</Label>
+                      <Label htmlFor="warning">Peringatan (hari)</Label>
                       <Input
                         id="warning"
                         type="number"
@@ -637,11 +637,11 @@ export default function SettingsPage() {
                           }))
                         }
                       />
-                      <Badge variant="secondary" className="text-xs">Important</Badge>
+                      <Badge variant="secondary" className="text-xs">Penting</Badge>
                     </div>
                     
                     <div className="space-y-2">
-                      <Label htmlFor="reminder">Reminder (Days)</Label>
+                      <Label htmlFor="reminder">Pengingat (hari)</Label>
                       <Input
                         id="reminder"
                         type="number"
@@ -668,22 +668,22 @@ export default function SettingsPage() {
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center space-x-2">
-                  <Shield className="w-5 h-5 text-green-600" />
-                  <span>Security Settings</span>
+                  <Shield className="w-5 h-5 text-on-mint" />
+                  <span>Pengaturan keamanan</span>
                 </CardTitle>
                 <CardDescription>
-                  Who can sign up, and bot protection on sign in
+                  Siapa yang boleh daftar, dan perlindungan bot saat masuk
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
                 {/* Public sign-up */}
                 <div className="flex items-center justify-between gap-4">
                   <div className="flex items-center space-x-3">
-                    <UserPlus className="w-5 h-5 text-blue-500" />
+                    <UserPlus className="w-5 h-5 text-violet" />
                     <div>
-                      <Label htmlFor="registrationEnabled" className="text-base font-medium">Public Sign Up</Label>
-                      <p className="text-sm text-gray-500">
-                        Let anyone create a Staff account from the sign-in page. When off, add users from the Users page.
+                      <Label htmlFor="registrationEnabled" className="text-base font-medium">Pendaftaran publik</Label>
+                      <p className="text-sm text-muted">
+                        Siapa pun bisa bikin akun Staf dari halaman masuk. Kalau dimatikan, tambah pengguna dari halaman Pengguna.
                       </p>
                     </div>
                   </div>
@@ -699,16 +699,16 @@ export default function SettingsPage() {
                 <div className="space-y-4">
                   <div className="flex items-center justify-between gap-4">
                     <div className="flex items-center space-x-3">
-                      <ShieldCheck className="w-5 h-5 text-orange-500" />
+                      <ShieldCheck className="w-5 h-5 text-on-peach" />
                       <div>
                         <div className="flex items-center gap-2">
                           <Label htmlFor="turnstileEnabled" className="text-base font-medium">Cloudflare Turnstile</Label>
                           <Badge variant={savedTurnstile?.enabled ? 'default' : 'secondary'}>
-                            {savedTurnstile?.enabled ? 'Active' : 'Off'}
+                            {savedTurnstile?.enabled ? 'Aktif' : 'Nonaktif'}
                           </Badge>
                         </div>
-                        <p className="text-sm text-gray-500">
-                          Bot check on the sign-in form. Create a widget for this domain in the Cloudflare dashboard (Turnstile → Add widget) and paste its keys here.
+                        <p className="text-sm text-muted">
+                          Pemeriksaan bot di form masuk. Buat widget untuk domain ini di dashboard Cloudflare (Turnstile → Add widget), lalu tempel key-nya di sini.
                         </p>
                       </div>
                     </div>
@@ -723,7 +723,7 @@ export default function SettingsPage() {
                   {turnstileEnabled && (
                     <div className="space-y-4 pl-8">
                       <div className="space-y-2">
-                        <Label htmlFor="turnstileSiteKey">Site Key</Label>
+                        <Label htmlFor="turnstileSiteKey">Site key</Label>
                         <Input
                           id="turnstileSiteKey"
                           placeholder="0x4AAAAAAA..."
@@ -736,22 +736,22 @@ export default function SettingsPage() {
                         />
                       </div>
                       <div className="space-y-2">
-                        <Label htmlFor="turnstileSecretKey">Secret Key</Label>
+                        <Label htmlFor="turnstileSecretKey">Secret key</Label>
                         <Input
                           id="turnstileSecretKey"
                           type="password"
-                          placeholder={savedTurnstile?.secretKeySet ? 'Saved. Leave blank to keep it' : '0x4AAAAAAA...'}
+                          placeholder={savedTurnstile?.secretKeySet ? 'Sudah tersimpan. Kosongkan kalau nggak mau ganti' : '0x4AAAAAAA...'}
                           autoComplete="new-password"
                           value={turnstileSecretKey}
                           onChange={(e) => setTurnstileSecretKey(e.target.value)}
                         />
-                        <p className="text-xs text-gray-500">Stored on the server and never shown again</p>
+                        <p className="text-xs text-muted">Disimpan di server dan nggak bakal ditampilkan lagi</p>
                       </div>
 
                       {turnstileNeedsCheck && debouncedTurnstileSiteKey && (
                         <div className="space-y-2">
-                          <p className="text-sm text-gray-500">
-                            Complete this check, then save. It confirms the keys work on this domain, so a wrong key cannot lock you out of sign in.
+                          <p className="text-sm text-muted">
+                            Selesaikan pemeriksaan ini dulu, baru simpan. Ini memastikan key-nya jalan di domain ini, jadi key yang salah nggak bikin kamu terkunci dari halaman masuk.
                           </p>
                           <TurnstileWidget
                             key={debouncedTurnstileSiteKey}
@@ -781,12 +781,12 @@ export default function SettingsPage() {
             {loading ? (
               <>
                 <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                Saving...
+                Menyimpan…
               </>
             ) : (
               <>
                 <Save className="w-4 h-4 mr-2" />
-                Save Settings
+                Simpan pengaturan
               </>
             )}
           </Button>

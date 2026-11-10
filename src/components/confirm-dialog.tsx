@@ -66,17 +66,17 @@ export function ConfirmProvider({ children }: { children: React.ReactNode }) {
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
-              {destructive && <AlertTriangle className="w-5 h-5 text-red-600" />}
+              {destructive && <AlertTriangle className="w-5 h-5 text-st-no" />}
               {options?.title}
             </DialogTitle>
             <DialogDescription>{options?.description}</DialogDescription>
           </DialogHeader>
           <DialogFooter className="gap-2 sm:gap-0">
             <Button variant="outline" onClick={() => settle(false)}>
-              {options?.cancelLabel ?? 'Cancel'}
+              {options?.cancelLabel ?? 'Batal'}
             </Button>
             <Button variant={destructive ? 'destructive' : 'default'} onClick={() => settle(true)}>
-              {options?.confirmLabel ?? 'Delete'}
+              {options?.confirmLabel ?? 'Hapus'}
             </Button>
           </DialogFooter>
         </DialogContent>

@@ -219,8 +219,8 @@ export default function ServersPage() {
     } catch (error) {
       console.error('Error fetching available domains:', error)
       toast({
-        title: "Error",
-        description: "Failed to load available domains",
+        title: "Gagal",
+        description: "Daftar domain nggak bisa dimuat. Coba lagi, ya.",
         variant: "destructive",
       })
     } finally {
@@ -313,15 +313,15 @@ export default function ServersPage() {
     try {
       await navigator.clipboard.writeText(password)
       toast({
-        title: "Password Copied",
-        description: `Password for ${serverName} copied to clipboard`,
+        title: "Tersalin",
+        description: `Kata sandi ${serverName} sudah disalin`,
         variant: "default",
       })
     } catch (error) {
       console.error('Failed to copy password:', error)
       toast({
-        title: "Copy Failed",
-        description: "Failed to copy password to clipboard",
+        title: "Gagal menyalin",
+        description: "Kata sandi nggak bisa disalin. Coba lagi, ya.",
         variant: "destructive",
       })
     }
@@ -368,8 +368,8 @@ export default function ServersPage() {
   const handleUpdateServer = async () => {
     if (!editServer.serverName.trim() || !editServer.provider.trim()) {
       toast({
-        title: "Validation Error",
-        description: "Server name and provider are required",
+        title: "Cek lagi, ya",
+        description: "Nama server dan penyedia wajib diisi",
         variant: "destructive",
       })
       return
@@ -399,14 +399,14 @@ export default function ServersPage() {
 
       if (!response.ok) {
         const errorData = await response.json()
-        throw new Error(errorData.error || 'Failed to update server')
+        throw new Error(errorData.error || 'Server gagal diperbarui')
       }
 
       const data = await response.json()
       
       toast({
-        title: "Server Updated",
-        description: `${editServer.serverName} has been updated successfully`,
+        title: "Beres!",
+        description: `${editServer.serverName} sudah diperbarui`,
         variant: "default",
       })
 
@@ -432,8 +432,8 @@ export default function ServersPage() {
     } catch (error) {
       console.error('Error updating server:', error)
       toast({
-        title: "Update Failed",
-        description: error instanceof Error ? error.message : "Failed to update server",
+        title: "Gagal memperbarui",
+        description: error instanceof Error ? error.message : "Server gagal diperbarui",
         variant: "destructive",
       })
     } finally {
@@ -444,66 +444,66 @@ export default function ServersPage() {
   // Get server status badge
   const getServerStatus = (status: string, daysToExpiry?: number) => {
     if (status === 'EXPIRED' || (daysToExpiry !== null && daysToExpiry !== undefined && daysToExpiry < 0)) {
-      return { status: 'expired', color: 'bg-red-600', text: 'Expired' }
+      return { status: 'expired', color: 'bg-red-600', text: 'Kedaluwarsa' }
     }
     
     if (status === 'SUSPENDED') {
-      return { status: 'suspended', color: 'bg-orange-600', text: 'Suspended' }
+      return { status: 'suspended', color: 'bg-orange-600', text: 'Ditangguhkan' }
     }
     
     if (status === 'MAINTENANCE') {
-      return { status: 'maintenance', color: 'bg-yellow-600', text: 'Maintenance' }
+      return { status: 'maintenance', color: 'bg-yellow-600', text: 'Pemeliharaan' }
     }
     
     if (status === 'CANCELLED') {
-      return { status: 'cancelled', color: 'bg-gray-600', text: 'Cancelled' }
+      return { status: 'cancelled', color: 'bg-gray-600', text: 'Dibatalkan' }
     }
 
     // Check expiry for active servers
     if (status === 'ACTIVE' && daysToExpiry !== null && daysToExpiry !== undefined) {
       if (daysToExpiry <= 1) {
-        return { status: 'critical', color: 'bg-red-500', text: 'Segera Expired' }
+        return { status: 'critical', color: 'bg-red-500', text: 'Segera kedaluwarsa' }
       }
       if (daysToExpiry <= 7) {
-        return { status: 'warning', color: 'bg-orange-500', text: 'Perlu Diperpanjang' }
+        return { status: 'warning', color: 'bg-orange-500', text: 'Perlu diperpanjang' }
       }
       if (daysToExpiry <= 30) {
-        return { status: 'attention', color: 'bg-yellow-500', text: 'Akan Expired' }
+        return { status: 'attention', color: 'bg-yellow-500', text: 'Akan kedaluwarsa' }
       }
     }
 
-    return { status: 'active', color: 'bg-green-500', text: 'Active' }
+    return { status: 'active', color: 'bg-green-500', text: 'Aktif' }
   }
 
   // Stats cards configuration
   const statsCards = [
     {
-      title: 'Total Servers',
+      title: 'Total server',
       value: stats.total,
       icon: Server,
-      color: 'text-blue-600',
-      bgColor: 'bg-blue-50'
+      color: 'text-violet',
+      bgColor: 'bg-lilac'
     },
     {
-      title: 'Active Servers',
+      title: 'Server aktif',
       value: stats.active,
       icon: Activity,
-      color: 'text-green-600',
-      bgColor: 'bg-green-50'
+      color: 'text-on-mint',
+      bgColor: 'bg-mint'
     },
     {
-      title: 'Expiring (30 Days)',
+      title: 'Segera kedaluwarsa (30 hari)',
       value: stats.expiring30,
       icon: CalendarClock,
-      color: 'text-orange-600',
-      bgColor: 'bg-orange-50'
+      color: 'text-on-peach',
+      bgColor: 'bg-peach'
     },
     {
-      title: 'Expired Servers',
+      title: 'Server kedaluwarsa',
       value: stats.expired,
       icon: CalendarX,
-      color: 'text-red-700',
-      bgColor: 'bg-red-50'
+      color: 'text-st-no',
+      bgColor: 'bg-rose'
     }
   ]
 
@@ -522,8 +522,8 @@ export default function ServersPage() {
       // Basic validation
       if (!newServer.serverName.trim()) {
         toast({
-          title: "Validation Error",
-          description: "Server name is required",
+          title: "Cek lagi, ya",
+          description: "Nama server wajib diisi",
           variant: "destructive",
         })
         return
@@ -531,8 +531,8 @@ export default function ServersPage() {
 
       if (!newServer.provider.trim()) {
         toast({
-          title: "Validation Error", 
-          description: "Provider is required",
+          title: "Cek lagi, ya", 
+          description: "Penyedia wajib diisi",
           variant: "destructive",
         })
         return
@@ -554,8 +554,8 @@ export default function ServersPage() {
 
       if (response.ok && result.success) {
         toast({
-          title: "Success",
-          description: `Server "${newServer.serverName}" added successfully`,
+          title: "Beres!",
+          description: `Server "${newServer.serverName}" sudah ditambahkan`,
           variant: "default",
         })
 
@@ -577,16 +577,16 @@ export default function ServersPage() {
         fetchServers() // Refresh data
       } else {
         toast({
-          title: "Error",
-          description: result.error || 'Failed to add server',
+          title: "Gagal",
+          description: result.error || 'Server gagal ditambahkan',
           variant: "destructive",
         })
       }
     } catch (error) {
       console.error('❌ Error adding server:', error)
       toast({
-        title: "Error",
-        description: "Failed to add server",
+        title: "Gagal",
+        description: "Server gagal ditambahkan",
         variant: "destructive",
       })
     } finally {
@@ -596,17 +596,17 @@ export default function ServersPage() {
 
   // Actions behind each row's "Manage" button
   const serverActions = (server: ServerData): ManageAction[] => [
-    { label: 'View Details', icon: Eye, onSelect: () => handleViewServer(server) },
-    { label: 'View Domains', icon: Globe, onSelect: () => handleShowDomains(server) },
-    ...(canManageServers ? [{ label: 'Edit', icon: Edit, onSelect: () => handleEditServer(server) }] : []),
-    ...(userRole === 'ADMIN' ? [{ label: 'Delete', icon: Trash2, onSelect: () => handleDeleteServer(server.id, server.serverName), destructive: true }] : []),
+    { label: 'Lihat detail', icon: Eye, onSelect: () => handleViewServer(server) },
+    { label: 'Lihat domain', icon: Globe, onSelect: () => handleShowDomains(server) },
+    ...(canManageServers ? [{ label: 'Ubah', icon: Edit, onSelect: () => handleEditServer(server) }] : []),
+    ...(userRole === 'ADMIN' ? [{ label: 'Hapus', icon: Trash2, onSelect: () => handleDeleteServer(server.id, server.serverName), destructive: true }] : []),
   ]
 
   // Handle delete server
   const handleDeleteServer = async (serverId: string, serverName: string) => {
     const confirmed = await confirm({
-      title: 'Delete server?',
-      description: `"${serverName}" will be permanently deleted and its domains will be unassigned. This action cannot be undone.`,
+      title: 'Hapus server?',
+      description: `"${serverName}" akan dihapus permanen dan domainnya dilepas dari server ini. Tindakan ini nggak bisa dibatalkan.`,
     })
     if (!confirmed) {
       return
@@ -622,24 +622,24 @@ export default function ServersPage() {
 
       if (response.ok && result.success) {
         toast({
-          title: "Success",
-          description: `Server "${serverName}" deleted successfully`,
+          title: "Beres!",
+          description: `Server "${serverName}" sudah dihapus`,
           variant: "default",
         })
 
         fetchServers() // Refresh data
       } else {
         toast({
-          title: "Error",
-          description: result.error || 'Failed to delete server',
+          title: "Gagal",
+          description: result.error || 'Server gagal dihapus',
           variant: "destructive",
         })
       }
     } catch (error) {
       console.error('❌ Error deleting server:', error)
       toast({
-        title: "Error",
-        description: "Failed to delete server",
+        title: "Gagal",
+        description: "Server gagal dihapus",
         variant: "destructive",
       })
     }
@@ -647,22 +647,22 @@ export default function ServersPage() {
 
   return (
     <div>
-      <div className="container mx-auto px-4 py-8">
+      <div className="w-full">
         <div className="space-y-8">
           {/* Header */}
           <PageHeader
-            title="Servers"
-            description="Manage your hosting and VPS servers"
+            title="Server"
+            description="Kelola server hosting dan VPS kamu"
             actions={
               <>
                 <Button variant="outline" onClick={fetchServers} disabled={serversQuery.isFetching}>
                   <RefreshCw className={`w-4 h-4 mr-2 ${serversQuery.isFetching ? 'animate-spin' : ''}`} />
-                  Refresh
+                  Muat ulang
                 </Button>
                 {canManageServers && (
                   <Button onClick={handleShowAddModal}>
                     <Plus className="w-4 h-4 mr-2" />
-                    Add Server
+                    Tambah server
                   </Button>
                 )}
               </>
@@ -674,9 +674,9 @@ export default function ServersPage() {
                 <Dialog open={showAddModal} onOpenChange={setShowAddModal}>
                 <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
                   <DialogHeader>
-                    <DialogTitle>Add New Server</DialogTitle>
+                    <DialogTitle>Tambah server baru</DialogTitle>
                     <DialogDescription>
-                      Add a new hosting or VPS server to your management system.
+                      Tambah server hosting atau VPS baru untuk dikelola di sini.
                     </DialogDescription>
                   </DialogHeader>
                   
@@ -684,19 +684,19 @@ export default function ServersPage() {
                     {/* Basic Information */}
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div className="space-y-2">
-                        <Label htmlFor="serverName">Server Name *</Label>
+                        <Label htmlFor="serverName">Nama server *</Label>
                         <Input
                           id="serverName"
-                          placeholder="e.g., Web Server 01"
+                          placeholder="mis. Web Server 01"
                           value={newServer.serverName}
                           onChange={(e) => setNewServer(prev => ({ ...prev, serverName: e.target.value }))}
                         />
                       </div>
                       <div className="space-y-2">
-                        <Label htmlFor="provider">Provider *</Label>
+                        <Label htmlFor="provider">Penyedia *</Label>
                         <Input
                           id="provider"
-                          placeholder="e.g., DigitalOcean, AWS"
+                          placeholder="mis. DigitalOcean, AWS"
                           value={newServer.provider}
                           onChange={(e) => setNewServer(prev => ({ ...prev, provider: e.target.value }))}
                         />
@@ -705,7 +705,7 @@ export default function ServersPage() {
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div className="space-y-2">
-                        <Label htmlFor="serverType">Server Type</Label>
+                        <Label htmlFor="serverType">Jenis server</Label>
                         <Select value={newServer.serverType} onValueChange={(value: any) => setNewServer(prev => ({ ...prev, serverType: value }))}>
                           <SelectTrigger>
                             <SelectValue />
@@ -723,10 +723,10 @@ export default function ServersPage() {
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="ACTIVE">Active</SelectItem>
-                            <SelectItem value="SUSPENDED">Suspended</SelectItem>
-                            <SelectItem value="MAINTENANCE">Maintenance</SelectItem>
-                            <SelectItem value="CANCELLED">Cancelled</SelectItem>
+                            <SelectItem value="ACTIVE">Aktif</SelectItem>
+                            <SelectItem value="SUSPENDED">Ditangguhkan</SelectItem>
+                            <SelectItem value="MAINTENANCE">Pemeliharaan</SelectItem>
+                            <SelectItem value="CANCELLED">Dibatalkan</SelectItem>
                           </SelectContent>
                         </Select>
                       </div>
@@ -741,7 +741,7 @@ export default function ServersPage() {
                     {/* Dates */}
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div className="space-y-2">
-                        <Label htmlFor="createdDate">Created Date</Label>
+                        <Label htmlFor="createdDate">Tanggal dibuat</Label>
                         <Input
                           id="createdDate"
                           type="date"
@@ -750,7 +750,7 @@ export default function ServersPage() {
                         />
                       </div>
                       <div className="space-y-2">
-                        <Label htmlFor="expiryDate">Expiry Date</Label>
+                        <Label htmlFor="expiryDate">Tanggal kedaluwarsa</Label>
                         <Input
                           id="expiryDate"
                           type="date"
@@ -772,11 +772,11 @@ export default function ServersPage() {
                         />
                       </div>
                       <div className="space-y-2">
-                        <Label htmlFor="password">Password</Label>
+                        <Label htmlFor="password">Kata sandi</Label>
                         <Input
                           id="password"
                           type="password"
-                          placeholder="Enter server password"
+                          placeholder="Masukkan kata sandi server"
                           value={newServer.password}
                           onChange={(e) => setNewServer(prev => ({ ...prev, password: e.target.value }))}
                         />
@@ -785,24 +785,24 @@ export default function ServersPage() {
 
                     {/* Domain Selection */}
                     <div className="space-y-2">
-                      <Label>Assign Domains (Optional)</Label>
+                      <Label>Pasang domain (opsional)</Label>
                       {loadingDomains ? (
                         <div className="flex items-center justify-center py-4">
                           <Loader2 className="w-4 h-4 animate-spin mr-2" />
-                          <span className="text-sm text-gray-500">Loading available domains...</span>
+                          <span className="text-sm text-muted">Memuat domain…</span>
                         </div>
                       ) : availableDomains.length === 0 ? (
-                        <div className="text-sm text-gray-500 py-2">
-                          No unassigned domains available
+                        <div className="text-sm text-muted py-2">
+                          Belum ada domain yang bisa dipasang
                         </div>
                       ) : (
                         <div className="space-y-2">
-                          <div className="text-sm text-gray-600">
-                            Select domains to assign to this server:
+                          <div className="text-sm text-muted">
+                            Pilih domain yang mau dipasang ke server ini:
                           </div>
-                          <div className="max-h-32 overflow-y-auto border rounded-md p-2 space-y-1">
+                          <div className="max-h-32 overflow-y-auto border rounded-2xl p-2 space-y-1">
                             {availableDomains.map((domain) => (
-                              <label key={domain.id} className="flex items-center space-x-2 cursor-pointer hover:bg-gray-50 p-1 rounded">
+                              <label key={domain.id} className="flex items-center space-x-2 cursor-pointer hover:bg-cream p-1 rounded-lg">
                                 <input
                                   type="checkbox"
                                   checked={selectedDomainsForNew.includes(domain.id)}
@@ -813,15 +813,15 @@ export default function ServersPage() {
                                       setSelectedDomainsForNew(prev => prev.filter(id => id !== domain.id))
                                     }
                                   }}
-                                  className="rounded border-gray-300"
+                                  className="rounded-lg border-sand"
                                 />
                                 <span className="text-sm">{domain.domain}</span>
                               </label>
                             ))}
                           </div>
                           {selectedDomainsForNew.length > 0 && (
-                            <div className="text-sm text-green-600">
-                              {selectedDomainsForNew.length} domain(s) selected
+                            <div className="text-sm text-on-mint">
+                              {selectedDomainsForNew.length} domain dipilih
                             </div>
                           )}
                         </div>
@@ -829,10 +829,10 @@ export default function ServersPage() {
                     </div>
 
                     <div className="space-y-2">
-                      <Label htmlFor="notes">Notes</Label>
+                      <Label htmlFor="notes">Catatan</Label>
                       <Textarea
                         id="notes"
-                        placeholder="Additional notes about this server..."
+                        placeholder="Catatan tambahan soal server ini…"
                         value={newServer.notes}
                         onChange={(e) => setNewServer(prev => ({ ...prev, notes: e.target.value }))}
                       />
@@ -842,18 +842,18 @@ export default function ServersPage() {
                   <div className="flex justify-end gap-2">
                     <Button variant="outline" onClick={() => setShowAddModal(false)}>
                       <X className="w-4 h-4 mr-2" />
-                      Cancel
+                      Batal
                     </Button>
                     <Button onClick={handleAddServer} disabled={addingServer}>
                       {addingServer ? (
                         <>
                           <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                          Adding...
+                          Menambahkan…
                         </>
                       ) : (
                         <>
                           <Plus className="w-4 h-4 mr-2" />
-                          Add Server
+                          Tambah server
                         </>
                       )}
                     </Button>
@@ -864,7 +864,7 @@ export default function ServersPage() {
             )}
 
           {/* Stats Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
+          <div className="grid grid-cols-2 gap-4 lg:gap-5 xl:grid-cols-4">
             {statsCards.map((card, index) => (
               <StatCard key={index} title={card.title} value={card.value} icon={card.icon} color={card.color} bgColor={card.bgColor} />
             ))}
@@ -876,9 +876,9 @@ export default function ServersPage() {
               <div className="flex flex-col sm:flex-row gap-4">
                 <div className="flex-1">
                   <div className="relative">
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted w-4 h-4" />
                     <Input
-                      placeholder="Search servers..."
+                      placeholder="Cari server…"
                       value={searchTerm}
                       onChange={(e) => setSearchTerm(e.target.value)}
                       className="pl-10"
@@ -888,29 +888,29 @@ export default function ServersPage() {
                 
                 <div className="flex flex-wrap gap-2">
                   <Select value={filterType} onValueChange={setFilterType}>
-                    <SelectTrigger className="w-[140px]">
+                    <SelectTrigger className="w-full sm:w-[190px]">
                       <Filter className="w-4 h-4 mr-2" />
-                      <SelectValue placeholder="Type" />
+                      <SelectValue placeholder="Jenis" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="all">All Types</SelectItem>
+                      <SelectItem value="all">Semua jenis</SelectItem>
                       <SelectItem value="hosting">Hosting</SelectItem>
                       <SelectItem value="vps">VPS</SelectItem>
                     </SelectContent>
                   </Select>
 
                   <Select value={filterStatus} onValueChange={setFilterStatus}>
-                    <SelectTrigger className="w-[140px]">
+                    <SelectTrigger className="w-full sm:w-[190px]">
                       <Filter className="w-4 h-4 mr-2" />
                       <SelectValue placeholder="Status" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="all">All Status</SelectItem>
-                      <SelectItem value="active">Active</SelectItem>
-                      <SelectItem value="suspended">Suspended</SelectItem>
-                      <SelectItem value="expired">Expired</SelectItem>
-                      <SelectItem value="maintenance">Maintenance</SelectItem>
-                      <SelectItem value="cancelled">Cancelled</SelectItem>
+                      <SelectItem value="all">Semua status</SelectItem>
+                      <SelectItem value="active">Aktif</SelectItem>
+                      <SelectItem value="suspended">Ditangguhkan</SelectItem>
+                      <SelectItem value="expired">Kedaluwarsa</SelectItem>
+                      <SelectItem value="maintenance">Pemeliharaan</SelectItem>
+                      <SelectItem value="cancelled">Dibatalkan</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -926,12 +926,12 @@ export default function ServersPage() {
                   <TableHeader>
                     <TableRow>
                       <TableHead>Server</TableHead>
-                      <TableHead>Provider</TableHead>
+                      <TableHead>Penyedia</TableHead>
                       <TableHead>Status</TableHead>
-                      <TableHead>Credentials</TableHead>
-                      <TableHead>Domains</TableHead>
-                      <TableHead>Expiry</TableHead>
-                      <TableHead className="text-right">Actions</TableHead>
+                      <TableHead>Kredensial</TableHead>
+                      <TableHead>Domain</TableHead>
+                      <TableHead>Kedaluwarsa</TableHead>
+                      <TableHead className="text-right">Aksi</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -939,8 +939,8 @@ export default function ServersPage() {
                       <TableRow>
                         <TableCell colSpan={7} className="text-center py-8">
                           <div className="flex flex-col items-center gap-2">
-                            <Server className="w-12 h-12 text-gray-400" />
-                            <p className="text-gray-500">No servers found</p>
+                            <Server className="w-12 h-12 text-muted" />
+                            <p className="text-muted">Nggak ada server yang ditemukan</p>
                             {canManageServers && (
                               <Button 
                                 variant="outline" 
@@ -948,7 +948,7 @@ export default function ServersPage() {
                                 className="mt-2"
                               >
                                 <Plus className="w-4 h-4 mr-2" />
-                                Add Your First Server
+                                Tambah server pertamamu
                               </Button>
                             )}
                           </div>
@@ -959,25 +959,25 @@ export default function ServersPage() {
                         const serverStatus = getServerStatus(server.status, server.daysToExpiry)
 
                         return (
-                          <TableRow key={server.id} className="hover:bg-gray-50">
+                          <TableRow key={server.id} className="hover:bg-cream">
                             <TableCell>
-                              <div className="font-medium text-gray-900">{server.serverName}</div>
+                              <div className="font-medium text-ink">{server.serverName}</div>
                               {server.ipAddress && (
-                                <div className="text-sm text-gray-500">{server.ipAddress}</div>
+                                <div className="text-sm text-muted">{server.ipAddress}</div>
                               )}
                             </TableCell>
                             <TableCell>
-                              <div className="text-sm text-gray-900">{server.provider}</div>
-                              <div className="text-sm text-gray-500">{server.serverType === 'VPS' ? 'VPS' : 'Hosting'}</div>
+                              <div className="text-sm text-ink">{server.provider}</div>
+                              <div className="text-sm text-muted">{server.serverType === 'VPS' ? 'VPS' : 'Hosting'}</div>
                             </TableCell>
                             <TableCell>
                               <StatusPill tone={toneFromBgClass(serverStatus.color)}>{serverStatus.text}</StatusPill>
                             </TableCell>
                             <TableCell>
                               {server.username ? (
-                                <div className="font-mono text-sm text-gray-900">{server.username}</div>
+                                <div className="font-mono text-sm text-ink">{server.username}</div>
                               ) : (
-                                <div className="text-sm text-gray-400">No username</div>
+                                <div className="text-sm text-muted">Belum ada username</div>
                               )}
                               {server.password ? (
                                 <div className="flex items-center space-x-2">
@@ -993,7 +993,7 @@ export default function ServersPage() {
                                       size="sm"
                                       className="h-6 w-6 p-0"
                                       onClick={() => togglePasswordVisibility(server.id)}
-                                      title={visiblePasswords.has(server.id) ? "Hide password" : "Show password"}
+                                      title={visiblePasswords.has(server.id) ? "Sembunyikan kata sandi" : "Tampilkan kata sandi"}
                                     >
                                       {visiblePasswords.has(server.id) ? (
                                         <EyeOff className="w-3 h-3" />
@@ -1006,24 +1006,24 @@ export default function ServersPage() {
                                       size="sm"
                                       className="h-6 w-6 p-0"
                                       onClick={() => copyPassword(server.password!, server.serverName)}
-                                      title="Copy password"
+                                      title="Salin kata sandi"
                                     >
                                       <Copy className="w-3 h-3" />
                                     </Button>
                                   </div>
                                 </div>
                               ) : (
-                                <div className="text-sm text-gray-400">No password</div>
+                                <div className="text-sm text-muted">Belum ada kata sandi</div>
                               )}
                             </TableCell>
                             <TableCell>
                               <button
                                 type="button"
-                                className="text-sm text-blue-600 hover:underline"
+                                className="text-sm text-violet hover:underline"
                                 onClick={() => handleShowDomains(server)}
-                                title="View assigned domains"
+                                title="Lihat domain yang terpasang"
                               >
-                                {server.domainCount || 0} domains
+                                {server.domainCount || 0} domain
                               </button>
                             </TableCell>
                             <TableCell>
@@ -1031,16 +1031,16 @@ export default function ServersPage() {
                                 <div className="text-sm">
                                   <div>{formatIndonesianDate(server.expiryDate)}</div>
                                   {server.daysToExpiry !== null && server.daysToExpiry !== undefined && (
-                                    <div className="text-gray-500">
+                                    <div className="text-muted">
                                       {server.daysToExpiry < 0 
-                                        ? `${Math.abs(server.daysToExpiry)} days ago`
-                                        : `${server.daysToExpiry} days left`
+                                        ? `${Math.abs(server.daysToExpiry)} hari lalu`
+                                        : server.daysToExpiry === 0 ? 'Hari ini' : server.daysToExpiry === 1 ? 'Besok' : `${server.daysToExpiry} hari lagi`
                                       }
                                     </div>
                                   )}
                                 </div>
                               ) : (
-                                'N/A'
+                                '–'
                               )}
                             </TableCell>
                             <TableCell className="text-right">
@@ -1060,7 +1060,7 @@ export default function ServersPage() {
                 totalItems={filteredServers.length}
                 pageSize={itemsPerPage}
                 onPageChange={setCurrentPage}
-                itemLabel="servers"
+                itemLabel="server"
                 className="px-6 py-4 border-t"
               />
             </CardContent>
@@ -1069,11 +1069,11 @@ export default function ServersPage() {
           {/* Server Cards - Mobile */}
           <div className="md:hidden space-y-4">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold">Servers ({filteredServers.length})</h3>
+              <h3 className="text-lg font-extrabold tracking-[-0.02em]">Server ({filteredServers.length})</h3>
               {canManageServers && (
                 <Button onClick={handleShowAddModal} size="sm">
                   <Plus className="w-4 h-4 mr-2" />
-                  Add
+                  Tambah
                 </Button>
               )}
             </div>
@@ -1082,8 +1082,8 @@ export default function ServersPage() {
               <Card>
                 <CardContent className="text-center py-8">
                   <div className="flex flex-col items-center gap-2">
-                    <Server className="w-12 h-12 text-gray-400" />
-                    <p className="text-gray-500">No servers found</p>
+                    <Server className="w-12 h-12 text-muted" />
+                    <p className="text-muted">Nggak ada server yang ditemukan</p>
                     {canManageServers && (
                       <Button 
                         variant="outline" 
@@ -1091,7 +1091,7 @@ export default function ServersPage() {
                         className="mt-2"
                       >
                         <Plus className="w-4 h-4 mr-2" />
-                        Add Server
+                        Tambah server
                       </Button>
                     )}
                   </div>
@@ -1109,12 +1109,12 @@ export default function ServersPage() {
                         {/* Server Header */}
                         <div className="flex items-center justify-between">
                           <div className="flex items-center space-x-3">
-                            <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
-                              <ServerIcon className="w-4 h-4 text-blue-600" />
+                            <div className="w-8 h-8 bg-lilac rounded-2xl flex items-center justify-center">
+                              <ServerIcon className="w-4 h-4 text-violet" />
                             </div>
                             <div>
-                              <h4 className="font-medium text-gray-900">{server.serverName}</h4>
-                              <p className="text-sm text-gray-500">{server.provider}</p>
+                              <h4 className="text-[15px] font-extrabold leading-snug">{server.serverName}</h4>
+                              <p className="text-sm text-muted">{server.provider}</p>
                             </div>
                           </div>
                           <div className="flex flex-col items-end space-y-1">
@@ -1128,14 +1128,14 @@ export default function ServersPage() {
                         {/* Server Details */}
                         <div className="grid grid-cols-2 gap-3 text-sm">
                           <div>
-                            <span className="text-gray-500">Username:</span>
+                            <span className="text-muted">Username:</span>
                             <div className="mt-1 font-medium">
-                              {server.username || 'N/A'}
+                              {server.username || '–'}
                             </div>
                           </div>
                           
                           <div>
-                            <span className="text-gray-500">Password:</span>
+                            <span className="text-muted">Kata sandi:</span>
                             <div className="mt-1 flex items-center space-x-2">
                               {server.password ? (
                                 <>
@@ -1164,29 +1164,29 @@ export default function ServersPage() {
                                   </Button>
                                 </>
                               ) : (
-                                <span className="text-gray-400 text-xs">Not set</span>
+                                <span className="text-muted text-xs">Belum diisi</span>
                               )}
                             </div>
                           </div>
                           
                           <div>
-                            <span className="text-gray-500">Domains:</span>
+                            <span className="text-muted">Domain:</span>
                             <div className="mt-1">
                               <Button
                                 variant="ghost"
                                 size="sm"
-                                className="h-6 px-2 text-blue-600 hover:text-blue-700"
+                                className="h-6 px-2 text-violet hover:text-violet-dark"
                                 onClick={() => handleShowDomains(server)}
                               >
-                                {server.domainCount} domains
+                                {server.domainCount} domain
                               </Button>
                             </div>
                           </div>
                           
                           <div>
-                            <span className="text-gray-500">Expiry:</span>
+                            <span className="text-muted">Kedaluwarsa:</span>
                             <div className="mt-1 font-medium">
-                              {server.expiryDate ? formatIndonesianDate(server.expiryDate) : 'N/A'}
+                              {server.expiryDate ? formatIndonesianDate(server.expiryDate) : '–'}
                             </div>
                           </div>
                         </div>
@@ -1194,7 +1194,7 @@ export default function ServersPage() {
                         {/* Actions */}
                         <div className="flex items-center justify-between pt-2 border-t">
                           <ManageMenu actions={serverActions(server)} />
-                          <div className="text-xs text-gray-400">
+                          <div className="text-xs text-muted">
                             #{server.id.slice(-8)}
                           </div>
                         </div>
@@ -1206,8 +1206,8 @@ export default function ServersPage() {
                 {/* Mobile Pagination */}
                 {totalPages > 1 && (
                   <div className="flex items-center justify-between mt-6">
-                    <div className="text-sm text-gray-500">
-                      Page {currentPage} of {totalPages}
+                    <div className="text-sm text-muted">
+                      Halaman {currentPage} dari {totalPages}
                     </div>
                     <div className="flex items-center space-x-2">
                       <Button
@@ -1239,31 +1239,31 @@ export default function ServersPage() {
       <Dialog open={showViewModal} onOpenChange={setShowViewModal}>
         <DialogContent className="max-w-2xl">
           <DialogHeader>
-            <DialogTitle>Server Details</DialogTitle>
+            <DialogTitle>Detail server</DialogTitle>
           </DialogHeader>
           
           {selectedServer && (
             <div className="space-y-6">
               {/* Basic Information */}
               <div className="space-y-4">
-                <h3 className="text-lg font-medium">Basic Information</h3>
+                <h3 className="text-lg font-extrabold tracking-[-0.02em]">Informasi dasar</h3>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
-                    <Label className="text-sm font-medium text-gray-500">Server Name</Label>
+                    <Label className="text-sm font-medium text-muted">Nama server</Label>
                     <p className="mt-1 text-sm">{selectedServer.serverName}</p>
                   </div>
                   <div>
-                    <Label className="text-sm font-medium text-gray-500">Provider</Label>
+                    <Label className="text-sm font-medium text-muted">Penyedia</Label>
                     <p className="mt-1 text-sm">{selectedServer.provider}</p>
                   </div>
                   <div>
-                    <Label className="text-sm font-medium text-gray-500">Type</Label>
+                    <Label className="text-sm font-medium text-muted">Jenis</Label>
                     <p className="mt-1">
                       <Badge variant="outline">{selectedServer.serverType}</Badge>
                     </p>
                   </div>
                   <div>
-                    <Label className="text-sm font-medium text-gray-500">Status</Label>
+                    <Label className="text-sm font-medium text-muted">Status</Label>
                     <p className="mt-1">
                       <StatusPill tone={toneFromBgClass(getServerStatus(selectedServer.status, selectedServer.daysToExpiry).color)}>{getServerStatus(selectedServer.status, selectedServer.daysToExpiry).text}</StatusPill>
                     </p>
@@ -1274,14 +1274,14 @@ export default function ServersPage() {
 
               {/* Access Details */}
               <div className="space-y-4">
-                <h3 className="text-lg font-medium">Access Details</h3>
+                <h3 className="text-lg font-extrabold tracking-[-0.02em]">Detail akses</h3>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
-                    <Label className="text-sm font-medium text-gray-500">Username</Label>
-                    <p className="mt-1 text-sm font-mono">{selectedServer.username || 'N/A'}</p>
+                    <Label className="text-sm font-medium text-muted">Username</Label>
+                    <p className="mt-1 text-sm font-mono">{selectedServer.username || '–'}</p>
                   </div>
                   <div>
-                    <Label className="text-sm font-medium text-gray-500">Password</Label>
+                    <Label className="text-sm font-medium text-muted">Kata sandi</Label>
                     {selectedServer.password ? (
                       <div className="flex items-center space-x-2 mt-1">
                         <span className="text-sm font-mono">
@@ -1312,7 +1312,7 @@ export default function ServersPage() {
                         </Button>
                       </div>
                     ) : (
-                      <p className="mt-1 text-sm text-gray-400">N/A</p>
+                      <p className="mt-1 text-sm text-muted">–</p>
                     )}
                   </div>
                 </div>
@@ -1320,35 +1320,35 @@ export default function ServersPage() {
 
               {/* Dates */}
               <div className="space-y-4">
-                <h3 className="text-lg font-medium">Important Dates</h3>
+                <h3 className="text-lg font-extrabold tracking-[-0.02em]">Tanggal penting</h3>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
-                    <Label className="text-sm font-medium text-gray-500">Created Date</Label>
+                    <Label className="text-sm font-medium text-muted">Tanggal dibuat</Label>
                     <p className="mt-1 text-sm">
-                      {selectedServer.createdDate ? formatIndonesianDate(selectedServer.createdDate) : 'N/A'}
+                      {selectedServer.createdDate ? formatIndonesianDate(selectedServer.createdDate) : '–'}
                     </p>
                   </div>
                   <div>
-                    <Label className="text-sm font-medium text-gray-500">Expiry Date</Label>
+                    <Label className="text-sm font-medium text-muted">Tanggal kedaluwarsa</Label>
                     <p className="mt-1 text-sm">
-                      {selectedServer.expiryDate ? formatIndonesianDate(selectedServer.expiryDate) : 'N/A'}
+                      {selectedServer.expiryDate ? formatIndonesianDate(selectedServer.expiryDate) : '–'}
                     </p>
                   </div>
                   {selectedServer.daysToExpiry !== null && selectedServer.daysToExpiry !== undefined && (
                     <div>
-                      <Label className="text-sm font-medium text-gray-500">Days to Expiry</Label>
+                      <Label className="text-sm font-medium text-muted">Sisa waktu</Label>
                       <p className="mt-1 text-sm">
                         {selectedServer.daysToExpiry < 0 
-                          ? `${Math.abs(selectedServer.daysToExpiry)} days ago`
-                          : `${selectedServer.daysToExpiry} days left`
+                          ? `${Math.abs(selectedServer.daysToExpiry)} hari lalu`
+                          : selectedServer.daysToExpiry === 0 ? 'Hari ini' : selectedServer.daysToExpiry === 1 ? 'Besok' : `${selectedServer.daysToExpiry} hari lagi`
                         }
                       </p>
                     </div>
                   )}
                   <div>
-                    <Label className="text-sm font-medium text-gray-500">Last Checked</Label>
+                    <Label className="text-sm font-medium text-muted">Terakhir dicek</Label>
                     <p className="mt-1 text-sm">
-                      {selectedServer.lastChecked ? formatIndonesianDate(selectedServer.lastChecked) : 'N/A'}
+                      {selectedServer.lastChecked ? formatIndonesianDate(selectedServer.lastChecked) : '–'}
                     </p>
                   </div>
                 </div>
@@ -1359,8 +1359,8 @@ export default function ServersPage() {
               {/* Notes */}
               {selectedServer.notes && (
                 <div className="space-y-4">
-                  <h3 className="text-lg font-medium">Notes</h3>
-                  <p className="text-sm text-gray-700 bg-gray-50 p-3 rounded-md">
+                  <h3 className="text-lg font-extrabold tracking-[-0.02em]">Catatan</h3>
+                  <p className="text-sm text-ink bg-cream p-3 rounded-2xl">
                     {selectedServer.notes}
                   </p>
                 </div>
@@ -1369,7 +1369,7 @@ export default function ServersPage() {
               {/* Footer */}
               <div className="flex justify-end pt-4 border-t">
                 <Button variant="outline" onClick={() => setShowViewModal(false)}>
-                  Close
+                  Tutup
                 </Button>
               </div>
             </div>
@@ -1381,16 +1381,16 @@ export default function ServersPage() {
       <Dialog open={showEditModal} onOpenChange={setShowEditModal}>
         <DialogContent className="max-w-2xl">
           <DialogHeader>
-            <DialogTitle>Edit Server</DialogTitle>
+            <DialogTitle>Ubah server</DialogTitle>
           </DialogHeader>
           
           <div className="space-y-6">
             {/* Basic Information */}
             <div className="space-y-4">
-              <h3 className="text-lg font-medium">Basic Information</h3>
+              <h3 className="text-lg font-extrabold tracking-[-0.02em]">Informasi dasar</h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="edit-serverName">Server Name *</Label>
+                  <Label htmlFor="edit-serverName">Nama server *</Label>
                   <Input
                     id="edit-serverName"
                     placeholder="Web Server 01"
@@ -1399,16 +1399,16 @@ export default function ServersPage() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="edit-provider">Provider *</Label>
+                  <Label htmlFor="edit-provider">Penyedia *</Label>
                   <Input
                     id="edit-provider"
-                    placeholder="DigitalOcean, AWS, etc."
+                    placeholder="DigitalOcean, AWS, dll."
                     value={editServer.provider}
                     onChange={(e) => setEditServer(prev => ({ ...prev, provider: e.target.value }))}
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="edit-serverType">Server Type</Label>
+                  <Label htmlFor="edit-serverType">Jenis server</Label>
                   <Select value={editServer.serverType} onValueChange={(value: 'HOSTING' | 'VPS') => setEditServer(prev => ({ ...prev, serverType: value }))}>
                     <SelectTrigger>
                       <SelectValue />
@@ -1426,11 +1426,11 @@ export default function ServersPage() {
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="ACTIVE">Active</SelectItem>
-                      <SelectItem value="SUSPENDED">Suspended</SelectItem>
-                      <SelectItem value="EXPIRED">Expired</SelectItem>
-                      <SelectItem value="MAINTENANCE">Maintenance</SelectItem>
-                      <SelectItem value="CANCELLED">Cancelled</SelectItem>
+                      <SelectItem value="ACTIVE">Aktif</SelectItem>
+                      <SelectItem value="SUSPENDED">Ditangguhkan</SelectItem>
+                      <SelectItem value="EXPIRED">Kedaluwarsa</SelectItem>
+                      <SelectItem value="MAINTENANCE">Pemeliharaan</SelectItem>
+                      <SelectItem value="CANCELLED">Dibatalkan</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -1440,10 +1440,10 @@ export default function ServersPage() {
 
             {/* Dates */}
             <div className="space-y-4">
-              <h3 className="text-lg font-medium">Important Dates</h3>
+              <h3 className="text-lg font-extrabold tracking-[-0.02em]">Tanggal penting</h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="edit-createdDate">Created Date</Label>
+                  <Label htmlFor="edit-createdDate">Tanggal dibuat</Label>
                   <Input
                     id="edit-createdDate"
                     type="date"
@@ -1452,7 +1452,7 @@ export default function ServersPage() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="edit-expiryDate">Expiry Date</Label>
+                  <Label htmlFor="edit-expiryDate">Tanggal kedaluwarsa</Label>
                   <Input
                     id="edit-expiryDate"
                     type="date"
@@ -1465,7 +1465,7 @@ export default function ServersPage() {
 
             {/* Access Details */}
             <div className="space-y-4">
-              <h3 className="text-lg font-medium">Access Details</h3>
+              <h3 className="text-lg font-extrabold tracking-[-0.02em]">Detail akses</h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="edit-username">Username</Label>
@@ -1477,11 +1477,11 @@ export default function ServersPage() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="edit-password">Password</Label>
+                  <Label htmlFor="edit-password">Kata sandi</Label>
                   <Input
                     id="edit-password"
                     type="password"
-                    placeholder="Enter server password"
+                    placeholder="Masukkan kata sandi server"
                     value={editServer.password}
                     onChange={(e) => setEditServer(prev => ({ ...prev, password: e.target.value }))}
                   />
@@ -1491,21 +1491,21 @@ export default function ServersPage() {
 
             {/* Domain Selection */}
             <div className="space-y-2">
-              <Label>Assign Domains (Optional)</Label>
+              <Label>Pasang domain (opsional)</Label>
               {loadingDomains ? (
                 <div className="flex items-center justify-center py-4">
                   <Loader2 className="w-4 h-4 animate-spin mr-2" />
-                  <span className="text-sm text-gray-500">Loading available domains...</span>
+                  <span className="text-sm text-muted">Memuat domain…</span>
                 </div>
               ) : (
                 <div className="space-y-2">
-                  <div className="text-sm text-gray-600">
-                    Select domains to assign to this server:
+                  <div className="text-sm text-muted">
+                    Pilih domain yang mau dipasang ke server ini:
                   </div>
-                  <div className="max-h-32 overflow-y-auto border rounded-md p-2 space-y-1">
+                  <div className="max-h-32 overflow-y-auto border rounded-2xl p-2 space-y-1">
                     {/* Currently assigned domains */}
                     {editServer.id && servers.find(s => s.id === editServer.id)?.domains?.map((domain) => (
-                      <label key={domain.id} className="flex items-center space-x-2 cursor-pointer hover:bg-gray-50 p-1 rounded">
+                      <label key={domain.id} className="flex items-center space-x-2 cursor-pointer hover:bg-cream p-1 rounded-lg">
                         <input
                           type="checkbox"
                           checked={selectedDomainsForEdit.includes(domain.id)}
@@ -1516,16 +1516,16 @@ export default function ServersPage() {
                               setSelectedDomainsForEdit(prev => prev.filter(id => id !== domain.id))
                             }
                           }}
-                          className="rounded border-gray-300"
+                          className="rounded-lg border-sand"
                         />
                         <span className="text-sm">{domain.domain}</span>
-                        <Badge variant="outline" className="text-xs">Currently assigned</Badge>
+                        <Badge variant="outline" className="text-xs">Sudah terpasang</Badge>
                       </label>
                     ))}
                     
                     {/* Available unassigned domains */}
                     {availableDomains.map((domain) => (
-                      <label key={domain.id} className="flex items-center space-x-2 cursor-pointer hover:bg-gray-50 p-1 rounded">
+                      <label key={domain.id} className="flex items-center space-x-2 cursor-pointer hover:bg-cream p-1 rounded-lg">
                         <input
                           type="checkbox"
                           checked={selectedDomainsForEdit.includes(domain.id)}
@@ -1536,20 +1536,20 @@ export default function ServersPage() {
                               setSelectedDomainsForEdit(prev => prev.filter(id => id !== domain.id))
                             }
                           }}
-                          className="rounded border-gray-300"
+                          className="rounded-lg border-sand"
                         />
                         <span className="text-sm">{domain.domain}</span>
                       </label>
                     ))}
                   </div>
                   {selectedDomainsForEdit.length > 0 && (
-                    <div className="text-sm text-green-600">
-                      {selectedDomainsForEdit.length} domain(s) selected
+                    <div className="text-sm text-on-mint">
+                      {selectedDomainsForEdit.length} domain dipilih
                     </div>
                   )}
                   {availableDomains.length === 0 && (!editServer.id || !servers.find(s => s.id === editServer.id)?.domains?.length) && (
-                    <div className="text-sm text-gray-500 py-2">
-                      No domains available for assignment
+                    <div className="text-sm text-muted py-2">
+                      Belum ada domain yang bisa dipasang
                     </div>
                   )}
                 </div>
@@ -1558,10 +1558,10 @@ export default function ServersPage() {
 
             {/* Notes */}
             <div className="space-y-2">
-              <Label htmlFor="edit-notes">Notes</Label>
+              <Label htmlFor="edit-notes">Catatan</Label>
               <Textarea
                 id="edit-notes"
-                placeholder="Additional notes about this server..."
+                placeholder="Catatan tambahan soal server ini…"
                 value={editServer.notes}
                 onChange={(e) => setEditServer(prev => ({ ...prev, notes: e.target.value }))}
                 rows={3}
@@ -1576,7 +1576,7 @@ export default function ServersPage() {
                 disabled={editingServer}
               >
                 <X className="w-4 h-4 mr-2" />
-                Cancel
+                Batal
               </Button>
               <Button 
                 onClick={handleUpdateServer}
@@ -1585,12 +1585,12 @@ export default function ServersPage() {
                 {editingServer ? (
                   <>
                     <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                    Updating...
+                    Memperbarui…
                   </>
                 ) : (
                   <>
                     <Save className="w-4 h-4 mr-2" />
-                    Update Server
+                    Perbarui server
                   </>
                 )}
               </Button>
@@ -1603,33 +1603,33 @@ export default function ServersPage() {
       <Dialog open={showDomainsModal} onOpenChange={setShowDomainsModal}>
         <DialogContent className="max-w-2xl">
           <DialogHeader>
-            <DialogTitle>Assigned Domains</DialogTitle>
+            <DialogTitle>Domain terpasang</DialogTitle>
             <DialogDescription>
-              Domains assigned to {selectedServerForDomains?.serverName}
+              Domain yang dipasang ke {selectedServerForDomains?.serverName}
             </DialogDescription>
           </DialogHeader>
           
           <div className="space-y-4">
             {selectedServerForDomains?.domains && selectedServerForDomains.domains.length > 0 ? (
               <div className="space-y-3">
-                <div className="text-sm text-gray-600">
-                  Total: {selectedServerForDomains.domains.length} domain(s)
+                <div className="text-sm text-muted">
+                  Total: {selectedServerForDomains.domains.length} domain
                 </div>
                 
                 <div className="max-h-96 overflow-y-auto space-y-2">
                   {selectedServerForDomains.domains.map((domain) => (
                     <div 
                       key={domain.id} 
-                      className="flex items-center justify-between p-3 border rounded-lg hover:bg-gray-50"
+                      className="flex items-center justify-between p-3 border rounded-2xl hover:bg-cream"
                     >
                       <div className="flex-1">
                         <div className="font-medium text-sm">{domain.domain}</div>
-                        <div className="text-xs text-gray-500 mt-1">
+                        <div className="text-xs text-muted mt-1">
                           Status: <span className={`inline-flex px-2 py-1 rounded-full text-xs font-medium ${
-                            domain.status === 'ACTIVE' ? 'bg-green-100 text-green-800' :
-                            domain.status === 'EXPIRED' ? 'bg-red-100 text-red-800' :
-                            domain.status === 'SUSPENDED' ? 'bg-yellow-100 text-yellow-800' :
-                            'bg-gray-100 text-gray-800'
+                            domain.status === 'ACTIVE' ? 'bg-mint text-on-mint' :
+                            domain.status === 'EXPIRED' ? 'bg-rose text-st-no' :
+                            domain.status === 'SUSPENDED' ? 'bg-butter text-st-wait' :
+                            'bg-cream text-ink'
                           }`}>
                             {domain.status}
                           </span>
@@ -1637,8 +1637,8 @@ export default function ServersPage() {
                       </div>
                       
                       {domain.expiryDate && (
-                        <div className="text-right text-xs text-gray-500">
-                          <div>Expires:</div>
+                        <div className="text-right text-xs text-muted">
+                          <div>Kedaluwarsa:</div>
                           <div className="font-medium">
                             {formatIndonesianDate(domain.expiryDate)}
                           </div>
@@ -1650,15 +1650,15 @@ export default function ServersPage() {
               </div>
             ) : (
               <div className="text-center py-8">
-                <Globe className="w-12 h-12 text-gray-400 mx-auto mb-3" />
-                <p className="text-gray-500">No domains assigned to this server</p>
+                <Globe className="w-12 h-12 text-muted mx-auto mb-3" />
+                <p className="text-muted">Belum ada domain yang dipasang ke server ini</p>
               </div>
             )}
           </div>
 
           <div className="flex justify-end">
             <Button variant="outline" onClick={() => setShowDomainsModal(false)}>
-              Close
+              Tutup
             </Button>
           </div>
         </DialogContent>

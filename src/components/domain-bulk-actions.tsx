@@ -44,7 +44,7 @@ export function SelectCheckbox({
     <input
       ref={ref}
       type="checkbox"
-      className="h-4 w-4 cursor-pointer rounded border-gray-300 accent-blue-600"
+      className="size-[18px] cursor-pointer accent-violet"
       checked={checked}
       onChange={(e) => onChange(e.target.checked)}
       onClick={(e) => e.stopPropagation()}
@@ -116,7 +116,7 @@ export function DomainBulkActions({ selected, onClear, totalMatching, onSelectAl
   if (selected.length === 0) return null
 
   const count = selected.length
-  const plural = (n: number) => `${n} domain${n === 1 ? '' : 's'}`
+  const plural = (n: number) => `${n} domain`
 
   // Runs the task for every selected domain, then reports and refreshes the lists
   const run = async (label: string, past: string, task: (domain: BulkDomain) => Promise<unknown>) => {
@@ -130,9 +130,9 @@ export function DomainBulkActions({ selected, onClear, totalMatching, onSelectAl
     const failed = domains.filter((_, i) => results[i].status === 'rejected')
     const succeeded = domains.length - failed.length
     toast({
-      title: failed.length ? `${past} ${succeeded} of ${plural(domains.length)}` : `${past} ${plural(succeeded)}`,
+      title: failed.length ? `${past} ${succeeded} dari ${plural(domains.length)}` : `${past} ${plural(succeeded)}`,
       description: failed.length
-        ? `Failed: ${failed.slice(0, 5).map(d => d.domain).join(', ')}${failed.length > 5 ? ` and ${failed.length - 5} more` : ''}`
+        ? `Gagal: ${failed.slice(0, 5).map(d => d.domain).join(', ')}${failed.length > 5 ? ` dan ${failed.length - 5} lainnya` : ''}`
         : undefined,
       variant: failed.length ? 'destructive' : 'default',
     })
@@ -141,23 +141,23 @@ export function DomainBulkActions({ selected, onClear, totalMatching, onSelectAl
   }
 
   const handleRefreshWhois = () =>
-    run('Refreshing WHOIS', 'Refreshed WHOIS for', (domain) =>
+    run('Memuat ulang WHOIS', 'WHOIS dimuat ulang untuk', (domain) =>
       fetchOrThrow(`/api/domains/${domain.id}/update-whois`, { method: 'POST' })
     )
 
   const handleDelete = async () => {
     const confirmed = await confirm({
-      title: `Delete ${plural(count)}?`,
-      description: `The selected domains and any websites linked to them will be permanently deleted. This action cannot be undone.`,
+      title: `Hapus ${plural(count)}?`,
+      description: `Domain yang dipilih dan semua website yang terhubung akan dihapus permanen. Tindakan ini nggak bisa dibatalkan.`,
     })
     if (!confirmed) return
-    await run('Deleting', 'Deleted', (domain) => fetchOrThrow(`/api/domains/${domain.id}`, { method: 'DELETE' }))
+    await run('Menghapus', 'Berhasil hapus', (domain) => fetchOrThrow(`/api/domains/${domain.id}`, { method: 'DELETE' }))
   }
 
   const handleAssign = async () => {
     if (!serverId) return
     setAssignOpen(false)
-    await run('Assigning', 'Assigned', async (domain) => {
+    await run('Memasang', 'Berhasil pasang', async (domain) => {
       // The API rejects a no-op assignment; for a bulk run it simply counts as done
       if (domain.server?.id === serverId) return
       await fetchOrThrow(`/api/domains/${domain.id}/assign-server`, {
@@ -173,32 +173,32 @@ export function DomainBulkActions({ selected, onClear, totalMatching, onSelectAl
 
   return (
     <>
-      <div className="flex flex-wrap items-center gap-2 rounded-lg border border-blue-200 bg-blue-50 px-4 py-3">
-        <span className="flex items-center text-sm font-medium text-blue-900">
+      <div className="flex flex-wrap items-center gap-2 rounded-tile bg-lilac p-3 pl-4">
+        <span className="tabular flex items-center text-[13px] font-extrabold text-violet-dark">
           {busy && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-          {busy ? `${progress.label} ${progress.done}/${progress.total}…` : `${plural(count)} selected`}
+          {busy ? `${progress.label} ${progress.done}/${progress.total}…` : `${plural(count)} dipilih`}
         </span>
         {!busy && count < totalMatching && (
-          <button type="button" onClick={onSelectAllMatching} className="text-sm font-medium text-blue-700 hover:underline">
-            Select all {totalMatching}
+          <button type="button" onClick={onSelectAllMatching} className="text-[13px] font-extrabold text-violet-dark underline underline-offset-2">
+            Pilih semua {totalMatching}
           </button>
         )}
         <div className="ml-auto flex flex-wrap items-center gap-2">
-          <Button variant="outline" size="sm" onClick={handleRefreshWhois} disabled={busy}>
+          <Button variant="secondary" size="sm" className="bg-white hover:bg-cream" onClick={handleRefreshWhois} disabled={busy}>
             <RefreshCw className="w-4 h-4 mr-2" />
-            Refresh WHOIS
+            Muat ulang WHOIS
           </Button>
-          <Button variant="outline" size="sm" onClick={() => setAssignOpen(true)} disabled={busy}>
+          <Button variant="secondary" size="sm" className="bg-white hover:bg-cream" onClick={() => setAssignOpen(true)} disabled={busy}>
             <Link className="w-4 h-4 mr-2" />
-            Assign to Server
+            Pasang ke server
           </Button>
           <Button variant="destructive" size="sm" onClick={handleDelete} disabled={busy}>
             <Trash2 className="w-4 h-4 mr-2" />
-            Delete
+            Hapus
           </Button>
-          <Button variant="ghost" size="sm" onClick={onClear} disabled={busy}>
+          <Button variant="ghost" size="sm" className="hover:bg-white" onClick={onClear} disabled={busy}>
             <X className="w-4 h-4 mr-2" />
-            Clear
+            Bersihkan
           </Button>
         </div>
       </div>
@@ -206,16 +206,16 @@ export function DomainBulkActions({ selected, onClear, totalMatching, onSelectAl
       <Dialog open={assignOpen} onOpenChange={setAssignOpen}>
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
-            <DialogTitle>Assign {plural(count)} to Server</DialogTitle>
+            <DialogTitle>Pasang {plural(count)} ke server</DialogTitle>
             <DialogDescription>
-              Each domain can only be assigned to one server; domains already on another server are moved.
+              Satu domain cuma bisa dipasang ke satu server; domain yang sudah ada di server lain akan dipindahkan.
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-2">
-            <label className="text-sm font-medium">Select Server:</label>
+            <label className="text-[13px] font-extrabold">Pilih server</label>
             <Select value={serverId} onValueChange={setServerId} disabled={serversQuery.isPending}>
               <SelectTrigger>
-                <SelectValue placeholder={serversQuery.isPending ? 'Loading servers...' : 'Choose a server'} />
+                <SelectValue placeholder={serversQuery.isPending ? 'Memuat server…' : 'Pilih server'} />
               </SelectTrigger>
               <SelectContent>
                 {activeServers.map(server => (
@@ -226,17 +226,17 @@ export function DomainBulkActions({ selected, onClear, totalMatching, onSelectAl
               </SelectContent>
             </Select>
             {!serversQuery.isPending && activeServers.length === 0 && (
-              <p className="text-sm text-gray-500">No active servers yet. Add one on the Servers page first.</p>
+              <p className="text-sm text-muted">Belum ada server aktif. Tambah dulu di halaman Server, yuk.</p>
             )}
           </div>
           <div className="flex justify-end space-x-2 pt-4">
             <Button variant="outline" onClick={() => setAssignOpen(false)}>
               <X className="w-4 h-4 mr-2" />
-              Cancel
+              Batal
             </Button>
             <Button onClick={handleAssign} disabled={!serverId}>
               <Link className="w-4 h-4 mr-2" />
-              Assign
+              Pasang
             </Button>
           </div>
         </DialogContent>

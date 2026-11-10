@@ -14,7 +14,7 @@ export async function GET(
     const session = await getServerSession(authOptions)
     
     if (!session?.user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+      return NextResponse.json({ error: 'Kamu perlu masuk dulu' }, { status: 401 })
     }
 
     const { id } = await params
@@ -24,7 +24,7 @@ export async function GET(
     })
 
     if (!server) {
-      return NextResponse.json({ error: 'Server not found' }, { status: 404 })
+      return NextResponse.json({ error: 'Server tidak ditemukan' }, { status: 404 })
     }
 
     // Calculate days to expiry
@@ -50,7 +50,7 @@ export async function GET(
   } catch (error) {
     console.error('❌ Error fetching server:', error)
     return NextResponse.json(
-      { error: 'Internal server error' },
+      { error: 'Gagal memproses permintaan. Coba lagi, ya.' },
       { status: 500 }
     )
   }
@@ -65,13 +65,13 @@ export async function PUT(
     const session = await getServerSession(authOptions)
     
     if (!session?.user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+      return NextResponse.json({ error: 'Kamu perlu masuk dulu' }, { status: 401 })
     }
 
     // Check permissions - only ADMIN and STAFF can update servers
     const userRole = (session.user as any)?.role
     if (userRole !== 'ADMIN' && userRole !== 'STAFF') {
-      return NextResponse.json({ error: 'Insufficient permissions' }, { status: 403 })
+      return NextResponse.json({ error: 'Kamu nggak punya akses untuk ini' }, { status: 403 })
     }
 
     const { id } = await params
@@ -83,13 +83,13 @@ export async function PUT(
     })
 
     if (!existingServer) {
-      return NextResponse.json({ error: 'Server not found' }, { status: 404 })
+      return NextResponse.json({ error: 'Server tidak ditemukan' }, { status: 404 })
     }
 
     // Validate server type if provided
     if (body.serverType && !Object.values(ServerType).includes(body.serverType)) {
       return NextResponse.json(
-        { error: 'Invalid server type' },
+        { error: 'Tipe server tidak valid' },
         { status: 400 }
       )
     }
@@ -97,7 +97,7 @@ export async function PUT(
     // Validate server status if provided
     if (body.status && !Object.values(ServerStatus).includes(body.status)) {
       return NextResponse.json(
-        { error: 'Invalid server status' },
+        { error: 'Status server tidak valid' },
         { status: 400 }
       )
     }
@@ -168,7 +168,7 @@ export async function PUT(
 
     return NextResponse.json({
       success: true,
-      message: 'Server updated successfully',
+      message: 'Server diperbarui',
       server: {
         ...updatedServer,
         uptimePercent: updatedServer.uptimePercent ? Number(updatedServer.uptimePercent) : null
@@ -178,7 +178,7 @@ export async function PUT(
   } catch (error) {
     console.error('❌ Error updating server:', error)
     return NextResponse.json(
-      { error: 'Failed to update server' },
+      { error: 'Gagal memperbarui server. Coba lagi, ya.' },
       { status: 500 }
     )
   }
@@ -193,13 +193,13 @@ export async function DELETE(
     const session = await getServerSession(authOptions)
     
     if (!session?.user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+      return NextResponse.json({ error: 'Kamu perlu masuk dulu' }, { status: 401 })
     }
 
     // Check permissions - only ADMIN can delete servers
     const userRole = (session.user as any)?.role
     if (userRole !== 'ADMIN') {
-      return NextResponse.json({ error: 'Only administrators can delete servers' }, { status: 403 })
+      return NextResponse.json({ error: 'Cuma admin yang bisa menghapus server' }, { status: 403 })
     }
 
     const { id } = await params
@@ -210,7 +210,7 @@ export async function DELETE(
     })
 
     if (!existingServer) {
-      return NextResponse.json({ error: 'Server not found' }, { status: 404 })
+      return NextResponse.json({ error: 'Server tidak ditemukan' }, { status: 404 })
     }
 
     // Delete server
@@ -222,13 +222,13 @@ export async function DELETE(
 
     return NextResponse.json({
       success: true,
-      message: 'Server deleted successfully'
+      message: 'Server dihapus'
     })
 
   } catch (error) {
     console.error('❌ Error deleting server:', error)
     return NextResponse.json(
-      { error: 'Failed to delete server' },
+      { error: 'Gagal menghapus server. Coba lagi, ya.' },
       { status: 500 }
     )
   }

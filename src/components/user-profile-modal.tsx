@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useSession } from 'next-auth/react'
 import { format, formatDistanceToNow } from 'date-fns'
+import { id as localeId } from 'date-fns/locale'
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Button } from '@/components/ui/button'
@@ -42,7 +43,7 @@ const EMPTY_ERRORS: Record<FormField, string> = {
 // Same colors as the status pills on the Users page
 const STATUS_TONES: Record<string, PillTone> = { ACTIVE: 'green', INACTIVE: 'gray', SUSPENDED: 'red' }
 
-const titleCase = (value: string) => value.charAt(0) + value.slice(1).toLowerCase()
+const STATUS_LABELS: Record<string, string> = { ACTIVE: 'Aktif', INACTIVE: 'Nonaktif', SUSPENDED: 'Ditangguhkan' }
 
 export function UserProfileModal({ open, onOpenChange }: UserProfileModalProps) {
   const { update: updateSession } = useSession()
@@ -86,16 +87,16 @@ export function UserProfileModal({ open, onOpenChange }: UserProfileModalProps) 
         })
       } else {
         toast({
-          title: 'Error',
-          description: 'Failed to load profile data',
+          title: 'Gagal',
+          description: 'Gagal memuat data profil',
           variant: 'destructive'
         })
       }
     } catch (error) {
       console.error('Error fetching profile:', error)
       toast({
-        title: 'Error',
-        description: 'Failed to load profile data',
+        title: 'Gagal',
+        description: 'Gagal memuat data profil',
         variant: 'destructive'
       })
     } finally {
@@ -121,24 +122,24 @@ export function UserProfileModal({ open, onOpenChange }: UserProfileModalProps) 
     const newErrors = { ...EMPTY_ERRORS }
 
     if (!formData.name.trim()) {
-      newErrors.name = 'Name is required'
+      newErrors.name = 'Nama wajib diisi'
     }
 
     if (!formData.email.trim()) {
-      newErrors.email = 'Email is required'
+      newErrors.email = 'Email wajib diisi'
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-      newErrors.email = 'Please enter a valid email'
+      newErrors.email = 'Masukkan email yang valid'
     }
 
     if (wantsPasswordChange) {
       if (!formData.currentPassword) {
-        newErrors.currentPassword = 'Current password is required to change password'
+        newErrors.currentPassword = 'Isi kata sandi saat ini untuk ganti kata sandi'
       }
       if (formData.newPassword.length < 6) {
-        newErrors.newPassword = 'New password must be at least 6 characters'
+        newErrors.newPassword = 'Kata sandi baru minimal 6 karakter'
       }
       if (formData.newPassword !== formData.confirmPassword) {
-        newErrors.confirmPassword = 'Passwords do not match'
+        newErrors.confirmPassword = 'Kata sandi belum sama'
       }
     }
 
@@ -196,8 +197,8 @@ export function UserProfileModal({ open, onOpenChange }: UserProfileModalProps) 
         refreshApiData()
 
         toast({
-          title: 'Success',
-          description: formData.newPassword ? 'Profile and password updated successfully' : 'Profile updated successfully'
+          title: 'Beres!',
+          description: formData.newPassword ? 'Profil dan kata sandi berhasil diperbarui' : 'Profil berhasil diperbarui'
         })
         onOpenChange(false)
       } else {
@@ -207,16 +208,16 @@ export function UserProfileModal({ open, onOpenChange }: UserProfileModalProps) 
           setErrors(prev => ({ ...prev, currentPassword: result.error }))
         }
         toast({
-          title: 'Error',
-          description: result.error || 'Failed to update profile',
+          title: 'Gagal',
+          description: result.error || 'Gagal memperbarui profil',
           variant: 'destructive'
         })
       }
     } catch (error) {
       console.error('Error updating profile:', error)
       toast({
-        title: 'Error',
-        description: 'Failed to update profile',
+        title: 'Gagal',
+        description: 'Gagal memperbarui profil',
         variant: 'destructive'
       })
     } finally {
@@ -234,7 +235,7 @@ export function UserProfileModal({ open, onOpenChange }: UserProfileModalProps) 
   }
 
   const formatLastLogin = (dateString: string | null) =>
-    dateString ? `Last login ${formatDistanceToNow(new Date(dateString), { addSuffix: true })}` : 'Never logged in'
+    dateString ? `Terakhir masuk ${formatDistanceToNow(new Date(dateString), { addSuffix: true, locale: localeId })}` : 'Belum pernah masuk'
 
   const renderPasswordField = (
     field: 'currentPassword' | 'newPassword' | 'confirmPassword',
@@ -243,7 +244,7 @@ export function UserProfileModal({ open, onOpenChange }: UserProfileModalProps) 
     autoComplete: string,
     hint?: string
   ) => {
-    const error = errors[field] || (field === 'confirmPassword' && confirmMismatch ? 'Passwords do not match' : '')
+    const error = errors[field] || (field === 'confirmPassword' && confirmMismatch ? 'Kata sandi belum sama' : '')
     return (
       <div className="space-y-2">
         <Label htmlFor={field}>{label}</Label>
@@ -255,22 +256,22 @@ export function UserProfileModal({ open, onOpenChange }: UserProfileModalProps) 
             autoComplete={autoComplete}
             value={formData[field]}
             onChange={(e) => handleInputChange(field, e.target.value)}
-            className={`pr-10 ${error ? 'border-red-500' : ''}`}
+            className={`pr-10 ${error ? 'border-st-no' : ''}`}
             disabled={saving}
           />
           <button
             type="button"
             onClick={() => setVisible(prev => ({ ...prev, [field]: !prev[field] }))}
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
-            aria-label={visible[field] ? `Hide ${label.toLowerCase()}` : `Show ${label.toLowerCase()}`}
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-muted hover:text-muted"
+            aria-label={visible[field] ? `Sembunyikan ${label.toLowerCase()}` : `Tampilkan ${label.toLowerCase()}`}
           >
             {visible[field] ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
           </button>
         </div>
         {error ? (
-          <p className="text-sm text-red-500">{error}</p>
+          <p className="text-sm text-st-no">{error}</p>
         ) : hint ? (
-          <p className="text-sm text-gray-500">{hint}</p>
+          <p className="text-sm text-muted">{hint}</p>
         ) : null}
       </div>
     )
@@ -284,16 +285,16 @@ export function UserProfileModal({ open, onOpenChange }: UserProfileModalProps) 
         {loading || !profile ? (
           <>
             <DialogHeader className="px-6 pt-6">
-              <DialogTitle>User Profile</DialogTitle>
-              <DialogDescription className="sr-only">Your account details</DialogDescription>
+              <DialogTitle>Profil pengguna</DialogTitle>
+              <DialogDescription className="sr-only">Detail akun kamu</DialogDescription>
             </DialogHeader>
             {loading ? (
               <div className="flex items-center justify-center py-12">
-                <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
+                <Loader2 className="w-8 h-8 animate-spin text-violet" />
               </div>
             ) : (
               <div className="py-12 text-center">
-                <p className="text-gray-500">Failed to load profile data</p>
+                <p className="text-muted">Gagal memuat data profil. Tutup lalu buka lagi, ya.</p>
               </div>
             )}
           </>
@@ -306,14 +307,14 @@ export function UserProfileModal({ open, onOpenChange }: UserProfileModalProps) 
                   {displayName.charAt(0).toUpperCase()}
                 </div>
                 <div className="min-w-0 flex-1">
-                  <DialogTitle className="truncate text-lg font-bold text-gray-900">{displayName}</DialogTitle>
+                  <DialogTitle className="truncate text-lg font-bold text-ink">{displayName}</DialogTitle>
                   <DialogDescription className="truncate">{profile.email}</DialogDescription>
                 </div>
               </div>
               <div className="mt-3 flex flex-wrap items-center gap-2">
-                <StatusPill tone={STATUS_TONES[profile.status] ?? 'gray'}>{titleCase(profile.status)}</StatusPill>
-                <span className="text-sm text-gray-500">
-                  Joined {format(new Date(profile.createdAt), 'd MMM yyyy')} · {formatLastLogin(profile.lastLoginAt)}
+                <StatusPill tone={STATUS_TONES[profile.status] ?? 'gray'}>{STATUS_LABELS[profile.status] ?? 'Tidak diketahui'}</StatusPill>
+                <span className="text-sm text-muted">
+                  Bergabung {format(new Date(profile.createdAt), 'd MMM yyyy', { locale: localeId })} · {formatLastLogin(profile.lastLoginAt)}
                 </span>
               </div>
             </DialogHeader>
@@ -323,11 +324,11 @@ export function UserProfileModal({ open, onOpenChange }: UserProfileModalProps) 
                 <TabsList className="grid w-full grid-cols-2">
                   <TabsTrigger value="profile">
                     <User className="w-4 h-4" />
-                    Profile
+                    Profil
                   </TabsTrigger>
                   <TabsTrigger value="security">
                     <Lock className="w-4 h-4" />
-                    Security
+                    Keamanan
                   </TabsTrigger>
                 </TabsList>
               </div>
@@ -336,41 +337,41 @@ export function UserProfileModal({ open, onOpenChange }: UserProfileModalProps) 
               <div className="min-h-0 flex-1 overflow-y-auto px-6 py-5">
                 <TabsContent value="profile" className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="name">Full Name</Label>
+                    <Label htmlFor="name">Nama lengkap</Label>
                     <Input
                       id="name"
                       type="text"
-                      placeholder="Enter your full name"
+                      placeholder="Masukkan nama lengkap kamu"
                       autoComplete="name"
                       value={formData.name}
                       onChange={(e) => handleInputChange('name', e.target.value)}
-                      className={errors.name ? 'border-red-500' : ''}
+                      className={errors.name ? 'border-st-no' : ''}
                       disabled={saving}
                     />
-                    {errors.name && <p className="text-sm text-red-500">{errors.name}</p>}
+                    {errors.name && <p className="text-sm text-st-no">{errors.name}</p>}
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="email">Email Address</Label>
+                    <Label htmlFor="email">Alamat email</Label>
                     <Input
                       id="email"
                       type="email"
-                      placeholder="Enter your email"
+                      placeholder="Masukkan email kamu"
                       autoComplete="email"
                       value={formData.email}
                       onChange={(e) => handleInputChange('email', e.target.value)}
-                      className={errors.email ? 'border-red-500' : ''}
+                      className={errors.email ? 'border-st-no' : ''}
                       disabled={saving}
                     />
-                    {errors.email && <p className="text-sm text-red-500">{errors.email}</p>}
+                    {errors.email && <p className="text-sm text-st-no">{errors.email}</p>}
                   </div>
                 </TabsContent>
 
                 <TabsContent value="security" className="space-y-4">
-                  <p className="text-sm text-gray-500">Leave these fields blank to keep your current password.</p>
-                  {renderPasswordField('currentPassword', 'Current Password', 'Enter current password', 'current-password')}
-                  {renderPasswordField('newPassword', 'New Password', 'Enter new password', 'new-password', 'At least 6 characters')}
-                  {renderPasswordField('confirmPassword', 'Confirm New Password', 'Confirm new password', 'new-password')}
+                  <p className="text-sm text-muted">Kosongkan kolom ini kalau nggak mau ganti kata sandi.</p>
+                  {renderPasswordField('currentPassword', 'Kata sandi saat ini', 'Masukkan kata sandi saat ini', 'current-password')}
+                  {renderPasswordField('newPassword', 'Kata sandi baru', 'Masukkan kata sandi baru', 'new-password', 'Minimal 6 karakter')}
+                  {renderPasswordField('confirmPassword', 'Konfirmasi kata sandi baru', 'Ulangi kata sandi baru', 'new-password')}
                 </TabsContent>
               </div>
             </Tabs>
@@ -385,7 +386,7 @@ export function UserProfileModal({ open, onOpenChange }: UserProfileModalProps) 
                 disabled={saving}
               >
                 <X className="w-4 h-4 mr-2" />
-                Cancel
+                Batal
               </Button>
               <Button
                 type="submit"
@@ -395,12 +396,12 @@ export function UserProfileModal({ open, onOpenChange }: UserProfileModalProps) 
                 {saving ? (
                   <>
                     <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                    Saving...
+                    Menyimpan…
                   </>
                 ) : (
                   <>
                     <Save className="w-4 h-4 mr-2" />
-                    Save Changes
+                    Simpan perubahan
                   </>
                 )}
               </Button>

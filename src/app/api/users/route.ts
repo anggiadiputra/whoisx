@@ -12,7 +12,7 @@ export async function GET(request: NextRequest) {
     
     if (!session?.user) {
       return NextResponse.json(
-        { success: false, error: 'Unauthorized' },
+        { success: false, error: 'Kamu perlu masuk dulu' },
         { status: 401 }
       )
     }
@@ -20,7 +20,7 @@ export async function GET(request: NextRequest) {
     // Only ADMIN can view users
     if (session.user.role !== 'ADMIN') {
       return NextResponse.json(
-        { success: false, error: 'Forbidden - Admin access required' },
+        { success: false, error: 'Kamu nggak punya akses untuk ini' },
         { status: 403 }
       )
     }
@@ -120,7 +120,7 @@ export async function GET(request: NextRequest) {
   } catch (error) {
     console.error('Error fetching users:', error)
     return NextResponse.json(
-      { success: false, error: 'Internal server error' },
+      { success: false, error: 'Gagal memproses permintaan. Coba lagi, ya.' },
       { status: 500 }
     )
   }
@@ -133,7 +133,7 @@ export async function POST(request: NextRequest) {
     
     if (!session?.user) {
       return NextResponse.json(
-        { success: false, error: 'Unauthorized' },
+        { success: false, error: 'Kamu perlu masuk dulu' },
         { status: 401 }
       )
     }
@@ -141,7 +141,7 @@ export async function POST(request: NextRequest) {
     // Only ADMIN can create users
     if (session.user.role !== 'ADMIN') {
       return NextResponse.json(
-        { success: false, error: 'Forbidden - Admin access required' },
+        { success: false, error: 'Kamu nggak punya akses untuk ini' },
         { status: 403 }
       )
     }
@@ -152,7 +152,7 @@ export async function POST(request: NextRequest) {
     // Validation
     if (!name || !email || !role || !password) {
       return NextResponse.json(
-        { success: false, error: 'Name, email, role, and password are required' },
+        { success: false, error: 'Nama, email, peran, dan kata sandi wajib diisi' },
         { status: 400 }
       )
     }
@@ -164,7 +164,7 @@ export async function POST(request: NextRequest) {
 
     if (existingUser) {
       return NextResponse.json(
-        { success: false, error: 'Email already exists' },
+        { success: false, error: 'Email sudah ada' },
         { status: 400 }
       )
     }
@@ -202,7 +202,7 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error('❌ Error creating user:', error)
     return NextResponse.json(
-      { success: false, error: 'Internal server error' },
+      { success: false, error: 'Gagal memproses permintaan. Coba lagi, ya.' },
       { status: 500 }
     )
   }

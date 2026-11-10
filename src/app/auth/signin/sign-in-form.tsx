@@ -42,8 +42,8 @@ export function SignInForm({ registrationEnabled, turnstileSiteKey }: SignInForm
 
       if (result?.error) {
         setError(result.error === TURNSTILE_FAILED
-          ? 'Security check failed. Please try again.'
-          : 'Invalid email or password')
+          ? 'Pemeriksaan keamanan gagal. Coba lagi, ya.'
+          : 'Email atau kata sandi salah')
         // The token was spent on this attempt
         if (turnstileSiteKey) setTurnstileResetKey(key => key + 1)
       } else {
@@ -55,71 +55,72 @@ export function SignInForm({ registrationEnabled, turnstileSiteKey }: SignInForm
         }
       }
     } catch (error) {
-      setError('An error occurred. Please try again.')
+      setError('Ada yang salah. Coba lagi, ya.')
     } finally {
       setLoading(false)
     }
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+    <div className="min-h-dvh flex items-center justify-center p-4">
 
       <div className="relative w-full max-w-md mx-auto space-y-6">
         {/* Error Message */}
         {error && (
-          <div className="flex items-center space-x-2 p-4 bg-red-50 border border-red-200 rounded-lg">
-            <AlertCircle className="w-5 h-5 text-red-600" />
-            <span className="text-red-800 font-medium">{error}</span>
-          </div>
+          <p role="alert" className="flex items-start gap-2 rounded-2xl bg-rose px-4 py-3 text-sm font-bold text-st-no">
+            <AlertCircle className="mt-0.5 size-4 shrink-0" />
+            {error}
+          </p>
         )}
 
         {/* Login Card */}
         <Card>
-          <CardHeader className="space-y-2 text-center pb-6">
-            <div className="mx-auto w-12 h-12 bg-primary rounded-xl flex items-center justify-center mb-4">
-              <Globe className="w-6 h-6 text-white" />
+          <CardHeader className="space-y-2 pb-6">
+            <div className="mb-4 grid size-12 place-items-center rounded-[16px] bg-violet text-lime">
+              <Globe className="size-6" />
             </div>
-            <CardTitle className="text-2xl font-bold text-gray-900">Welcome Back</CardTitle>
-            <CardDescription className="text-gray-600">
-              Access your domain management dashboard
+            <CardTitle className="text-[36px] leading-[1.04] tracking-[-0.035em]">Halo lagi</CardTitle>
+            <CardDescription className="text-[15px] font-medium">
+              Masuk dulu buat kelola domain kamu
             </CardDescription>
           </CardHeader>
           
           <CardContent className="space-y-6">
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-2">
-                <label htmlFor="email" className="text-sm font-medium text-gray-700">
-                  Email Address
+                <label htmlFor="email" className="text-[13px] font-extrabold">
+                  Alamat email
                 </label>
                 <Input
                   id="email"
                   type="email"
-                  placeholder="Enter your email address"
+                  placeholder="Masukkan alamat email kamu"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
-                  className="h-11"
+                  
                 />
               </div>
 
               <div className="space-y-2">
-                <label htmlFor="password" className="text-sm font-medium text-gray-700">
-                  Password
+                <label htmlFor="password" className="text-[13px] font-extrabold">
+                  Kata sandi
                 </label>
                 <div className="relative">
                   <Input
                     id="password"
                     type={showPassword ? 'text' : 'password'}
-                    placeholder="Enter your password"
+                    placeholder="Masukkan kata sandi kamu"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     required
-                    className="h-11 pr-10"
+                    className="pr-12"
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 transition-colors"
+                    aria-label={showPassword ? 'Sembunyikan kata sandi' : 'Tampilkan kata sandi'}
+                    className="absolute inset-y-0 right-0 flex items-center pr-4 text-muted transition-colors hover:text-ink"
                   >
                     {showPassword ? (
                       <EyeOff className="h-5 w-5" />
@@ -141,16 +142,16 @@ export function SignInForm({ registrationEnabled, turnstileSiteKey }: SignInForm
               <Button
                 type="submit"
                 disabled={loading || (!!turnstileSiteKey && !turnstileToken)}
-                className="w-full"
+                className="w-full shadow-float"
               >
                 {loading ? (
                   <>
                     <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                    Signing in...
+                    Sedang masuk…
                   </>
                 ) : (
                   <>
-                    Sign In
+                    Masuk
                     <ArrowRight className="w-4 h-4 ml-2" />
                   </>
                 )}
@@ -161,9 +162,9 @@ export function SignInForm({ registrationEnabled, turnstileSiteKey }: SignInForm
               <div className="text-center">
                 <Link
                   href="/auth/signup"
-                  className="text-sm text-gray-600 hover:text-blue-600 transition-colors"
+                  className="text-[13px] font-semibold text-muted transition-colors hover:text-ink"
                 >
-                  Don't have an account? <span className="font-semibold text-blue-600">Create one now</span>
+                  Belum punya akun? <span className="font-extrabold text-violet">Daftar sekarang</span>
                 </Link>
               </div>
             )}

@@ -51,28 +51,28 @@ export function SignUpForm() {
 
   const validateForm = () => {
     if (!formData.name.trim()) {
-      setError('Name is required')
+      setError('Nama wajib diisi')
       return false
     }
 
     if (!formData.email.trim()) {
-      setError('Email is required')
+      setError('Email wajib diisi')
       return false
     }
 
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
     if (!emailRegex.test(formData.email)) {
-      setError('Please enter a valid email address')
+      setError('Masukkan alamat email yang valid')
       return false
     }
 
     if (formData.password.length < 8) {
-      setError('Password must be at least 8 characters long')
+      setError('Kata sandi minimal 8 karakter')
       return false
     }
 
     if (formData.password !== formData.confirmPassword) {
-      setError('Passwords do not match')
+      setError('Kata sandi belum sama')
       return false
     }
 
@@ -106,10 +106,10 @@ export function SignUpForm() {
       const data = await response.json()
 
       if (!response.ok) {
-        throw new Error(data.error || 'Registration failed')
+        throw new Error(data.error || 'Pendaftaran gagal')
       }
 
-      setSuccess('Account created successfully! Redirecting to sign in...')
+      setSuccess('Akun berhasil dibuat! Mengarahkan ke halaman masuk…')
       
       // Redirect to sign in page after 2 seconds
       setTimeout(() => {
@@ -117,49 +117,49 @@ export function SignUpForm() {
       }, 2000)
 
     } catch (error: any) {
-      setError(error.message || 'An error occurred during registration')
+      setError(error.message || 'Ada yang salah saat mendaftar. Coba lagi, ya.')
     } finally {
       setLoading(false)
     }
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+    <div className="min-h-dvh bg-cream flex items-center justify-center p-4">
 
       <div className="relative w-full max-w-6xl mx-auto grid lg:grid-cols-2 gap-8 items-center">
         {/* Left side - Branding */}
         <div className="hidden lg:block space-y-8">
           <div className="space-y-6">
             <div className="flex items-center space-x-4">
-              <div className="w-12 h-12 bg-primary rounded-xl flex items-center justify-center">
+              <div className="w-12 h-12 bg-primary rounded-2xl flex items-center justify-center">
                 <Globe className="w-6 h-6 text-white" />
               </div>
               <div>
-                <h1 className="text-3xl font-bold text-gray-900">
+                <h1 className="text-3xl font-bold text-ink">
                   {appName}
                 </h1>
-                <p className="text-gray-600 font-medium">Professional Portfolio Management</p>
+                <p className="text-muted font-medium">Kelola portofolio secara profesional</p>
               </div>
             </div>
             
-            <p className="text-xl text-gray-700 leading-relaxed max-w-lg">
-              Join thousands of professionals who trust our platform for comprehensive domain management, automated monitoring, and intelligent analytics.
+            <p className="text-xl text-ink leading-relaxed max-w-lg">
+              Gabung bareng ribuan profesional yang mengandalkan platform ini buat kelola domain, pemantauan otomatis, dan analitik cerdas.
             </p>
           </div>
           
           {/* Benefits List */}
           <div className="space-y-4">
             {[
-              { icon: Gift, text: "Free 30-day trial with all features" },
-              { icon: Receipt, text: "No setup fees or hidden costs" },
-              { icon: Headphones, text: "24/7 customer support" },
-              { icon: Undo2, text: "Cancel anytime, no questions asked" }
+              { icon: Gift, text: "Coba gratis 30 hari dengan semua fitur" },
+              { icon: Receipt, text: "Tanpa biaya pemasangan atau biaya tersembunyi" },
+              { icon: Headphones, text: "Dukungan pelanggan 24 jam" },
+              { icon: Undo2, text: "Bisa berhenti kapan saja, tanpa ribet" }
             ].map((benefit, index) => (
               <div key={index} className="flex items-center space-x-3 group">
-                <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center group-hover:bg-green-200 transition-colors">
-                  <benefit.icon className="w-4 h-4 text-green-600" />
+                <div className="w-8 h-8 bg-mint rounded-full flex items-center justify-center group-hover:bg-mint transition-colors">
+                  <benefit.icon className="w-4 h-4 text-on-mint" />
                 </div>
-                <span className="text-gray-700 font-medium">{benefit.text}</span>
+                <span className="text-ink font-medium">{benefit.text}</span>
               </div>
             ))}
           </div>
@@ -167,13 +167,13 @@ export function SignUpForm() {
           {/* Trust Indicators */}
           <div className="grid grid-cols-3 gap-6 pt-8">
             {[
-              { value: "10K+", label: "Active Users" },
-              { value: "500K+", label: "Domains Managed" },
-              { value: "99.9%", label: "Uptime SLA" }
+              { value: "10K+", label: "Pengguna aktif" },
+              { value: "500K+", label: "Domain dikelola" },
+              { value: "99.9%", label: "SLA uptime" }
             ].map((stat, index) => (
               <div key={index} className="text-center">
-                <div className="text-2xl font-bold text-gray-900">{stat.value}</div>
-                <div className="text-sm text-gray-600">{stat.label}</div>
+                <div className="text-2xl font-bold text-ink">{stat.value}</div>
+                <div className="text-sm text-muted">{stat.label}</div>
               </div>
             ))}
           </div>
@@ -184,54 +184,54 @@ export function SignUpForm() {
           {/* Mobile Header */}
           <div className="text-center lg:hidden">
             <div className="flex items-center justify-center space-x-3 mb-6">
-              <div className="w-10 h-10 bg-primary rounded-xl flex items-center justify-center">
+              <div className="w-10 h-10 bg-primary rounded-2xl flex items-center justify-center">
                 <Globe className="w-5 h-5 text-white" />
               </div>
               <div className="text-left">
-                <h1 className="text-2xl font-bold text-gray-900">{appName}</h1>
-                <p className="text-sm text-gray-600">Professional Management</p>
+                <h1 className="text-2xl font-bold text-ink">{appName}</h1>
+                <p className="text-sm text-muted">Pengelolaan profesional</p>
               </div>
             </div>
           </div>
 
           {/* Success/Error Messages */}
           {success && (
-            <div className="flex items-center space-x-2 p-4 bg-green-50 border border-green-200 rounded-lg">
-              <CheckCircle className="w-5 h-5 text-green-600" />
-              <span className="text-green-800 font-medium">{success}</span>
+            <div className="flex items-center space-x-2 p-4 bg-mint border border-mint rounded-2xl">
+              <CheckCircle className="w-5 h-5 text-on-mint" />
+              <span className="text-on-mint font-medium">{success}</span>
             </div>
           )}
 
           {error && (
-            <div className="flex items-center space-x-2 p-4 bg-red-50 border border-red-200 rounded-lg">
-              <AlertCircle className="w-5 h-5 text-red-600" />
-              <span className="text-red-800 font-medium">{error}</span>
+            <div className="flex items-center space-x-2 p-4 bg-rose border border-rose rounded-2xl">
+              <AlertCircle className="w-5 h-5 text-st-no" />
+              <span className="text-st-no font-medium">{error}</span>
             </div>
           )}
 
           {/* Signup Card */}
           <Card>
             <CardHeader className="space-y-2 text-center pb-6">
-              <div className="mx-auto w-12 h-12 bg-primary rounded-xl flex items-center justify-center mb-4">
+              <div className="mx-auto w-12 h-12 bg-primary rounded-2xl flex items-center justify-center mb-4">
                 <UserPlus className="w-6 h-6 text-white" />
               </div>
-              <CardTitle className="text-2xl font-bold text-gray-900">Create Account</CardTitle>
-              <CardDescription className="text-gray-600">
-                Start managing your domains professionally
+              <CardTitle className="text-2xl font-bold text-ink">Buat akun</CardTitle>
+              <CardDescription className="text-muted">
+                Yuk, mulai kelola domain kamu dengan rapi
               </CardDescription>
             </CardHeader>
             
             <CardContent className="space-y-6">
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div className="space-y-2">
-                  <label htmlFor="name" className="text-sm font-medium text-gray-700">
-                    Full Name
+                  <label htmlFor="name" className="text-sm font-medium text-ink">
+                    Nama lengkap
                   </label>
                   <Input
                     id="name"
                     name="name"
                     type="text"
-                    placeholder="Enter your full name"
+                    placeholder="Masukkan nama lengkap kamu"
                     value={formData.name}
                     onChange={handleChange}
                     required
@@ -240,14 +240,14 @@ export function SignUpForm() {
                 </div>
 
                 <div className="space-y-2">
-                  <label htmlFor="email" className="text-sm font-medium text-gray-700">
-                    Email Address
+                  <label htmlFor="email" className="text-sm font-medium text-ink">
+                    Alamat email
                   </label>
                   <Input
                     id="email"
                     name="email"
                     type="email"
-                    placeholder="Enter your email address"
+                    placeholder="Masukkan alamat email kamu"
                     value={formData.email}
                     onChange={handleChange}
                     required
@@ -256,15 +256,15 @@ export function SignUpForm() {
                 </div>
 
                 <div className="space-y-2">
-                  <label htmlFor="password" className="text-sm font-medium text-gray-700">
-                    Password
+                  <label htmlFor="password" className="text-sm font-medium text-ink">
+                    Kata sandi
                   </label>
                   <div className="relative">
                     <Input
                       id="password"
                       name="password"
                       type={showPassword ? 'text' : 'password'}
-                      placeholder="Create a strong password"
+                      placeholder="Buat kata sandi yang kuat"
                       value={formData.password}
                       onChange={handleChange}
                       required
@@ -273,7 +273,7 @@ export function SignUpForm() {
                     <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
-                      className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 transition-colors"
+                      className="absolute inset-y-0 right-0 pr-3 flex items-center text-muted hover:text-muted transition-colors"
                     >
                       {showPassword ? (
                         <EyeOff className="h-5 w-5" />
@@ -290,14 +290,14 @@ export function SignUpForm() {
                         {[1, 2, 3, 4, 5].map((level) => (
                           <div
                             key={level}
-                            className={`h-1 flex-1 rounded ${
+                            className={`h-1 flex-1 rounded-lg ${
                               level <= passwordStrength.score
                                 ? passwordStrength.score <= 2
-                                  ? 'bg-red-400'
+                                  ? 'bg-st-no'
                                   : passwordStrength.score <= 3
-                                  ? 'bg-yellow-400'
-                                  : 'bg-green-400'
-                                : 'bg-gray-200'
+                                  ? 'bg-st-wait'
+                                  : 'bg-on-mint'
+                                : 'bg-sand'
                             }`}
                           />
                         ))}
@@ -306,16 +306,16 @@ export function SignUpForm() {
                         {Object.entries(passwordStrength.checks).map(([key, passed]) => (
                           <div key={key} className="flex items-center space-x-1">
                             {passed ? (
-                              <Check className="w-3 h-3 text-green-600" />
+                              <Check className="w-3 h-3 text-on-mint" />
                             ) : (
-                              <X className="w-3 h-3 text-gray-400" />
+                              <X className="w-3 h-3 text-muted" />
                             )}
-                            <span className={passed ? 'text-green-600' : 'text-gray-500'}>
-                              {key === 'length' && '8+ chars'}
-                              {key === 'uppercase' && 'Uppercase'}
-                              {key === 'lowercase' && 'Lowercase'}
-                              {key === 'number' && 'Number'}
-                              {key === 'special' && 'Special'}
+                            <span className={passed ? 'text-on-mint' : 'text-muted'}>
+                              {key === 'length' && '8+ karakter'}
+                              {key === 'uppercase' && 'Huruf besar'}
+                              {key === 'lowercase' && 'Huruf kecil'}
+                              {key === 'number' && 'Angka'}
+                              {key === 'special' && 'Simbol'}
                             </span>
                           </div>
                         ))}
@@ -325,15 +325,15 @@ export function SignUpForm() {
                 </div>
 
                 <div className="space-y-2">
-                  <label htmlFor="confirmPassword" className="text-sm font-medium text-gray-700">
-                    Confirm Password
+                  <label htmlFor="confirmPassword" className="text-sm font-medium text-ink">
+                    Konfirmasi kata sandi
                   </label>
                   <div className="relative">
                     <Input
                       id="confirmPassword"
                       name="confirmPassword"
                       type={showConfirmPassword ? 'text' : 'password'}
-                      placeholder="Confirm your password"
+                      placeholder="Ulangi kata sandi kamu"
                       value={formData.confirmPassword}
                       onChange={handleChange}
                       required
@@ -342,7 +342,7 @@ export function SignUpForm() {
                     <button
                       type="button"
                       onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                      className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 transition-colors"
+                      className="absolute inset-y-0 right-0 pr-3 flex items-center text-muted hover:text-muted transition-colors"
                     >
                       {showConfirmPassword ? (
                         <EyeOff className="h-5 w-5" />
@@ -361,11 +361,11 @@ export function SignUpForm() {
                   {loading ? (
                     <>
                       <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                      Creating Account...
+                      Membuat akun…
                     </>
                   ) : (
                     <>
-                      Create Account
+                      Buat akun
                       <ArrowRight className="w-4 h-4 ml-2" />
                     </>
                   )}
@@ -377,21 +377,21 @@ export function SignUpForm() {
               <div className="text-center">
                 <Link
                   href="/auth/signin"
-                  className="text-sm text-gray-600 hover:text-blue-600 transition-colors"
+                  className="text-sm text-muted hover:text-violet transition-colors"
                 >
-                  Already have an account? <span className="font-semibold text-blue-600">Sign in here</span>
+                  Sudah punya akun? <span className="font-semibold text-violet">Masuk di sini</span>
                 </Link>
               </div>
             </CardContent>
           </Card>
 
           {/* Terms */}
-          <div className="text-center text-xs text-gray-500 space-y-2">
-            <p>By creating an account, you agree to our</p>
+          <div className="text-center text-xs text-muted space-y-2">
+            <p>Dengan membuat akun, kamu setuju dengan</p>
             <div className="space-x-4">
-              <Link href="#" className="text-blue-600 hover:underline">Terms of Service</Link>
+              <Link href="#" className="text-violet hover:underline">Ketentuan layanan</Link>
               <span>•</span>
-              <Link href="#" className="text-blue-600 hover:underline">Privacy Policy</Link>
+              <Link href="#" className="text-violet hover:underline">Kebijakan privasi</Link>
             </div>
           </div>
         </div>

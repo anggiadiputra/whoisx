@@ -7,7 +7,7 @@ export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions)
     if (!session?.user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+      return NextResponse.json({ error: 'Kamu perlu masuk dulu' }, { status: 401 })
     }
 
     const { searchParams } = new URL(request.url)
@@ -41,7 +41,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ activities })
   } catch (error) {
     console.error('Error fetching activities:', error)
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+    return NextResponse.json({ error: 'Gagal memproses permintaan. Coba lagi, ya.' }, { status: 500 })
   }
 }
 
@@ -49,7 +49,7 @@ export async function POST(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions)
     if (!session?.user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+      return NextResponse.json({ error: 'Kamu perlu masuk dulu' }, { status: 401 })
     }
 
     const body = await request.json()
@@ -79,6 +79,6 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ activity })
   } catch (error) {
     console.error('Error creating activity:', error)
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+    return NextResponse.json({ error: 'Gagal memproses permintaan. Coba lagi, ya.' }, { status: 500 })
   }
 }

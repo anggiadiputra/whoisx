@@ -15,8 +15,8 @@ function createQueryClient() {
     queryCache: new QueryCache({
       onError: (error) => {
         toast({
-          title: "Error Loading Data",
-          description: error.message || 'Unable to connect to server. Please check your connection.',
+          title: "Gagal memuat data",
+          description: error.message || 'Nggak bisa terhubung ke server. Cek koneksi kamu, ya.',
           variant: "destructive",
         })
       },

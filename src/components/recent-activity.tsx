@@ -2,10 +2,10 @@
 
 import { useState, useEffect } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { RefreshCw, Globe, Server, Users, LogIn, LogOut, AppWindow } from 'lucide-react'
 import { formatDistanceToNow } from 'date-fns'
+import { id as localeId } from 'date-fns/locale'
 
 interface Activity {
   id: string
@@ -84,36 +84,37 @@ export function RecentActivity() {
   const getActivityColor = (type: string) => {
     switch (type) {
       case 'USER_LOGIN':
-        return 'bg-green-500'
+        return 'bg-mint text-on-mint'
       case 'USER_LOGOUT':
-        return 'bg-gray-500'
+        return 'bg-sand text-st-draft'
       case 'DOMAIN_ADDED':
       case 'SERVER_ADDED':
       case 'WEBSITE_ADDED':
       case 'USER_CREATED':
-        return 'bg-blue-500'
+        return 'bg-lilac text-violet'
       case 'DOMAIN_UPDATED':
       case 'SERVER_UPDATED':
       case 'WEBSITE_UPDATED':
       case 'USER_UPDATED':
-        return 'bg-orange-500'
+        return 'bg-peach text-on-peach'
       case 'DOMAIN_DELETED':
       case 'SERVER_DELETED':
       case 'WEBSITE_DELETED':
       case 'USER_DELETED':
-        return 'bg-red-500'
+        return 'bg-rose text-st-no'
       default:
-        return 'bg-gray-500'
+        return 'bg-sand text-st-draft'
     }
   }
 
   const formatTimeAgo = (dateString: string) => {
     try {
       return formatDistanceToNow(new Date(dateString), { 
-        addSuffix: true
+        addSuffix: true,
+        locale: localeId,
       })
     } catch (error) {
-      return 'Unknown time'
+      return 'Waktu tidak diketahui'
     }
   }
 
@@ -121,16 +122,16 @@ export function RecentActivity() {
     return (
       <Card>
         <CardHeader>
-          <CardTitle className="text-lg">Recent Activity</CardTitle>
+          <CardTitle>Aktivitas terbaru</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
             {[1, 2, 3].map((i) => (
-              <div key={i} className="flex items-start space-x-3">
-                <div className="w-2 h-2 bg-gray-300 rounded-full mt-2 animate-pulse"></div>
-                <div className="flex-1 min-w-0">
-                  <div className="h-4 bg-gray-200 rounded animate-pulse mb-1"></div>
-                  <div className="h-3 bg-gray-100 rounded animate-pulse w-16"></div>
+              <div key={i} className="flex items-center gap-3">
+                <div className="size-11 shrink-0 rounded-[16px] bg-sand motion-safe:animate-pulse"></div>
+                <div className="min-w-0 flex-1">
+                  <div className="mb-1.5 h-4 rounded-full bg-sand motion-safe:animate-pulse"></div>
+                  <div className="h-3 w-16 rounded-full bg-cream motion-safe:animate-pulse"></div>
                 </div>
               </div>
             ))}
@@ -144,22 +145,24 @@ export function RecentActivity() {
     <Card>
       <CardHeader>
         <div className="flex items-center justify-between">
-          <CardTitle className="text-lg">Recent Activity</CardTitle>
+          <CardTitle>Aktivitas terbaru</CardTitle>
           <Button
-            variant="ghost"
-            size="sm"
+            variant="secondary"
+            size="icon"
             onClick={handleRefresh}
             disabled={refreshing}
+            aria-label="Muat ulang aktivitas"
           >
             <RefreshCw className={`w-4 h-4 ${refreshing ? 'animate-spin' : ''}`} />
           </Button>
         </div>
       </CardHeader>
       <CardContent>
-        <div className="space-y-4">
+        <div className="divide-y divide-sand">
           {activities.length === 0 ? (
-            <div className="text-center py-4">
-              <p className="text-sm text-gray-500">No recent activity</p>
+            <div className="flex items-center gap-4 rounded-card border-2 border-dashed border-ink/15 p-4">
+              <span className="grid size-12 shrink-0 place-items-center rounded-[16px] bg-cream text-2xl" aria-hidden="true">🌤️</span>
+              <p className="text-[15px] font-extrabold">Belum ada aktivitas</p>
             </div>
           ) : (
             activities.map((activity) => {
@@ -167,26 +170,16 @@ export function RecentActivity() {
               const colorClass = getActivityColor(activity.type)
               
               return (
-                <div key={activity.id} className="flex items-start space-x-3">
-                  <div className={`w-2 h-2 ${colorClass} rounded-full mt-2`}></div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center space-x-2">
-                      <IconComponent className="w-3 h-3 text-gray-400" />
-                      <p className="text-sm text-gray-900">{activity.description}</p>
-                    </div>
-                    <div className="flex items-center space-x-2 mt-1">
-                      <p className="text-xs text-gray-500">
-                        {formatTimeAgo(activity.createdAt)}
-                      </p>
-                      {activity.user && (
-                        <>
-                          <span className="text-xs text-gray-300">•</span>
-                          <Badge variant="outline" className="text-xs">
-                            {activity.user.name || activity.user.email}
-                          </Badge>
-                        </>
-                      )}
-                    </div>
+                <div key={activity.id} className="flex items-center gap-3 py-3 first:pt-0 last:pb-0">
+                  <span className={`grid size-11 shrink-0 place-items-center rounded-[16px] ${colorClass}`}>
+                    <IconComponent className="size-5" />
+                  </span>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-[15px] font-extrabold leading-snug">{activity.description}</p>
+                    <p className="truncate text-[13px] font-semibold text-muted">
+                      {formatTimeAgo(activity.createdAt)}
+                      {activity.user && ` · ${activity.user.name || activity.user.email}`}
+                    </p>
                   </div>
                 </div>
               )

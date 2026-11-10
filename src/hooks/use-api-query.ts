@@ -7,7 +7,7 @@ import { keepPreviousData, useQuery, useQueryClient } from '@tanstack/react-quer
 async function fetchJson<T>(url: string): Promise<T> {
   const response = await fetch(url, { credentials: 'include' })
   if (!response.ok) {
-    throw new Error(`Failed to load data (${response.status})`)
+    throw new Error(`Gagal memuat data (${response.status})`)
   }
   return response.json()
 }

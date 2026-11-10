@@ -213,11 +213,11 @@ export default function HomePage() {
 
   if (status === 'unauthenticated') {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-dvh bg-cream flex items-center justify-center">
         <Card className="w-full max-w-md">
           <CardHeader className="text-center">
-            <CardTitle>Access Denied</CardTitle>
-            <CardDescription>Please sign in to access the dashboard</CardDescription>
+            <CardTitle>Akses ditolak</CardTitle>
+            <CardDescription>Masuk dulu untuk membuka beranda</CardDescription>
           </CardHeader>
         </Card>
       </div>
@@ -233,18 +233,18 @@ export default function HomePage() {
 
 
   const getExpiryStatus = (daysToExpiry: number | null) => {
-    if (daysToExpiry === undefined || daysToExpiry === null || daysToExpiry < 0) return { status: 'inactive', color: 'bg-red-600', text: 'Tidak Aktif' }
+    if (daysToExpiry === undefined || daysToExpiry === null || daysToExpiry < 0) return { status: 'inactive', color: 'bg-red-600', text: 'Nonaktif' }
     return { status: 'active', color: 'bg-green-600', text: 'Aktif' }
   }
 
   // Domain validation function
   const validateDomain = (domain: string): string | null => {
-    if (!domain) return 'Domain is required'
-    if (domain.length < 3) return 'Domain must be at least 3 characters'
+    if (!domain) return 'Nama domain wajib diisi'
+    if (domain.length < 3) return 'Nama domain minimal 3 karakter'
     
     // Basic domain validation regex
     const domainRegex = /^[a-zA-Z0-9]([a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(\.[a-zA-Z0-9]([a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/
-    if (!domainRegex.test(domain)) return 'Please enter a valid domain name'
+    if (!domainRegex.test(domain)) return 'Masukkan nama domain yang valid'
     
     return null
   }
@@ -256,7 +256,7 @@ export default function HomePage() {
     const domainError = validateDomain(newDomain.domain.trim())
     if (domainError) {
       toast({
-        title: "Validation Error",
+        title: "Cek lagi, ya",
         description: domainError,
         variant: "destructive",
       })
@@ -282,8 +282,8 @@ export default function HomePage() {
 
       if (response.ok) {
         toast({
-          title: "Success!",
-          description: `Domain ${newDomain.domain} has been added successfully.`,
+          title: "Beres!",
+          description: `Domain ${newDomain.domain} berhasil ditambahkan.`,
         })
         setNewDomain({ domain: '', renewalPrice: '', notes: '' })
         setShowAddDomain(false)
@@ -291,16 +291,16 @@ export default function HomePage() {
       } else {
         // Handle API errors
         toast({
-          title: "Error Adding Domain",
-          description: data.error || 'Failed to add domain. Please try again.',
+          title: "Gagal menambah domain",
+          description: data.error || 'Domain gagal ditambahkan. Coba lagi, ya.',
           variant: "destructive",
         })
       }
     } catch (error) {
       console.error('Error adding domain:', error)
       toast({
-        title: "Network Error",
-        description: 'Unable to connect to server. Please check your connection.',
+        title: "Koneksi bermasalah",
+        description: 'Nggak bisa terhubung ke server. Cek koneksi kamu dulu.',
         variant: "destructive",
       })
     } finally {
@@ -310,53 +310,53 @@ export default function HomePage() {
 
   const statsCards = [
     {
-      title: 'Total Domains',
+      title: 'Total domain',
       value: stats.total,
       icon: Globe,
-      color: 'text-blue-600',
-      bgColor: 'bg-blue-50'
+      color: 'text-violet',
+      bgColor: 'bg-lilac'
     },
     {
-      title: 'Available to Order',
+      title: 'Bisa dipesan',
       value: domains.filter(d => d.daysToExpiry === null).length,
       icon: ShoppingCart,
-      color: 'text-blue-600',
-      bgColor: 'bg-blue-50'
+      color: 'text-on-sky',
+      bgColor: 'bg-sky'
     },
     {
-      title: 'Expiring Soon',
+      title: 'Segera kedaluwarsa',
       value: stats.expiring30,
       icon: CalendarClock,
-      color: 'text-orange-600',
-      bgColor: 'bg-orange-50'
+      color: 'text-on-peach',
+      bgColor: 'bg-peach'
     },
     {
-      title: 'Sudah Expired',
+      title: 'Sudah kedaluwarsa',
       value: stats.expired || 0,
       icon: CalendarX,
-      color: 'text-red-600',
-      bgColor: 'bg-red-50'
+      color: 'text-st-no',
+      bgColor: 'bg-rose'
     }
   ]
 
   return (
     <div>
-      <div className="container mx-auto px-4 py-8 space-y-8">
+      <div className="space-y-6 lg:space-y-8">
         {/* Header */}
         <PageHeader
-          title="Dashboard"
-          description={`Welcome back, ${session?.user?.name || session?.user?.email}`}
+          title="Beranda"
+          description={`Selamat datang lagi, ${session?.user?.name || session?.user?.email}`}
           actions={
             <>
               <Button variant="outline" onClick={fetchDomains} disabled={domainsQuery.isFetching}>
                 <RefreshCw className={`w-4 h-4 mr-2 ${domainsQuery.isFetching ? 'animate-spin' : ''}`} />
-                Refresh
+                Muat ulang
               </Button>
               {canManageDomains && (
                 <Button asChild>
                   <NextLink href="/domains?add=1">
                     <Plus className="w-4 h-4 mr-2" />
-                    Add Domain
+                    Tambah domain
                   </NextLink>
                 </Button>
               )}
@@ -365,7 +365,7 @@ export default function HomePage() {
         />
 
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
+        <div className="grid grid-cols-2 gap-4 lg:gap-5 xl:grid-cols-4">
           {statsCards.map((stat, index) => (
             <StatCard key={index} title={stat.title} value={stat.value} icon={stat.icon} color={stat.color} bgColor={stat.bgColor} />
           ))}
@@ -381,15 +381,15 @@ export default function HomePage() {
               <CardHeader>
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-4 sm:space-y-0">
                   <div>
-                    <CardTitle className="text-xl font-semibold">Domain Portfolio</CardTitle>
-                    <CardDescription>Manage and monitor your domain collection</CardDescription>
+                    <CardTitle>Portofolio domain</CardTitle>
+                    <CardDescription>Kelola dan pantau semua domain kamu</CardDescription>
                   </div>
                   
                   <div className="flex items-center space-x-2">
                     <div className="relative w-full sm:w-auto">
-                      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted w-4 h-4" />
                       <Input
-                        placeholder="Search domains..."
+                        placeholder="Cari domain…"
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
                         className="pl-10 w-full sm:w-64"
@@ -402,27 +402,28 @@ export default function HomePage() {
                 <Tabs value={filterExpiring || 'all'} onValueChange={(value) => setFilterExpiring(value === 'all' ? null : value)}>
                   <TabsList className="grid w-full grid-cols-4">
                     <TabsTrigger value="all">
-                      All<span className="hidden sm:inline">&nbsp;Domains</span>
+                      Semua<span className="hidden sm:inline">&nbsp;domain</span>
                     </TabsTrigger>
-                    <TabsTrigger value="30">30 Days</TabsTrigger>
-                    <TabsTrigger value="7">7 Days</TabsTrigger>
-                    <TabsTrigger value="1">1 Day</TabsTrigger>
+                    <TabsTrigger value="30">30 hari</TabsTrigger>
+                    <TabsTrigger value="7">7 hari</TabsTrigger>
+                    <TabsTrigger value="1">1 hari</TabsTrigger>
                   </TabsList>
                 </Tabs>
               </CardHeader>
               
               <CardContent>
                 {filteredDomains.length === 0 ? (
-                  <div className="text-center py-12">
-                    <Globe className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                    <h3 className="text-lg font-medium text-gray-900 mb-2">No domains found</h3>
-                    <p className="text-gray-600 mb-4">
-                      {searchTerm || filterExpiring ? 'Try adjusting your search or filters' : 'Get started by adding your first domain'}
-                    </p>
+                  <div className="flex items-center gap-4 rounded-card border-2 border-dashed border-ink/15 p-4">
+                    <span className="grid size-12 shrink-0 place-items-center rounded-[16px] bg-cream text-2xl" aria-hidden="true">🌤️</span>
+                    <div className="min-w-0 flex-1">
+                      <p className="text-[15px] font-extrabold">Tidak ada domain</p>
+                      <p className="text-[13px] font-medium text-muted">
+                        {searchTerm || filterExpiring ? 'Coba ubah pencarian atau filternya' : 'Yuk, tambah domain pertama kamu'}
+                      </p>
+                    </div>
                     {canManageDomains && !searchTerm && !filterExpiring && (
-                      <Button onClick={() => setShowAddDomain(true)}>
-                        <Plus className="w-4 h-4 mr-2" />
-                        Add Domain
+                      <Button size="icon" className="shrink-0" onClick={() => setShowAddDomain(true)} aria-label="Tambah domain">
+                        <Plus className="size-5" strokeWidth={2.6} />
                       </Button>
                     )}
                   </div>
@@ -450,14 +451,14 @@ export default function HomePage() {
                                   checked={selection.pageAllSelected}
                                   indeterminate={selection.pageSomeSelected}
                                   onChange={selection.togglePage}
-                                  label="Select all domains on this page"
+                                  label="Pilih semua domain di halaman ini"
                                 />
                               </TableHead>
                             )}
                             <TableHead>Domain</TableHead>
                             <TableHead>Status</TableHead>
-                            <TableHead>Expiry</TableHead>
-                            {canViewPrices && <TableHead>Price</TableHead>}
+                            <TableHead>Kedaluwarsa</TableHead>
+                            {canViewPrices && <TableHead>Harga</TableHead>}
                             <TableHead>Server</TableHead>
                           </TableRow>
                         </TableHeader>
@@ -465,30 +466,30 @@ export default function HomePage() {
                         {paginatedDomains.map((domain) => {
                           const expiryStatus = getExpiryStatus(domain.daysToExpiry)
                           return (
-                            <TableRow key={domain.id} className={selection.isSelected(domain.id) ? 'bg-blue-50/60' : 'hover:bg-gray-50'}>
+                            <TableRow key={domain.id} className={selection.isSelected(domain.id) ? 'bg-lilac/60' : ''}>
                               {canManageDomains && (
                                 <TableCell className="w-10 pr-0">
                                   <SelectCheckbox
                                     checked={selection.isSelected(domain.id)}
                                     onChange={(checked) => selection.toggle(domain.id, checked)}
-                                    label={`Select ${domain.domain}`}
+                                    label={`Pilih ${domain.domain}`}
                                   />
                                 </TableCell>
                               )}
                               {/* Wraps so a long registrar name does not push the table past the card */}
                               <TableCell className="whitespace-normal">
                                 <div className="flex items-center space-x-3">
-                                  <div className="w-8 h-8 shrink-0 bg-blue-100 rounded-lg flex items-center justify-center">
-                                    <Globe className="w-4 h-4 text-blue-600" />
+                                  <div className="grid size-11 shrink-0 place-items-center rounded-[16px] bg-lilac">
+                                    <Globe className="size-5 text-violet" />
                                   </div>
                                   <div>
-                                    <div className="font-medium text-gray-900">{domain.domain}</div>
+                                    <div className="text-[15px] font-extrabold leading-snug">{domain.domain}</div>
                                     {/* Registrar sits under the name (as on the Domains page) so the table fits beside the sidebar */}
-                                    <div className="text-sm text-gray-500">
-                                      {domain.realRegistrarName || domain.registrar || 'Unknown registrar'}
+                                    <div className="text-sm text-muted">
+                                      {domain.realRegistrarName || domain.registrar || 'Registrar tidak diketahui'}
                                     </div>
                                     {domain.notes && (
-                                      <div className="text-sm text-gray-500 truncate max-w-[200px]">
+                                      <div className="text-sm text-muted truncate max-w-[200px]">
                                         {domain.notes}
                                       </div>
                                     )}
@@ -505,16 +506,16 @@ export default function HomePage() {
                                       <div className="font-medium">
                                         {formatIndonesianDate(domain.expiryDate)}
                                       </div>
-                                      <div className="text-gray-500">
+                                      <div className="text-muted">
                                         {domain.daysToExpiry !== null ? (
-                                          `${domain.daysToExpiry} days`
+                                          `${domain.daysToExpiry} hari`
                                         ) : (
-                                          'Unknown'
+                                          'Tidak diketahui'
                                         )}
                                       </div>
                                     </>
                                   ) : (
-                                    <span className="text-gray-400">Not available</span>
+                                    <span className="text-muted">Tidak tersedia</span>
                                   )}
                                 </div>
                               </TableCell>
@@ -523,27 +524,27 @@ export default function HomePage() {
                                   {domain.renewalPrice ? (
                                     <span className="font-medium">Rp {parseInt(domain.renewalPrice.toString()).toLocaleString('id-ID')}</span>
                                   ) : (
-                                    <span className="text-gray-400">-</span>
+                                    <span className="text-muted">-</span>
                                   )}
                                 </TableCell>
                               )}
                               <TableCell>
                                 {domain.server ? (
                                   <div className="flex items-center space-x-2">
-                                    <div className="w-5 h-5 bg-green-100 rounded flex items-center justify-center">
+                                    <div className="grid size-7 shrink-0 place-items-center rounded-full bg-mint">
                                       {domain.server.serverType === 'VPS' ? (
-                                        <Server className="w-3 h-3 text-green-600" />
+                                        <Server className="w-3 h-3 text-on-mint" />
                                       ) : (
-                                        <Cloud className="w-3 h-3 text-green-600" />
+                                        <Cloud className="w-3 h-3 text-on-mint" />
                                       )}
                                     </div>
                                     <div className="text-sm">
                                       <div className="font-medium">{domain.server.serverName}</div>
-                                      <div className="text-xs text-gray-500">{domain.server.provider}</div>
+                                      <div className="text-xs text-muted">{domain.server.provider}</div>
                                     </div>
                                   </div>
                                 ) : (
-                                  <span className="text-gray-400 text-sm">Not assigned</span>
+                                  <span className="text-muted text-sm">Belum dipasang</span>
                                 )}
                               </TableCell>
                             </TableRow>
@@ -558,7 +559,7 @@ export default function HomePage() {
                       {paginatedDomains.map((domain) => {
                         const expiryStatus = getExpiryStatus(domain.daysToExpiry)
                         return (
-                          <Card key={domain.id} className="p-4">
+                          <Card key={domain.id} className="rounded-card border-2 border-sand p-4 shadow-none">
                             <div className="space-y-3">
                               {/* Header */}
                               <div className="flex items-center justify-between">
@@ -567,16 +568,16 @@ export default function HomePage() {
                                     <SelectCheckbox
                                       checked={selection.isSelected(domain.id)}
                                       onChange={(checked) => selection.toggle(domain.id, checked)}
-                                      label={`Select ${domain.domain}`}
+                                      label={`Pilih ${domain.domain}`}
                                     />
                                   )}
-                                  <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-                                    <Globe className="w-5 h-5 text-blue-600" />
+                                  <div className="grid size-11 shrink-0 place-items-center rounded-[16px] bg-lilac">
+                                    <Globe className="size-5 text-violet" />
                                   </div>
                                   <div>
-                                    <div className="font-semibold text-gray-900">{domain.domain}</div>
+                                    <div className="text-[15px] font-extrabold leading-snug">{domain.domain}</div>
                                     {domain.notes && (
-                                      <div className="text-sm text-gray-500 truncate max-w-[200px]">
+                                      <div className="text-sm text-muted truncate max-w-[200px]">
                                         {domain.notes}
                                       </div>
                                     )}
@@ -588,35 +589,35 @@ export default function HomePage() {
                               {/* Details Grid */}
                               <div className="grid grid-cols-2 gap-3 text-sm">
                                 <div>
-                                  <span className="text-gray-500">Expiry:</span>
+                                  <span className="text-muted">Kedaluwarsa:</span>
                                   <div className="font-medium">
-                                    {domain.expiryDate ? formatIndonesianDate(domain.expiryDate) : 'N/A'}
+                                    {domain.expiryDate ? formatIndonesianDate(domain.expiryDate) : '–'}
                                   </div>
                                 </div>
                                 {canViewPrices && (
                                   <div>
-                                    <span className="text-gray-500">Price:</span>
+                                    <span className="text-muted">Harga:</span>
                                     <div className="font-medium">
-                                      {domain.renewalPrice ? `Rp ${parseInt(domain.renewalPrice.toString()).toLocaleString('id-ID')}` : 'N/A'}
+                                      {domain.renewalPrice ? `Rp ${parseInt(domain.renewalPrice.toString()).toLocaleString('id-ID')}` : '–'}
                                     </div>
                                   </div>
                                 )}
                                 <div>
-                                  <span className="text-gray-500">Registrar:</span>
+                                  <span className="text-muted">Registrar:</span>
                                   <div className="font-medium">
-                                    {domain.realRegistrarName || domain.registrar || 'Unknown'}
+                                    {domain.realRegistrarName || domain.registrar || 'Tidak diketahui'}
                                   </div>
                                 </div>
                                 <div>
-                                  <span className="text-gray-500">Server:</span>
+                                  <span className="text-muted">Server:</span>
                                   <div className="font-medium">
                                     {domain.server ? (
                                       <div className="flex items-center space-x-1">
-                                        <Server className="w-3 h-3 text-gray-400" />
+                                        <Server className="w-3 h-3 text-muted" />
                                         <span>{domain.server.serverName}</span>
                                       </div>
                                     ) : (
-                                      <span className="text-gray-400">Not assigned</span>
+                                      <span className="text-muted">Belum dipasang</span>
                                     )}
                                   </div>
                                 </div>
@@ -626,8 +627,8 @@ export default function HomePage() {
                               <div className="flex justify-end space-x-2 pt-2 border-t">
                                 <ManageMenu
                                   actions={[
-                                    { label: 'View WHOIS', icon: Eye, onSelect: () => setWhoisDomain(domain) },
-                                    ...(canManageDomains ? [{ label: 'Manage in Domains', icon: Globe, onSelect: () => router.push('/domains') }] : []),
+                                    { label: 'Lihat WHOIS', icon: Eye, onSelect: () => setWhoisDomain(domain) },
+                                    ...(canManageDomains ? [{ label: 'Kelola di Domain', icon: Globe, onSelect: () => router.push('/domains') }] : []),
                                   ]}
                                 />
                               </div>
@@ -645,7 +646,7 @@ export default function HomePage() {
                   totalItems={filteredDomains.length}
                   pageSize={itemsPerPage}
                   onPageChange={setCurrentPage}
-                  itemLabel="domains"
+                  itemLabel="domain"
                   className="mt-4 pt-4 border-t"
                 />
               </CardContent>
@@ -655,103 +656,98 @@ export default function HomePage() {
           {/* Sidebar */}
           <div className="space-y-6">
             {/* Jumlah Bayar */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-lg">Jumlah Bayar</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3">
+            {/* Hidden for roles that may not see prices; it would be an empty card */}
+            {(userRole === 'ADMIN' || userRole === 'FINANCE') && (
+            <section className="relative overflow-hidden rounded-hero bg-ink p-5 text-white md:p-7">
+              <div aria-hidden="true" className="pointer-events-none absolute -right-24 -top-28 size-64 rounded-full border-[28px] border-violet/40 md:-right-16 md:-top-20" />
+              <div className="relative space-y-5">
+                <h2 className="inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1.5 text-[13px] font-bold">
+                  <Wallet className="size-4 text-lime" />
+                  Jumlah Bayar
+                </h2>
                 {/* Total Finance Payment */}
-                {(userRole === 'ADMIN' || userRole === 'FINANCE') && (
-                  <Card className="border-orange-200 bg-orange-50">
-                    <CardContent className="p-4">
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <p className="text-sm font-medium text-orange-700">Total Payment Required</p>
-                          <p className="text-2xl font-bold text-orange-800 mt-1">
-                            Rp {renewalCosts.expiring30.toLocaleString('id-ID')}
-                          </p>
-                          <p className="text-xs text-orange-600 mt-1">Domain renewals (30 days)</p>
-                        </div>
-                        <div className="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center">
-                          <Wallet className="w-6 h-6 text-orange-600" />
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                )}
+                <div>
+                  <p className="tabular break-words text-[40px] font-extrabold leading-none tracking-[-0.05em] text-lime">
+                    Rp {renewalCosts.expiring30.toLocaleString('id-ID')}
+                  </p>
+                  <p className="mt-2 text-lg font-extrabold leading-tight">
+                    Total yang perlu dibayar<br />
+                    <span className="text-white/60">Perpanjangan domain (30 hari)</span>
+                  </p>
+                </div>
                 
                 {/* Detailed Breakdown Modal */}
                 {(userRole === 'ADMIN' || userRole === 'FINANCE') && (
                   <Dialog>
                     <DialogTrigger asChild>
-                      <Button variant="outline" className="w-full justify-start">
+                      <Button className="h-10 bg-lime px-4 text-[13px] text-ink shadow-none hover:bg-white">
                         <Receipt className="w-4 h-4 mr-2" />
-                        View Payment Breakdown
+                        Lihat rincian pembayaran
                       </Button>
                     </DialogTrigger>
                     <DialogContent className="sm:max-w-[500px]">
                       <DialogHeader>
-                        <DialogTitle>Domain Renewal Costs</DialogTitle>
+                        <DialogTitle>Biaya perpanjangan domain</DialogTitle>
                         <DialogDescription>
-                          Financial overview of upcoming domain renewal expenses
+                          Ringkasan biaya perpanjangan domain yang akan datang
                         </DialogDescription>
                       </DialogHeader>
                       
                       <div className="space-y-4 mt-4">
                         {/* Cost Summary Cards */}
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                          <Card>
+                          <Card className="rounded-card bg-cream shadow-none">
                             <CardContent className="p-4">
                               <div className="flex items-center justify-between">
                                 <div>
-                                  <p className="text-sm text-gray-600">Critical (1 Day)</p>
-                                  <p className="text-2xl font-bold text-red-600">
+                                  <p className="text-[13px] font-semibold text-muted">Kritis (1 hari)</p>
+                                  <p className="tabular text-2xl font-extrabold tracking-[-0.03em] text-st-no">
                                     Rp {renewalCosts.expiring1.toLocaleString('id-ID')}
                                   </p>
                                 </div>
-                                <AlertTriangle className="w-8 h-8 text-red-500" />
+                                <AlertTriangle className="w-8 h-8 text-st-no" />
                               </div>
                             </CardContent>
                           </Card>
                           
-                          <Card>
+                          <Card className="rounded-card bg-cream shadow-none">
                             <CardContent className="p-4">
                               <div className="flex items-center justify-between">
                                 <div>
-                                  <p className="text-sm text-gray-600">Warning (7 Days)</p>
-                                  <p className="text-2xl font-bold text-orange-600">
+                                  <p className="text-[13px] font-semibold text-muted">Peringatan (7 hari)</p>
+                                  <p className="tabular text-2xl font-extrabold tracking-[-0.03em] text-on-peach">
                                     Rp {renewalCosts.expiring7.toLocaleString('id-ID')}
                                   </p>
                                 </div>
-                                <Clock className="w-8 h-8 text-orange-500" />
+                                <Clock className="w-8 h-8 text-on-peach" />
                               </div>
                             </CardContent>
                           </Card>
                           
-                          <Card>
+                          <Card className="rounded-card bg-cream shadow-none">
                             <CardContent className="p-4">
                               <div className="flex items-center justify-between">
                                 <div>
-                                  <p className="text-sm text-gray-600">Upcoming (30 Days)</p>
-                                  <p className="text-2xl font-bold text-yellow-600">
+                                  <p className="text-[13px] font-semibold text-muted">Mendatang (30 hari)</p>
+                                  <p className="tabular text-2xl font-extrabold tracking-[-0.03em] text-st-wait">
                                     Rp {renewalCosts.expiring30.toLocaleString('id-ID')}
                                   </p>
                                 </div>
-                                <CalendarClock className="w-8 h-8 text-yellow-500" />
+                                <CalendarClock className="w-8 h-8 text-st-wait" />
                               </div>
                             </CardContent>
                           </Card>
                           
-                          <Card>
+                          <Card className="rounded-card bg-cream shadow-none">
                             <CardContent className="p-4">
                               <div className="flex items-center justify-between">
                                 <div>
-                                  <p className="text-sm text-gray-600">Total Portfolio</p>
-                                  <p className="text-2xl font-bold text-blue-600">
+                                  <p className="text-[13px] font-semibold text-muted">Total portofolio</p>
+                                  <p className="tabular text-2xl font-extrabold tracking-[-0.03em] text-violet">
                                     Rp {renewalCosts.total.toLocaleString('id-ID')}
                                   </p>
                                 </div>
-                                <Banknote className="w-8 h-8 text-blue-500" />
+                                <Banknote className="w-8 h-8 text-violet" />
                               </div>
                             </CardContent>
                           </Card>
@@ -759,23 +755,23 @@ export default function HomePage() {
                         
                         {/* Detailed Breakdown */}
                         <div className="mt-6">
-                          <h4 className="font-medium mb-3">Budget Planning</h4>
+                          <h4 className="mb-3 text-[15px] font-extrabold">Rencana anggaran</h4>
                           <div className="space-y-2 text-sm">
-                            <div className="flex justify-between p-2 bg-red-50 rounded">
-                              <span>Immediate Payment Required (≤1 day):</span>
-                              <span className="font-medium text-red-600">
+                            <div className="flex justify-between gap-3 rounded-2xl bg-rose px-4 py-3 font-semibold">
+                              <span>Harus segera dibayar (≤1 hari):</span>
+                              <span className="tabular shrink-0 font-extrabold text-st-no">
                                 Rp {renewalCosts.expiring1.toLocaleString('id-ID')}
                               </span>
                             </div>
-                            <div className="flex justify-between p-2 bg-orange-50 rounded">
-                              <span>This Week (≤7 days):</span>
-                              <span className="font-medium text-orange-600">
+                            <div className="flex justify-between gap-3 rounded-2xl bg-peach px-4 py-3 font-semibold">
+                              <span>Minggu ini (≤7 hari):</span>
+                              <span className="tabular shrink-0 font-extrabold text-on-peach">
                                 Rp {renewalCosts.expiring7.toLocaleString('id-ID')}
                               </span>
                             </div>
-                            <div className="flex justify-between p-2 bg-yellow-50 rounded">
-                              <span>This Month (≤30 days):</span>
-                              <span className="font-medium text-yellow-600">
+                            <div className="flex justify-between gap-3 rounded-2xl bg-butter px-4 py-3 font-semibold">
+                              <span>Bulan ini (≤30 hari):</span>
+                              <span className="tabular shrink-0 font-extrabold text-st-wait">
                                 Rp {renewalCosts.expiring30.toLocaleString('id-ID')}
                               </span>
                             </div>
@@ -786,19 +782,20 @@ export default function HomePage() {
                         <div className="flex gap-2 mt-6">
                           <Button variant="outline" className="flex-1">
                             <Download className="w-4 h-4 mr-2" />
-                            Export Report
+                            Ekspor laporan
                           </Button>
                           <Button className="flex-1">
                             <CalendarPlus className="w-4 h-4 mr-2" />
-                            Schedule Payments
+                            Jadwalkan pembayaran
                           </Button>
                         </div>
                       </div>
                     </DialogContent>
                   </Dialog>
                 )}
-              </CardContent>
-            </Card>
+              </div>
+            </section>
+            )}
 
             {/* Recent Activity */}
             <RecentActivity />

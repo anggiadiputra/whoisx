@@ -9,7 +9,7 @@ export async function GET() {
     const session = await getServerSession(authOptions)
     
     if (!session?.user?.id) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+      return NextResponse.json({ error: 'Kamu perlu masuk dulu' }, { status: 401 })
     }
 
     const user = await prisma.user.findUnique({
@@ -26,13 +26,13 @@ export async function GET() {
     })
 
     if (!user) {
-      return NextResponse.json({ error: 'User not found' }, { status: 404 })
+      return NextResponse.json({ error: 'Pengguna tidak ditemukan' }, { status: 404 })
     }
 
     return NextResponse.json(user)
   } catch (error) {
     console.error('Error fetching user profile:', error)
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+    return NextResponse.json({ error: 'Gagal memproses permintaan. Coba lagi, ya.' }, { status: 500 })
   }
 }
 
@@ -41,7 +41,7 @@ export async function PUT(request: NextRequest) {
     const session = await getServerSession(authOptions)
     
     if (!session?.user?.id) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+      return NextResponse.json({ error: 'Kamu perlu masuk dulu' }, { status: 401 })
     }
 
     const body = await request.json()
@@ -49,7 +49,7 @@ export async function PUT(request: NextRequest) {
 
     // Validate required fields
     if (!name || !email) {
-      return NextResponse.json({ error: 'Name and email are required' }, { status: 400 })
+      return NextResponse.json({ error: 'Nama dan email wajib diisi' }, { status: 400 })
     }
 
     // Get current user data
@@ -58,7 +58,7 @@ export async function PUT(request: NextRequest) {
     })
 
     if (!currentUser) {
-      return NextResponse.json({ error: 'User not found' }, { status: 404 })
+      return NextResponse.json({ error: 'Pengguna tidak ditemukan' }, { status: 404 })
     }
 
     // Check if email is already taken by another user
@@ -68,7 +68,7 @@ export async function PUT(request: NextRequest) {
       })
 
       if (existingUser && existingUser.id !== session.user.id) {
-        return NextResponse.json({ error: 'Email already exists' }, { status: 400 })
+        return NextResponse.json({ error: 'Email sudah ada' }, { status: 400 })
       }
     }
 
@@ -82,7 +82,7 @@ export async function PUT(request: NextRequest) {
     // Handle password update
     if (newPassword) {
       if (!currentPassword) {
-        return NextResponse.json({ error: 'Current password is required to set new password' }, { status: 400 })
+        return NextResponse.json({ error: 'Kata sandi saat ini wajib diisi untuk membuat kata sandi baru' }, { status: 400 })
       }
 
       // Verify current password (the column is passwordHash; `password` does not exist)
@@ -90,12 +90,12 @@ export async function PUT(request: NextRequest) {
         ? await bcrypt.compare(currentPassword, currentUser.passwordHash)
         : false
       if (!isCurrentPasswordValid) {
-        return NextResponse.json({ error: 'Current password is incorrect' }, { status: 400 })
+        return NextResponse.json({ error: 'Kata sandi saat ini salah' }, { status: 400 })
       }
 
       // Validate new password
       if (newPassword.length < 6) {
-        return NextResponse.json({ error: 'New password must be at least 6 characters' }, { status: 400 })
+        return NextResponse.json({ error: 'Kata sandi baru minimal 6 karakter' }, { status: 400 })
       }
 
       // Hash new password
@@ -119,12 +119,12 @@ export async function PUT(request: NextRequest) {
     })
 
     return NextResponse.json({
-      message: 'Profile updated successfully',
+      message: 'Profil diperbarui',
       user: updatedUser
     })
 
   } catch (error) {
     console.error('Error updating user profile:', error)
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+    return NextResponse.json({ error: 'Gagal memproses permintaan. Coba lagi, ya.' }, { status: 500 })
   }
 }
