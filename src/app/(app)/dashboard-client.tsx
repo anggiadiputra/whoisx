@@ -180,16 +180,13 @@ export default function HomePage() {
   // Memoized filtered domains for better performance
   const filteredDomains = useMemo(() => {
     return domains.filter(domain => {
-      const matchesSearch = domain.domain.toLowerCase().includes(debouncedSearchTerm.toLowerCase())
-      
-      if (!filterExpiring) return matchesSearch
-      
+      const matchesSearch = domain.domain.toLowerCase().includes(debouncedSearchTerm.trim().toLowerCase())
+      if (!matchesSearch) return false
+      if (!filterExpiring) return true
+
+      // Same window as the renewal panel: still active, expiring within N days
       const days = domain.daysToExpiry
-      if (filterExpiring === '1' && days !== null && days <= 1) return matchesSearch
-      if (filterExpiring === '7' && days !== null && days <= 7) return matchesSearch
-      if (filterExpiring === '30' && days !== null && days <= 30) return matchesSearch
-      
-      return false
+      return days !== null && days >= 0 && days <= Number(filterExpiring)
     })
   }, [domains, debouncedSearchTerm, filterExpiring])
 
@@ -379,36 +376,36 @@ export default function HomePage() {
           <div className="xl:col-span-2">
             <Card>
               <CardHeader>
-                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-4 sm:space-y-0">
-                  <div>
-                    <CardTitle>Portofolio domain</CardTitle>
-                    <CardDescription>Kelola dan pantau semua domain kamu</CardDescription>
-                  </div>
-                  
-                  <div className="flex items-center space-x-2">
-                    <div className="relative w-full sm:w-auto">
-                      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted w-4 h-4" />
-                      <Input
-                        placeholder="Cari domain…"
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                        className="pl-10 w-full sm:w-64"
-                      />
-                    </div>
-                  </div>
+                <div>
+                  <CardTitle>Portofolio domain</CardTitle>
+                  <CardDescription>Kelola dan pantau semua domain kamu</CardDescription>
                 </div>
-                
-                {/* Filter Tabs */}
-                <Tabs value={filterExpiring || 'all'} onValueChange={(value) => setFilterExpiring(value === 'all' ? null : value)}>
-                  <TabsList className="grid w-full grid-cols-4">
-                    <TabsTrigger value="all">
-                      Semua<span className="hidden sm:inline">&nbsp;domain</span>
-                    </TabsTrigger>
-                    <TabsTrigger value="30">30 hari</TabsTrigger>
-                    <TabsTrigger value="7">7 hari</TabsTrigger>
-                    <TabsTrigger value="1">1 hari</TabsTrigger>
-                  </TabsList>
-                </Tabs>
+
+                {/* Toolbar: search + filter share one row and one height (52px) */}
+                <div className="mt-3 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+                  <div className="relative w-full lg:order-last lg:w-72">
+                    <Search className="pointer-events-none absolute left-4 top-1/2 size-4 -translate-y-1/2 text-muted" />
+                    <Input
+                      type="search"
+                      aria-label="Cari domain"
+                      placeholder="Cari domain…"
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      className="h-[52px] pl-11"
+                    />
+                  </div>
+
+                  <Tabs value={filterExpiring || 'all'} onValueChange={(value) => setFilterExpiring(value === 'all' ? null : value)}>
+                    <TabsList className="grid w-full grid-cols-4 lg:flex lg:w-fit">
+                      <TabsTrigger value="all" className="lg:flex-none lg:px-4">
+                        Semua<span className="hidden sm:inline">&nbsp;domain</span>
+                      </TabsTrigger>
+                      <TabsTrigger value="30" className="lg:flex-none lg:px-4">30 hari</TabsTrigger>
+                      <TabsTrigger value="7" className="lg:flex-none lg:px-4">7 hari</TabsTrigger>
+                      <TabsTrigger value="1" className="lg:flex-none lg:px-4">1 hari</TabsTrigger>
+                    </TabsList>
+                  </Tabs>
+                </div>
               </CardHeader>
               
               <CardContent>
