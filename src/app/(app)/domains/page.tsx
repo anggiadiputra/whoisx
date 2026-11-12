@@ -193,18 +193,21 @@ export default function DomainsPage() {
   // Memoized filtered domains for better performance
   const filteredDomains = useMemo(() => {
     return domains.filter(domain => {
-      const matchesSearch = domain.domain.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) ||
-                           domain.registrar?.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) ||
-                           domain.notes?.toLowerCase().includes(debouncedSearchTerm.toLowerCase())
+      const term = debouncedSearchTerm.trim().toLowerCase()
+      const matchesSearch = domain.domain.toLowerCase().includes(term) ||
+                           domain.registrar?.toLowerCase().includes(term) ||
+                           domain.notes?.toLowerCase().includes(term)
 
       if (!matchesSearch) return false
+      if (!filterExpiring) return true
 
-      if (filterExpiring === 'critical') return domain.daysToExpiry && domain.daysToExpiry <= 1
-      if (filterExpiring === 'warning') return domain.daysToExpiry && domain.daysToExpiry <= 7
-      if (filterExpiring === 'attention') return domain.daysToExpiry && domain.daysToExpiry <= 30
-      if (filterExpiring === 'good') return domain.daysToExpiry && domain.daysToExpiry > 30
-
-      return true
+      // Same window as the stat cards (API): still active, expiring within N days.
+      // `days` can be 0 (expires today), so compare explicitly instead of truthiness.
+      const days = domain.daysToExpiry
+      if (days === undefined || days === null) return false
+      if (filterExpiring === 'good') return days > 30
+      const limit = ({ critical: 1, warning: 7, attention: 30 } as Record<string, number>)[filterExpiring]
+      return limit !== undefined && days >= 0 && days <= limit
     })
   }, [domains, debouncedSearchTerm, filterExpiring])
 
@@ -800,51 +803,28 @@ export default function DomainsPage() {
         {/* Search and Filter */}
         <Card className="mb-6">
           <CardContent className="p-6">
-            <div className="flex flex-col sm:flex-row gap-4">
-              <div className="relative flex-1">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted w-4 h-4" />
+            {/* Search + filter share one row and one height (52px), like the dashboard */}
+            <div className="flex flex-col gap-3 lg:flex-row lg:items-center">
+              <div className="relative w-full lg:flex-1">
+                <Search className="pointer-events-none absolute left-4 top-1/2 size-4 -translate-y-1/2 text-muted" />
                 <Input
+                  type="search"
+                  aria-label="Cari domain"
                   placeholder="Cari domain, registrar, atau catatan…"
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10"
+                  className="h-[52px] pl-11"
                 />
               </div>
-              
-              <div className="flex flex-wrap gap-2">
-                <Button
-                  variant={filterExpiring === null ? "chipOn" : "chipOff"}
-                  aria-pressed={filterExpiring === null}
-                  onClick={() => setFilterExpiring(null)}
-                  size="sm"
-                >
-                  Semua
-                </Button>
-                <Button
-                  variant={filterExpiring === 'critical' ? "chipOn" : "chipOff"}
-                  aria-pressed={filterExpiring === 'critical'}
-                  onClick={() => setFilterExpiring(filterExpiring === 'critical' ? null : 'critical')}
-                  size="sm"
-                >
-                  Kritis
-                </Button>
-                <Button
-                  variant={filterExpiring === 'warning' ? "chipOn" : "chipOff"}
-                  aria-pressed={filterExpiring === 'warning'}
-                  onClick={() => setFilterExpiring(filterExpiring === 'warning' ? null : 'warning')}
-                  size="sm"
-                >
-                  Peringatan
-                </Button>
-                <Button
-                  variant={filterExpiring === 'attention' ? "chipOn" : "chipOff"}
-                  aria-pressed={filterExpiring === 'attention'}
-                  onClick={() => setFilterExpiring(filterExpiring === 'attention' ? null : 'attention')}
-                  size="sm"
-                >
-                  Perhatian
-                </Button>
-              </div>
+
+              <Tabs value={filterExpiring || 'all'} onValueChange={(value) => setFilterExpiring(value === 'all' ? null : value)}>
+                <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4 lg:flex lg:w-fit">
+                  <TabsTrigger value="all" className="lg:flex-none lg:px-4">Semua</TabsTrigger>
+                  <TabsTrigger value="critical" className="lg:flex-none lg:px-4">Kritis</TabsTrigger>
+                  <TabsTrigger value="warning" className="lg:flex-none lg:px-4">Peringatan</TabsTrigger>
+                  <TabsTrigger value="attention" className="lg:flex-none lg:px-4">Perhatian</TabsTrigger>
+                </TabsList>
+              </Tabs>
             </div>
           </CardContent>
         </Card>

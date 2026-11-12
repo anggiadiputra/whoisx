@@ -227,9 +227,9 @@ export default function UsersPage() {
 
   // Filter users based on search and filters
   const filteredUsers = users.filter(user => {
-    const matchesSearch = !searchTerm || 
-      user.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      user.email.toLowerCase().includes(searchTerm.toLowerCase())
+    const matchesSearch = !searchTerm.trim() || 
+      user.name?.toLowerCase().includes(searchTerm.trim().toLowerCase()) ||
+      user.email.toLowerCase().includes(searchTerm.trim().toLowerCase())
     
     const matchesRole = !filterRole || user.role === filterRole
     const matchesStatus = !filterStatus || user.status === filterStatus
@@ -458,22 +458,22 @@ export default function UsersPage() {
       {/* Filters */}
       <Card className="mb-6">
         <CardContent className="p-6">
-          <div className="flex flex-col md:flex-row gap-4">
+          <div className="flex flex-col gap-3 lg:flex-row lg:items-center">
             <div className="flex-1">
               <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted w-4 h-4" />
+                <Search className="pointer-events-none absolute left-4 top-1/2 size-4 -translate-y-1/2 text-muted" />
                 <Input
                   placeholder="Cari pengguna dari nama atau email…"
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10"
+                  className="pl-11"
                 />
               </div>
             </div>
-            <div className="flex flex-wrap gap-2">
+            <div className="flex flex-col gap-3 sm:flex-row">
               <Select value={filterRole || 'none'} onValueChange={handleRoleChange}>
-                <SelectTrigger className="w-full sm:w-[190px]">
-                  <Filter className="w-4 h-4 mr-2" />
+                <SelectTrigger className="w-full whitespace-nowrap sm:flex-1 lg:w-auto lg:min-w-[190px] lg:flex-none">
+                  <Filter className="w-4 h-4 shrink-0 text-muted" />
                   <SelectValue placeholder="Peran" />
                 </SelectTrigger>
                 <SelectContent>
@@ -485,8 +485,8 @@ export default function UsersPage() {
               </Select>
               
               <Select value={filterStatus || 'none'} onValueChange={handleStatusChange}>
-                <SelectTrigger className="w-full sm:w-[190px]">
-                  <Filter className="w-4 h-4 mr-2" />
+                <SelectTrigger className="w-full whitespace-nowrap sm:flex-1 lg:w-auto lg:min-w-[190px] lg:flex-none">
+                  <Filter className="w-4 h-4 shrink-0 text-muted" />
                   <SelectValue placeholder="Status" />
                 </SelectTrigger>
                 <SelectContent>

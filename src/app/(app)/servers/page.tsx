@@ -266,10 +266,10 @@ export default function ServersPage() {
   // Filter servers based on search and filters
   const filteredServers = servers.filter(server => {
     const matchesSearch = 
-      server.serverName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      server.provider.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      server.ipAddress?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      server.notes?.toLowerCase().includes(searchTerm.toLowerCase())
+      server.serverName.toLowerCase().includes(searchTerm.trim().toLowerCase()) ||
+      server.provider.toLowerCase().includes(searchTerm.trim().toLowerCase()) ||
+      server.ipAddress?.toLowerCase().includes(searchTerm.trim().toLowerCase()) ||
+      server.notes?.toLowerCase().includes(searchTerm.trim().toLowerCase())
 
     const matchesType = filterType === 'all' || server.serverType === filterType.toUpperCase()
     const matchesStatus = filterStatus === 'all' || server.status === filterStatus.toUpperCase()
@@ -873,23 +873,23 @@ export default function ServersPage() {
           {/* Filters and Search */}
           <Card>
             <CardContent className="p-6">
-              <div className="flex flex-col sm:flex-row gap-4">
+              <div className="flex flex-col gap-3 lg:flex-row lg:items-center">
                 <div className="flex-1">
                   <div className="relative">
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted w-4 h-4" />
+                    <Search className="pointer-events-none absolute left-4 top-1/2 size-4 -translate-y-1/2 text-muted" />
                     <Input
                       placeholder="Cari server…"
                       value={searchTerm}
                       onChange={(e) => setSearchTerm(e.target.value)}
-                      className="pl-10"
+                      className="pl-11"
                     />
                   </div>
                 </div>
                 
-                <div className="flex flex-wrap gap-2">
+                <div className="flex flex-col gap-3 sm:flex-row">
                   <Select value={filterType} onValueChange={setFilterType}>
-                    <SelectTrigger className="w-full sm:w-[190px]">
-                      <Filter className="w-4 h-4 mr-2" />
+                    <SelectTrigger className="w-full whitespace-nowrap sm:flex-1 lg:w-auto lg:min-w-[190px] lg:flex-none">
+                      <Filter className="w-4 h-4 shrink-0 text-muted" />
                       <SelectValue placeholder="Jenis" />
                     </SelectTrigger>
                     <SelectContent>
@@ -900,8 +900,8 @@ export default function ServersPage() {
                   </Select>
 
                   <Select value={filterStatus} onValueChange={setFilterStatus}>
-                    <SelectTrigger className="w-full sm:w-[190px]">
-                      <Filter className="w-4 h-4 mr-2" />
+                    <SelectTrigger className="w-full whitespace-nowrap sm:flex-1 lg:w-auto lg:min-w-[190px] lg:flex-none">
+                      <Filter className="w-4 h-4 shrink-0 text-muted" />
                       <SelectValue placeholder="Status" />
                     </SelectTrigger>
                     <SelectContent>

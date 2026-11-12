@@ -605,9 +605,9 @@ export default function WebsitesPage() {
 
   // Filter websites
   const filteredWebsites = websites.filter(website => {
-    const matchesSearch = website.siteName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         website.domain.domain.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         (website.cms && website.cms.toLowerCase().includes(searchTerm.toLowerCase()))
+    const matchesSearch = website.siteName.toLowerCase().includes(searchTerm.trim().toLowerCase()) ||
+                         website.domain.domain.toLowerCase().includes(searchTerm.trim().toLowerCase()) ||
+                         (website.cms && website.cms.toLowerCase().includes(searchTerm.trim().toLowerCase()))
     
     const matchesFilter = filterStatus === 'all' || website.status === filterStatus
     
@@ -666,18 +666,18 @@ export default function WebsitesPage() {
       {/* Filters */}
       <div className="flex flex-col sm:flex-row gap-4 mb-6">
         <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted w-4 h-4" />
+          <Search className="pointer-events-none absolute left-4 top-1/2 size-4 -translate-y-1/2 text-muted" />
           <Input
             placeholder="Cari website, domain, atau CMS…"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="bg-white pl-10 shadow-card"
+            className="bg-white pl-11 shadow-card"
           />
         </div>
         
         <Select value={filterStatus} onValueChange={setFilterStatus}>
-          <SelectTrigger className="w-full bg-white shadow-card sm:w-52">
-            <Filter className="w-4 h-4 mr-2" />
+          <SelectTrigger className="w-full whitespace-nowrap bg-white shadow-card sm:w-auto sm:min-w-52">
+            <Filter className="w-4 h-4 shrink-0 text-muted" />
             <SelectValue placeholder="Filter status" />
           </SelectTrigger>
           <SelectContent>
