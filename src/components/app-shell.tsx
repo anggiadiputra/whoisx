@@ -106,7 +106,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       </aside>
 
       <div className="md:pl-[116px]">
-        <div className="mx-auto max-w-[1200px] px-4 pb-32 pt-4 md:px-6 md:pb-16 md:pt-6">
+        <div className="mx-auto max-w-[1600px] px-4 pb-32 pt-4 md:px-6 md:pb-16 md:pt-6 xl:px-8">
           {/* Top bar: every element is a white pill */}
           <header className="flex items-center justify-between gap-3">
             <Link href="/" className="flex min-w-0 items-center gap-2.5">
