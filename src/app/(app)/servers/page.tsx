@@ -872,7 +872,7 @@ export default function ServersPage() {
 
           {/* Filters and Search */}
           <Card>
-            <CardContent className="p-6">
+            <CardContent className="p-5 md:p-6">
               <div className="flex flex-col gap-3 lg:flex-row lg:items-center">
                 <div className="flex-1">
                   <div className="relative">

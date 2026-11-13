@@ -696,7 +696,7 @@ export default function HomePage() {
                         {/* Cost Summary Cards */}
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                           <Card className="rounded-card bg-cream shadow-none">
-                            <CardContent className="p-4">
+                            <CardContent className="p-4 md:p-4">
                               <div className="flex items-center justify-between">
                                 <div>
                                   <p className="text-[13px] font-semibold text-muted">Kritis (1 hari)</p>
@@ -710,7 +710,7 @@ export default function HomePage() {
                           </Card>
                           
                           <Card className="rounded-card bg-cream shadow-none">
-                            <CardContent className="p-4">
+                            <CardContent className="p-4 md:p-4">
                               <div className="flex items-center justify-between">
                                 <div>
                                   <p className="text-[13px] font-semibold text-muted">Peringatan (7 hari)</p>
@@ -724,7 +724,7 @@ export default function HomePage() {
                           </Card>
                           
                           <Card className="rounded-card bg-cream shadow-none">
-                            <CardContent className="p-4">
+                            <CardContent className="p-4 md:p-4">
                               <div className="flex items-center justify-between">
                                 <div>
                                   <p className="text-[13px] font-semibold text-muted">Mendatang (30 hari)</p>
@@ -738,7 +738,7 @@ export default function HomePage() {
                           </Card>
                           
                           <Card className="rounded-card bg-cream shadow-none">
-                            <CardContent className="p-4">
+                            <CardContent className="p-4 md:p-4">
                               <div className="flex items-center justify-between">
                                 <div>
                                   <p className="text-[13px] font-semibold text-muted">Total portofolio</p>

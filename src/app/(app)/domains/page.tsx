@@ -802,7 +802,7 @@ export default function DomainsPage() {
 
         {/* Search and Filter */}
         <Card className="mb-6">
-          <CardContent className="p-6">
+          <CardContent className="p-5 md:p-6">
             {/* Search + filter share one row and one height (52px), like the dashboard */}
             <div className="flex flex-col gap-3 lg:flex-row lg:items-center">
               <div className="relative w-full lg:flex-1">
