@@ -201,7 +201,10 @@ model Website {
   id          String      @id @default(cuid())
   siteName    String      @map("site_name")
   domainId    String      @map("domain_id")
-  
+  // Host label(s) in front of the domain, e.g. "blog" or "shop.id"; "" means the domain itself.
+  // Stored as "" (not NULL) so the unique index below also stops two root sites on one domain.
+  subdomain   String      @default("")
+
   // Optional fields
   username    String?
   password    String?     // Should be encrypted in production
@@ -221,7 +224,8 @@ model Website {
   
   // Relations
   domain      Domain      @relation(fields: [domainId], references: [id], onDelete: Cascade)
-  
+
+  @@unique([domainId, subdomain])
   @@map("websites")
 }
 

@@ -3,6 +3,8 @@
 import { useState, useEffect, useCallback, useMemo } from 'react'
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
+import { SubdomainField } from '@/components/subdomain-field'
+import { websiteAddress } from '@/lib/subdomain'
 import { useToast } from '@/hooks/use-toast'
 import { useApiQuery, useRefreshApiData } from '@/hooks/use-api-query'
 import { useConfirm } from '@/components/confirm-dialog'
@@ -79,6 +81,7 @@ interface Website {
   id: string
   siteName: string
   domainId: string
+  subdomain: string
   username?: string
   password?: string
   cms?: string
@@ -105,6 +108,7 @@ interface WebsiteStats {
 interface NewWebsite {
   siteName: string
   domainId: string
+  subdomain: string
   username: string
   password: string
   cms: string
@@ -156,6 +160,7 @@ export default function WebsitesPage() {
   const [newWebsite, setNewWebsite] = useState<NewWebsite>({
     siteName: '',
     domainId: '',
+    subdomain: '',
     username: '',
     password: '',
     cms: 'none',
@@ -172,6 +177,7 @@ export default function WebsitesPage() {
     id: '',
     siteName: '',
     domainId: '',
+    subdomain: '',
     username: '',
     password: '',
     cms: 'none',
@@ -204,7 +210,7 @@ export default function WebsitesPage() {
   const fetchAvailableDomains = useCallback(async () => {
     try {
       setLoadingDomains(true)
-      const response = await fetch('/api/domains?availableForWebsite=true', {
+      const response = await fetch('/api/domains', {
         credentials: 'include'
       })
 
@@ -214,6 +220,7 @@ export default function WebsitesPage() {
 
       const data = await response.json()
       if (data.success) {
+        // Every domain is offered: one domain can hold several websites on different subdomains
         setAvailableDomains(data.domains.map((domain: any) => ({
           id: domain.id,
           domain: domain.domain,
@@ -346,6 +353,7 @@ export default function WebsitesPage() {
         setNewWebsite({
           siteName: '',
           domainId: '',
+          subdomain: '',
           username: '',
           password: '',
           cms: 'none',
@@ -375,68 +383,13 @@ export default function WebsitesPage() {
     }
   }
 
-  // Fetch available domains for edit (including current domain)
-  const fetchAvailableDomainsForEdit = useCallback(async (currentDomainId: string) => {
-    try {
-      setLoadingDomains(true)
-      const response = await fetch('/api/domains?availableForWebsite=true', {
-        credentials: 'include'
-      })
-
-      if (!response.ok) {
-        throw new Error('Failed to fetch domains')
-      }
-
-      const data = await response.json()
-      if (data.success) {
-        const availableDomains = data.domains.map((domain: any) => ({
-          id: domain.id,
-          domain: domain.domain,
-          expiryDate: domain.expiryDate,
-          status: domain.status
-        }))
-
-        // Add current domain if not in the list
-        const currentDomainExists = availableDomains.some((d: any) => d.id === currentDomainId)
-        if (!currentDomainExists) {
-          // Fetch current domain details
-          const currentDomainResponse = await fetch('/api/domains', {
-            credentials: 'include'
-          })
-          if (currentDomainResponse.ok) {
-            const currentDomainData = await currentDomainResponse.json()
-            const currentDomain = currentDomainData.domains.find((d: any) => d.id === currentDomainId)
-            if (currentDomain) {
-              availableDomains.push({
-                id: currentDomain.id,
-                domain: currentDomain.domain,
-                expiryDate: currentDomain.expiryDate,
-                status: currentDomain.status
-              })
-            }
-          }
-        }
-
-        setAvailableDomains(availableDomains)
-      }
-    } catch (error) {
-      console.error('Error fetching domains:', error)
-      toast({
-        title: "Gagal",
-        description: "Daftar domain nggak bisa dimuat. Coba lagi, ya.",
-        variant: "destructive",
-      })
-    } finally {
-      setLoadingDomains(false)
-    }
-  }, [toast])
-
   // Handle edit website
   const handleEditWebsite = (website: Website) => {
     setEditWebsite({
       id: website.id,
       siteName: website.siteName,
       domainId: website.domainId,
+      subdomain: website.subdomain || '',
       username: website.username || '',
       password: website.password || '',
       cms: website.cms || 'none',
@@ -445,7 +398,7 @@ export default function WebsitesPage() {
       status: website.status,
       isLive: website.isLive
     })
-    fetchAvailableDomainsForEdit(website.domainId)
+    fetchAvailableDomains()
     setShowEditModal(true)
   }
 
@@ -463,6 +416,7 @@ export default function WebsitesPage() {
         body: JSON.stringify({
           siteName: editWebsite.siteName.trim(),
           domainId: editWebsite.domainId,
+          subdomain: editWebsite.subdomain,
           username: editWebsite.username.trim() || null,
           password: editWebsite.password.trim() || null,
           cms: editWebsite.cms === 'none' ? null : (editWebsite.cms.trim() || null),
@@ -489,6 +443,7 @@ export default function WebsitesPage() {
           id: '',
           siteName: '',
           domainId: '',
+          subdomain: '',
           username: '',
           password: '',
           cms: 'none',
@@ -606,7 +561,7 @@ export default function WebsitesPage() {
   // Filter websites
   const filteredWebsites = websites.filter(website => {
     const matchesSearch = website.siteName.toLowerCase().includes(searchTerm.trim().toLowerCase()) ||
-                         website.domain.domain.toLowerCase().includes(searchTerm.trim().toLowerCase()) ||
+                         websiteAddress(website.subdomain, website.domain.domain).includes(searchTerm.trim().toLowerCase()) ||
                          (website.cms && website.cms.toLowerCase().includes(searchTerm.trim().toLowerCase()))
     
     const matchesFilter = filterStatus === 'all' || website.status === filterStatus
@@ -738,7 +693,7 @@ export default function WebsitesPage() {
                         <TableCell>
                           <div className="flex items-center gap-2">
                             <Globe className="w-4 h-4 text-violet" />
-                            <span className="font-mono text-sm">{website.domain.domain}</span>
+                            <span className="font-mono text-sm">{websiteAddress(website.subdomain, website.domain.domain)}</span>
                           </div>
                         </TableCell>
                         <TableCell>
@@ -818,7 +773,7 @@ export default function WebsitesPage() {
                         </div>
                         <div className="min-w-0">
                           <h4 className="text-[15px] font-extrabold leading-snug break-words">{website.siteName}</h4>
-                          <p className="truncate text-sm text-muted">{website.domain?.domain || 'Belum ada domain'}</p>
+                          <p className="truncate text-sm text-muted">{website.domain?.domain ? websiteAddress(website.subdomain, website.domain.domain) : 'Belum ada domain'}</p>
                           <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
                             <StatusPill tone={toneFromBgClass(statusBadge.color)}>{statusBadge.text}</StatusPill>
                             <div className="flex items-center space-x-1">
@@ -961,6 +916,16 @@ export default function WebsitesPage() {
                   </SelectContent>
                 </Select>
               )}
+            </div>
+
+            {/* Subdomain: full width so the address preview fits */}
+            <div className="md:col-span-2">
+              <SubdomainField
+                id="subdomain"
+                value={newWebsite.subdomain}
+                onChange={(value) => setNewWebsite(prev => ({ ...prev, subdomain: value }))}
+                domain={availableDomains.find(d => d.id === newWebsite.domainId)?.domain}
+              />
             </div>
 
             {/* Username */}
@@ -1135,6 +1100,16 @@ export default function WebsitesPage() {
               </Select>
             </div>
 
+            {/* Subdomain: full width so the address preview fits */}
+            <div className="md:col-span-2">
+              <SubdomainField
+                id="editSubdomain"
+                value={editWebsite.subdomain}
+                onChange={(value) => setEditWebsite(prev => ({ ...prev, subdomain: value }))}
+                domain={availableDomains.find(d => d.id === editWebsite.domainId)?.domain}
+              />
+            </div>
+
             {/* Username */}
             <div className="space-y-2">
               <Label htmlFor="editUsername">Username</Label>
@@ -1284,7 +1259,7 @@ export default function WebsitesPage() {
                   <Label className="text-sm font-medium text-muted">Domain</Label>
                   <div className="flex items-center gap-2">
                     <Globe className="w-4 h-4 text-violet" />
-                    <p className="text-sm font-mono">{selectedWebsite.domain.domain}</p>
+                    <p className="text-sm font-mono">{websiteAddress(selectedWebsite.subdomain, selectedWebsite.domain.domain)}</p>
                   </div>
                 </div>
 

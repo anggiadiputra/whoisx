@@ -4,6 +4,7 @@ import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { WebsiteStatus } from '@prisma/client'
 import { withoutPassword, PRIVATE_CACHE_CONTROL } from '@/lib/permissions'
+import { normalizeSubdomain, websiteAddress } from '@/lib/subdomain'
 
 // GET /api/websites - List all websites with stats
 export async function GET(request: NextRequest) {
@@ -104,11 +105,29 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    const subdomain = normalizeSubdomain(body.subdomain, domain.domain)
+    if (!subdomain.ok) {
+      return NextResponse.json({ error: subdomain.error }, { status: 400 })
+    }
+
+    // One website per address (domain + subdomain)
+    const taken = await prisma.website.findFirst({
+      where: { domainId: domain.id, subdomain: subdomain.value },
+      select: { siteName: true }
+    })
+    if (taken) {
+      return NextResponse.json(
+        { error: `${websiteAddress(subdomain.value, domain.domain)} sudah dipakai website "${taken.siteName}"` },
+        { status: 409 }
+      )
+    }
+
     // Create website
     const website = await prisma.website.create({
       data: {
         siteName: body.siteName.trim(),
         domainId: body.domainId,
+        subdomain: subdomain.value,
         username: body.username?.trim() || null,
         password: body.password?.trim() || null, // TODO: Encrypt in production
         cms: body.cms?.trim() || null,

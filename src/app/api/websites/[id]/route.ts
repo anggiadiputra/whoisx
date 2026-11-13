@@ -4,6 +4,7 @@ import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { WebsiteStatus } from '@prisma/client'
 import { withoutPassword, PRIVATE_CACHE_CONTROL } from '@/lib/permissions'
+import { normalizeSubdomain, websiteAddress } from '@/lib/subdomain'
 
 // GET /api/websites/[id] - Get website by ID
 export async function GET(
@@ -89,18 +90,38 @@ export async function PUT(
       )
     }
 
-    // If domainId is being changed, validate the new domain exists
-    if (body.domainId && body.domainId !== existingWebsite.domainId) {
-      const domain = await prisma.domain.findUnique({
-        where: { id: body.domainId }
-      })
+    // Resolve the target domain (new one if it changes) so the subdomain can be checked against it
+    const domainId: string = body.domainId || existingWebsite.domainId
+    const domain = await prisma.domain.findUnique({
+      where: { id: domainId },
+      select: { id: true, domain: true }
+    })
 
-      if (!domain) {
-        return NextResponse.json(
-          { error: 'Domain tidak ditemukan' },
-          { status: 404 }
-        )
-      }
+    if (!domain) {
+      return NextResponse.json(
+        { error: 'Domain tidak ditemukan' },
+        { status: 404 }
+      )
+    }
+
+    // Omitted subdomain keeps the current one; "" moves the site to the domain itself
+    const subdomain = body.subdomain === undefined
+      ? { ok: true as const, value: existingWebsite.subdomain }
+      : normalizeSubdomain(body.subdomain, domain.domain)
+    if (!subdomain.ok) {
+      return NextResponse.json({ error: subdomain.error }, { status: 400 })
+    }
+
+    // One website per address (domain + subdomain)
+    const taken = await prisma.website.findFirst({
+      where: { domainId, subdomain: subdomain.value, NOT: { id } },
+      select: { siteName: true }
+    })
+    if (taken) {
+      return NextResponse.json(
+        { error: `${websiteAddress(subdomain.value, domain.domain)} sudah dipakai website "${taken.siteName}"` },
+        { status: 409 }
+      )
     }
 
     // Update website
@@ -108,7 +129,8 @@ export async function PUT(
       where: { id },
       data: {
         siteName: body.siteName?.trim() || existingWebsite.siteName,
-        domainId: body.domainId || existingWebsite.domainId,
+        domainId,
+        subdomain: subdomain.value,
         username: body.username?.trim() || existingWebsite.username,
         password: body.password?.trim() || existingWebsite.password,
         cms: body.cms?.trim() || existingWebsite.cms,
