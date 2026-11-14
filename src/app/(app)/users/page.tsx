@@ -725,7 +725,7 @@ export default function UsersPage() {
             <div>
               <Label htmlFor="role">Peran</Label>
               <Select value={newUser.role} onValueChange={(value) => setNewUser({ ...newUser, role: value })}>
-                <SelectTrigger>
+                <SelectTrigger id="role">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -739,7 +739,7 @@ export default function UsersPage() {
             <div>
               <Label htmlFor="status">Status</Label>
               <Select value={newUser.status} onValueChange={(value) => setNewUser({ ...newUser, status: value })}>
-                <SelectTrigger>
+                <SelectTrigger id="status">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -819,7 +819,7 @@ export default function UsersPage() {
             <div>
               <Label htmlFor="edit-role">Peran</Label>
               <Select value={editUser.role} onValueChange={(value) => setEditUser({ ...editUser, role: value })}>
-                <SelectTrigger>
+                <SelectTrigger id="edit-role">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -833,7 +833,7 @@ export default function UsersPage() {
             <div>
               <Label htmlFor="edit-status">Status</Label>
               <Select value={editUser.status} onValueChange={(value) => setEditUser({ ...editUser, status: value })}>
-                <SelectTrigger>
+                <SelectTrigger id="edit-status">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>

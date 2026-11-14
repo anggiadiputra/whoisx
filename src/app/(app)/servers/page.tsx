@@ -723,7 +723,7 @@ export default function ServersPage() {
                       <div className="space-y-2">
                         <Label htmlFor="serverType">Jenis server</Label>
                         <Select value={newServer.serverType} onValueChange={(value: any) => setNewServer(prev => ({ ...prev, serverType: value }))}>
-                          <SelectTrigger>
+                          <SelectTrigger id="serverType">
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent>
@@ -735,7 +735,7 @@ export default function ServersPage() {
                       <div className="space-y-2">
                         <Label htmlFor="status">Status</Label>
                         <Select value={newServer.status} onValueChange={(value: any) => setNewServer(prev => ({ ...prev, status: value }))}>
-                          <SelectTrigger>
+                          <SelectTrigger id="status">
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent>
@@ -983,7 +983,7 @@ export default function ServersPage() {
                               ) : (
                                 <div className="text-sm text-muted">Belum ada username</div>
                               )}
-                              {server.password ? (
+                              {server.password && (
                                 <div className="flex items-center space-x-2">
                                   <div className="flex items-center space-x-1">
                                     <span className="font-mono text-sm">
@@ -1016,8 +1016,6 @@ export default function ServersPage() {
                                     </Button>
                                   </div>
                                 </div>
-                              ) : (
-                                <div className="text-sm text-muted">Belum ada kata sandi</div>
                               )}
                             </TableCell>
                             <TableCell>
@@ -1121,7 +1119,7 @@ export default function ServersPage() {
                               <p className="truncate text-sm text-muted">{server.provider}</p>
                               <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
                                 <Badge variant="outline" className="text-xs">
-                                  {server.serverType}
+                                  {server.serverType === 'VPS' ? 'VPS' : 'Hosting'}
                                 </Badge>
                                 <StatusPill tone={toneFromBgClass(serverStatus.color)}>{serverStatus.text}</StatusPill>
                               </div>
@@ -1139,40 +1137,43 @@ export default function ServersPage() {
                           </div>
                           
                           <div>
-                            <span className="text-muted">Kata sandi:</span>
-                            <div className="mt-1 flex items-center space-x-2">
-                              {server.password ? (
-                                <>
-                                  <span className="font-mono text-xs">
-                                    {visiblePasswords.has(server.id) ? server.password : '••••••••'}
-                                  </span>
-                                  <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    className="h-6 w-6 p-0"
-                                    onClick={() => togglePasswordVisibility(server.id)}
-                                  >
-                                    {visiblePasswords.has(server.id) ? (
-                                      <EyeOff className="w-3 h-3" />
-                                    ) : (
-                                      <Eye className="w-3 h-3" />
-                                    )}
-                                  </Button>
-                                  <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    className="h-6 w-6 p-0"
-                                    onClick={() => copyPassword(server.password!, server.id)}
-                                  >
-                                    <Copy className="w-3 h-3" />
-                                  </Button>
-                                </>
-                              ) : (
-                                <span className="text-muted text-xs">Belum diisi</span>
-                              )}
+                            <span className="text-muted">IP:</span>
+                            <div className="mt-1 font-mono text-xs font-medium">
+                              {server.ipAddress || '–'}
                             </div>
                           </div>
-                          
+
+                          {server.password && (
+                            <div>
+                              <span className="text-muted">Kata sandi:</span>
+                              <div className="mt-1 flex items-center space-x-2">
+                                <span className="font-mono text-xs">
+                                  {visiblePasswords.has(server.id) ? server.password : '••••••••'}
+                                </span>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  className="h-6 w-6 p-0"
+                                  onClick={() => togglePasswordVisibility(server.id)}
+                                >
+                                  {visiblePasswords.has(server.id) ? (
+                                    <EyeOff className="w-3 h-3" />
+                                  ) : (
+                                    <Eye className="w-3 h-3" />
+                                  )}
+                                </Button>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  className="h-6 w-6 p-0"
+                                  onClick={() => copyPassword(server.password!, server.serverName)}
+                                >
+                                  <Copy className="w-3 h-3" />
+                                </Button>
+                              </div>
+                            </div>
+                          )}
+
                           <div>
                             <span className="text-muted">Domain:</span>
                             <div className="mt-1">
@@ -1263,7 +1264,7 @@ export default function ServersPage() {
                   <div>
                     <Label className="text-sm font-medium text-muted">Jenis</Label>
                     <p className="mt-1">
-                      <Badge variant="outline">{selectedServer.serverType}</Badge>
+                      <Badge variant="outline">{selectedServer.serverType === 'VPS' ? 'VPS' : 'Hosting'}</Badge>
                     </p>
                   </div>
                   <div>
@@ -1285,14 +1286,15 @@ export default function ServersPage() {
                     <p className="mt-1 text-sm font-mono">{selectedServer.username || '–'}</p>
                   </div>
                   <div>
-                    <Label className="text-sm font-medium text-muted">Kata sandi</Label>
-                    {selectedServer.password ? (
+                    <Label className="text-sm font-medium text-muted">IP VPS atau Hosting</Label>
+                    <p className="mt-1 text-sm font-mono">{selectedServer.ipAddress || '–'}</p>
+                  </div>
+                  {selectedServer.password && (
+                    <div>
+                      <Label className="text-sm font-medium text-muted">Kata sandi</Label>
                       <div className="flex items-center space-x-2 mt-1">
                         <span className="text-sm font-mono">
-                          {visiblePasswords.has(selectedServer.id) 
-                            ? selectedServer.password 
-                            : '••••••••'
-                          }
+                          {visiblePasswords.has(selectedServer.id) ? selectedServer.password : '••••••••'}
                         </span>
                         <Button
                           variant="ghost"
@@ -1315,10 +1317,8 @@ export default function ServersPage() {
                           <Copy className="w-3 h-3" />
                         </Button>
                       </div>
-                    ) : (
-                      <p className="mt-1 text-sm text-muted">–</p>
-                    )}
-                  </div>
+                    </div>
+                  )}
                 </div>
               </div>
 
@@ -1359,6 +1359,20 @@ export default function ServersPage() {
               </div>
 
 
+
+              {/* Attached domains */}
+              <div className="space-y-4">
+                <h3 className="text-lg font-extrabold tracking-[-0.02em]">Domain terpasang</h3>
+                {selectedServer.domains?.length ? (
+                  <div className="flex flex-wrap gap-2">
+                    {selectedServer.domains.map((domain) => (
+                      <Badge key={domain.id} variant="outline" className="font-mono">{domain.domain}</Badge>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-sm text-muted">Belum ada domain yang dipasang</p>
+                )}
+              </div>
 
               {/* Notes */}
               {selectedServer.notes && (
@@ -1414,7 +1428,7 @@ export default function ServersPage() {
                 <div className="space-y-2">
                   <Label htmlFor="edit-serverType">Jenis server</Label>
                   <Select value={editServer.serverType} onValueChange={(value: 'HOSTING' | 'VPS') => setEditServer(prev => ({ ...prev, serverType: value }))}>
-                    <SelectTrigger>
+                    <SelectTrigger id="edit-serverType">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -1426,7 +1440,7 @@ export default function ServersPage() {
                 <div className="space-y-2">
                   <Label htmlFor="edit-status">Status</Label>
                   <Select value={editServer.status} onValueChange={(value: 'ACTIVE' | 'SUSPENDED' | 'EXPIRED' | 'MAINTENANCE' | 'CANCELLED') => setEditServer(prev => ({ ...prev, status: value }))}>
-                    <SelectTrigger>
+                    <SelectTrigger id="edit-status">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>

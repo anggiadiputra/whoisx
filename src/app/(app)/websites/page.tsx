@@ -946,7 +946,7 @@ export default function WebsitesPage() {
                 value={newWebsite.cms} 
                 onValueChange={(value) => setNewWebsite(prev => ({ ...prev, cms: value }))}
               >
-                <SelectTrigger>
+                <SelectTrigger id="cms">
                   <SelectValue placeholder="Pilih CMS" />
                 </SelectTrigger>
                 <SelectContent>
@@ -1115,7 +1115,7 @@ export default function WebsitesPage() {
                 value={editWebsite.cms} 
                 onValueChange={(value) => setEditWebsite(prev => ({ ...prev, cms: value }))}
               >
-                <SelectTrigger>
+                <SelectTrigger id="editCms">
                   <SelectValue placeholder="Pilih CMS" />
                 </SelectTrigger>
                 <SelectContent>
