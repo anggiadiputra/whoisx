@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback, useMemo } from 'react'
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import { SubdomainField } from '@/components/subdomain-field'
+import { DomainCombobox } from '@/components/domain-combobox'
 import { websiteAddress } from '@/lib/subdomain'
 import { useToast } from '@/hooks/use-toast'
 import { useApiQuery, useRefreshApiData } from '@/hooks/use-api-query'
@@ -897,24 +898,11 @@ export default function WebsitesPage() {
                   <span className="text-sm text-muted">Memuat domain…</span>
                 </div>
               ) : (
-                <Select 
-                  value={newWebsite.domainId} 
-                  onValueChange={(value) => setNewWebsite(prev => ({ ...prev, domainId: value }))}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Pilih domain" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {availableDomains.map((domain) => (
-                      <SelectItem key={domain.id} value={domain.id}>
-                        <div className="flex items-center gap-2">
-                          <Globe className="w-4 h-4" />
-                          {domain.domain}
-                        </div>
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <DomainCombobox
+                  domains={availableDomains}
+                  value={newWebsite.domainId}
+                  onChange={(value) => setNewWebsite(prev => ({ ...prev, domainId: value }))}
+                />
               )}
             </div>
 
@@ -1080,24 +1068,11 @@ export default function WebsitesPage() {
             {/* Domain Selection */}
             <div className="space-y-2">
               <Label>Domain *</Label>
-              <Select 
-                value={editWebsite.domainId} 
-                onValueChange={(value) => setEditWebsite(prev => ({ ...prev, domainId: value }))}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Pilih domain" />
-                </SelectTrigger>
-                <SelectContent>
-                  {availableDomains.map((domain) => (
-                    <SelectItem key={domain.id} value={domain.id}>
-                      <div className="flex items-center gap-2">
-                        <Globe className="w-4 h-4" />
-                        {domain.domain}
-                      </div>
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <DomainCombobox
+                domains={availableDomains}
+                value={editWebsite.domainId}
+                onChange={(value) => setEditWebsite(prev => ({ ...prev, domainId: value }))}
+              />
             </div>
 
             {/* Subdomain: full width so the address preview fits */}
