@@ -50,6 +50,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { useToast } from '@/hooks/use-toast'
 import { useApiQuery, useRefreshApiData } from '@/hooks/use-api-query'
 import { useConfirm } from '@/components/confirm-dialog'
+import { DomainChecklist } from '@/components/domain-checklist'
 import {
   Select,
   SelectContent,
@@ -161,6 +162,7 @@ export default function ServersPage() {
     status: 'ACTIVE' | 'SUSPENDED' | 'EXPIRED' | 'MAINTENANCE' | 'CANCELLED'
     createdDate: string
     expiryDate: string
+    ipAddress: string
     username: string
     password: string
     notes: string
@@ -172,6 +174,7 @@ export default function ServersPage() {
     status: 'ACTIVE',
     createdDate: '',
     expiryDate: '',
+    ipAddress: '',
     username: '',
     password: '',
     notes: ''
@@ -183,10 +186,20 @@ export default function ServersPage() {
     status: 'ACTIVE' as const,
     createdDate: '',
     expiryDate: '',
+    ipAddress: '',
     username: '',
-    password: '',
     notes: ''
   })
+
+  // Edit modal: domains already on this server first, then the unassigned ones
+  const editDomainOptions = useMemo(() => {
+    const assigned = servers.find(s => s.id === editServer.id)?.domains ?? []
+    const assignedIds = new Set(assigned.map(d => d.id))
+    return [
+      ...assigned.map(d => ({ id: d.id, domain: d.domain, badge: 'Sudah terpasang' })),
+      ...availableDomains.filter(d => !assignedIds.has(d.id)),
+    ]
+  }, [servers, editServer.id, availableDomains])
 
   // User permissions
   const userRole = session?.user?.role
@@ -349,6 +362,7 @@ export default function ServersPage() {
       status: server.status,
       createdDate: server.createdDate ? server.createdDate.split('T')[0] : '',
       expiryDate: server.expiryDate ? server.expiryDate.split('T')[0] : '',
+      ipAddress: server.ipAddress || '',
       username: server.username || '',
       password: server.password || '',
       notes: server.notes || ''
@@ -390,6 +404,7 @@ export default function ServersPage() {
           status: editServer.status,
           createdDate: editServer.createdDate || null,
           expiryDate: editServer.expiryDate || null,
+          ipAddress: editServer.ipAddress.trim() || null,
           username: editServer.username.trim() || null,
           password: editServer.password.trim() || null,
           notes: editServer.notes.trim() || null,
@@ -419,6 +434,7 @@ export default function ServersPage() {
         status: 'ACTIVE',
         createdDate: '',
         expiryDate: '',
+        ipAddress: '',
         username: '',
         password: '',
         notes: ''
@@ -567,8 +583,8 @@ export default function ServersPage() {
           status: 'ACTIVE',
           createdDate: '',
           expiryDate: '',
+          ipAddress: '',
           username: '',
-          password: '',
           notes: ''
         })
         setSelectedDomainsForNew([])
@@ -772,13 +788,15 @@ export default function ServersPage() {
                         />
                       </div>
                       <div className="space-y-2">
-                        <Label htmlFor="password">Kata sandi</Label>
+                        <Label htmlFor="ipAddress">IP VPS atau Hosting</Label>
                         <Input
-                          id="password"
-                          type="password"
-                          placeholder="Masukkan kata sandi server"
-                          value={newServer.password}
-                          onChange={(e) => setNewServer(prev => ({ ...prev, password: e.target.value }))}
+                          id="ipAddress"
+                          inputMode="decimal"
+                          autoComplete="off"
+                          spellCheck={false}
+                          placeholder="mis. 203.0.113.10"
+                          value={newServer.ipAddress}
+                          onChange={(e) => setNewServer(prev => ({ ...prev, ipAddress: e.target.value }))}
                         />
                       </div>
                     </div>
@@ -800,25 +818,11 @@ export default function ServersPage() {
                           <div className="text-sm text-muted">
                             Pilih domain yang mau dipasang ke server ini:
                           </div>
-                          <div className="max-h-32 overflow-y-auto border rounded-2xl p-2 space-y-1">
-                            {availableDomains.map((domain) => (
-                              <label key={domain.id} className="flex items-center space-x-2 cursor-pointer hover:bg-cream p-1 rounded-lg">
-                                <input
-                                  type="checkbox"
-                                  checked={selectedDomainsForNew.includes(domain.id)}
-                                  onChange={(e) => {
-                                    if (e.target.checked) {
-                                      setSelectedDomainsForNew(prev => [...prev, domain.id])
-                                    } else {
-                                      setSelectedDomainsForNew(prev => prev.filter(id => id !== domain.id))
-                                    }
-                                  }}
-                                  className="rounded-lg border-sand"
-                                />
-                                <span className="text-sm">{domain.domain}</span>
-                              </label>
-                            ))}
-                          </div>
+                          <DomainChecklist
+                            domains={availableDomains}
+                            selected={selectedDomainsForNew}
+                            onChange={setSelectedDomainsForNew}
+                          />
                           {selectedDomainsForNew.length > 0 && (
                             <div className="text-sm text-on-mint">
                               {selectedDomainsForNew.length} domain dipilih
@@ -1467,6 +1471,18 @@ export default function ServersPage() {
             <div className="space-y-4">
               <h3 className="text-lg font-extrabold tracking-[-0.02em]">Detail akses</h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="space-y-2 sm:col-span-2">
+                  <Label htmlFor="edit-ipAddress">IP VPS atau Hosting</Label>
+                  <Input
+                    id="edit-ipAddress"
+                    inputMode="decimal"
+                    autoComplete="off"
+                    spellCheck={false}
+                    placeholder="mis. 203.0.113.10"
+                    value={editServer.ipAddress}
+                    onChange={(e) => setEditServer(prev => ({ ...prev, ipAddress: e.target.value }))}
+                  />
+                </div>
                 <div className="space-y-2">
                   <Label htmlFor="edit-username">Username</Label>
                   <Input
@@ -1502,46 +1518,11 @@ export default function ServersPage() {
                   <div className="text-sm text-muted">
                     Pilih domain yang mau dipasang ke server ini:
                   </div>
-                  <div className="max-h-32 overflow-y-auto border rounded-2xl p-2 space-y-1">
-                    {/* Currently assigned domains */}
-                    {editServer.id && servers.find(s => s.id === editServer.id)?.domains?.map((domain) => (
-                      <label key={domain.id} className="flex items-center space-x-2 cursor-pointer hover:bg-cream p-1 rounded-lg">
-                        <input
-                          type="checkbox"
-                          checked={selectedDomainsForEdit.includes(domain.id)}
-                          onChange={(e) => {
-                            if (e.target.checked) {
-                              setSelectedDomainsForEdit(prev => [...prev, domain.id])
-                            } else {
-                              setSelectedDomainsForEdit(prev => prev.filter(id => id !== domain.id))
-                            }
-                          }}
-                          className="rounded-lg border-sand"
-                        />
-                        <span className="text-sm">{domain.domain}</span>
-                        <Badge variant="outline" className="text-xs">Sudah terpasang</Badge>
-                      </label>
-                    ))}
-                    
-                    {/* Available unassigned domains */}
-                    {availableDomains.map((domain) => (
-                      <label key={domain.id} className="flex items-center space-x-2 cursor-pointer hover:bg-cream p-1 rounded-lg">
-                        <input
-                          type="checkbox"
-                          checked={selectedDomainsForEdit.includes(domain.id)}
-                          onChange={(e) => {
-                            if (e.target.checked) {
-                              setSelectedDomainsForEdit(prev => [...prev, domain.id])
-                            } else {
-                              setSelectedDomainsForEdit(prev => prev.filter(id => id !== domain.id))
-                            }
-                          }}
-                          className="rounded-lg border-sand"
-                        />
-                        <span className="text-sm">{domain.domain}</span>
-                      </label>
-                    ))}
-                  </div>
+                  <DomainChecklist
+                    domains={editDomainOptions}
+                    selected={selectedDomainsForEdit}
+                    onChange={setSelectedDomainsForEdit}
+                  />
                   {selectedDomainsForEdit.length > 0 && (
                     <div className="text-sm text-on-mint">
                       {selectedDomainsForEdit.length} domain dipilih

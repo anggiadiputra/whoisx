@@ -174,6 +174,7 @@ export async function POST(request: NextRequest) {
         createdDate: body.createdDate ? new Date(body.createdDate) : null,
         expiryDate: body.expiryDate ? new Date(body.expiryDate) : null,
         daysToExpiry,
+        ipAddress: body.ipAddress?.trim() || null,
         username: body.username?.trim() || null,
         password: body.password?.trim() || null, // TODO: Encrypt in production
         notes: body.notes?.trim() || null
